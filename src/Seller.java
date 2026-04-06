@@ -7,4 +7,7 @@ abstract class Seller{
     }
     public String getUsername(){return username;}
     public String getPassword(){return password;}
+    public void sell(String name, String description, Double price){
+        new Product(name, description, price);
+    }
 }
