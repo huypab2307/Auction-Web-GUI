@@ -1,16 +1,18 @@
 public class Vehicle extends Item {
     private double mileage; //Số km đã đi
     private int mFG;  // Ngày sản xuất
-    private String autoMaker; // nhà sản xuất
+    private String brand; // nhà sản xuất
     private String model; //dòng xe
     private String trim; // phiên bản
-    public Vehicle(double mileage, int mFG, String autoMaker, String model, String trim,String name, String description, Double price) {
+    private String titleStatus; //Tình trạng giấy tờ
+    public Vehicle(double mileage, int mFG, String brand, String model, String trim,String titleStatus,String name, String description, Double price) {
         super(name, description, price, "V");
         this.mileage = mileage;
         this.mFG = mFG;
-        this.autoMaker = autoMaker;
+        this. brand = brand;
         this.model = model;
         this.trim = trim;
+        this.titleStatus = titleStatus;
     }
     // Mileage
     public double getMileage() {
@@ -27,11 +29,11 @@ public class Vehicle extends Item {
         this.mFG = mFG;
     }
     // AutoMaker
-    public String getAutoMaker() {
-        return this.autoMaker;
+    public String getBrand() {
+        return this.brand;
     }
-    public void setAutoMaker(String autoMaker) {
-        this.autoMaker = autoMaker;
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
     // model
     public String getModel() {
@@ -47,5 +49,11 @@ public class Vehicle extends Item {
     public void setTrim(String trim) {
         this.trim = trim;
     }
-
-}
+    // title
+    public String getTitleStatus() {
+        return this.titleStatus;
+    }
+    public void setTitleStatus(String titleStatus) {
+        this.titleStatus = titleStatus;
+    }
+}    
