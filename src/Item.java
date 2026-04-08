@@ -36,4 +36,5 @@ abstract class Item {
             System.out.println("Current price: " + curPrice);
         }
     }
+
 }
