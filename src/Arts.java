@@ -4,7 +4,7 @@ public class Arts extends Item {
     private String dimensions; //Kích thước
     private String medium; //Chất liệu 
     public Arts (String name, String description, Double price, String artist, String yearOfcreation, String dimensions, String medium) {
-        super(name, description, price, type: "A");
+        super(name, description, price, "A");
         this.artist = artist;
         this.yearOfcreation = yearOfcreation;
         this.dimensions = dimensions;
@@ -15,7 +15,7 @@ public class Arts extends Item {
         return this.artist;
     }
 
-    public String setArtist(String artist){
+    public void setArtist(String artist){
         this.artist = artist;
     }
     // YearOfCreation
@@ -23,7 +23,7 @@ public class Arts extends Item {
         return this.yearOfcreation;
     }
     
-    public String setYearOfcreation(String yearOfcreation){
+    public void setYearOfcreation(String yearOfcreation){
         this.yearOfcreation = yearOfcreation;
     }
     // Dimensions
@@ -31,7 +31,7 @@ public class Arts extends Item {
         return this.dimensions;
     }
 
-    public String setDimensions(String dimensions){
+    public void setDimensions(String dimensions){
         this.dimensions = dimensions;
     }
     // Medium
@@ -39,7 +39,7 @@ public class Arts extends Item {
         return this.medium;
     }
 
-    public String setMedium(String medium){
+    public void setMedium(String medium){
         this.medium = medium;
     }
 
