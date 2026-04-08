@@ -1,14 +1,17 @@
-public class Item {
+abstract class Item {
     private String name;
     private String description;
     private Double price;
     private Double curPrice;
+    private static int cur_id = 00000;
+    private String id;
 
-    public Item(String name, String description, Double price) {
+    public Item(String name, String description, Double price,String type) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.curPrice = null;
+        this.id = type + cur_id++;
     }
     public String getName() {
         return name;

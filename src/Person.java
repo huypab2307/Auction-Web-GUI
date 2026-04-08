@@ -1,11 +1,12 @@
 public abstract class Person {
     private String username;
     private String password;
-    private static int id = 25020000;
+    private static int cur_id = 0000;
+    private String id;
 
     public Person(String username, String password) {
         this.username = username;
         this.password = password;
-        this.id = Person.id++;
+        this.id = "U" +  Person.cur_id++;
     }
 }
