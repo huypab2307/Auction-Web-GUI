@@ -1,3 +1,3 @@
-public class Role {
-
+public enum Role {
+    SELLER, BIDDER;
 }
