@@ -1,18 +1,13 @@
-class FactoryItem {
-    public static Item CreateItem(String type, String name, String description, Double price, String seller_id){
-        Item item;
-        switch (type.toLowerCase()) {
-            case "arts":
-                item = new Arts(name,description,price, seller_id);
-                return item;
-            case "electronics":
-                item = new Electronics(name,description,price, seller_id);
-                return item;
-            case "vehicle":
-                item = new Vehicle(name,description,price,seller_id);
-                return item;
-            default:
-                throw new AssertionError();
+public class FactoryItem {
+
+    public static <T> T createBuilder(Class<T> clazz, String name, String desc, double price, String sellerId) {
+        if (clazz == Arts.Builder.class) {
+            return clazz.cast(new Arts.Builder(name, desc, price, sellerId));
+        } else if (clazz == Electronics.Builder.class) {
+            return clazz.cast(new Electronics.Builder(name, desc, price, sellerId));
+        } else if (clazz == Vehicle.Builder.class){
+            return clazz.cast(new Vehicle.Builder(name, desc, price, sellerId));
         }
+        throw new IllegalArgumentException("Class không được hỗ trợ: " + clazz.getName());
     }
 }
