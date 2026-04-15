@@ -45,7 +45,7 @@ public class Electronics extends Item {
     public double getWeight() {
         return weight;
     }
-    static private class Builder {
+    static class Builder {
         private String name;
         private String description;
         private double price;
@@ -83,6 +83,9 @@ public class Electronics extends Item {
         }
         public void withWeight (double weight){
             this.weight = weight;
+        }
+        public Item build(){
+            return new Electronics(this);
         }
     }
 }
