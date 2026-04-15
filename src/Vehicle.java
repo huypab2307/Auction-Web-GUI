@@ -99,4 +99,19 @@ public class Vehicle extends Item {
     public String getTitleStatus() {
         return this.titleStatus;
     }
+    @Override
+    public String toString() {
+        return "Vehicle {" +
+                "id='" + getId() + '\'' +
+                ", name='" + getName() + '\'' +
+                ", brand='" + brand + '\'' +
+                ", model='" + model + '\'' +
+                ", trim='" + trim + '\'' +
+                ", year=" + mFG +
+                ", mileage=" + mileage + " km" +
+                ", status='" + titleStatus + '\'' +
+                ", price=" + getPrice() +
+                ", seller='" + getSellerId() + '\'' +
+                '}';
+    }
 }    

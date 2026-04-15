@@ -95,4 +95,20 @@ public class Electronics extends Item {
             return new Electronics(this);
         }
     }
+    @Override
+    public String toString() {
+    return "Electronics {" +
+            "id='" + getId() + '\'' +
+            ", name='" + getName() + '\'' +
+            ", brand='" + brand + '\'' +
+            ", power=" + power + "W" +
+            ", voltage=" + voltage + "V" +
+            ", current=" + current + "A" +
+            ", color='" + color + '\'' +
+            ", weight=" + weight + "kg" +
+            ", status='" + status + '\'' +
+            ", price=" + getPrice() +
+            ", seller='" + getSellerId() + '\'' +
+            '}';
+    }
 }

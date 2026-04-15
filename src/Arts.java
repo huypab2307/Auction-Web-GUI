@@ -66,4 +66,17 @@ public class Arts extends Item {
 
         }
     }
+    @Override
+    public String toString() {
+    return "Arts {" +
+            "id='" + getId() + '\'' +
+            ", name='" + getName() + '\'' +
+            ", artist='" + artist + '\'' +
+            ", year=" + yearOfcreation +
+            ", medium='" + medium + '\'' +
+            ", dimensions='" + dimensions + '\'' +
+            ", price=" + getPrice() +
+            ", seller='" + getSellerId() + '\'' +
+            '}';
+}
 }
