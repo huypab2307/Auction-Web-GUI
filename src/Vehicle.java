@@ -5,14 +5,17 @@ public class Vehicle extends Item {
     private String model; //dòng xe
     private String trim; // phiên bản
     private String titleStatus; //Tình trạng giấy tờ
-    public Vehicle(double mileage, int mFG, String brand, String model, String trim,String titleStatus,String name, String description, Double price) {
-        super(name, description, price, "V");
+    public Vehicle(double mileage, int mFG, String brand, String model, String trim,String titleStatus,String name, String description, Double price,String seller_id) {
+        super(name, description, price, "V",seller_id);
         this.mileage = mileage;
         this.mFG = mFG;
         this. brand = brand;
         this.model = model;
         this.trim = trim;
         this.titleStatus = titleStatus;
+    }
+    public Vehicle(String name, String description, Double price, String sellerId){
+        super(name, description, price, "V",sellerId);
     }
     // Mileage
     public double getMileage() {

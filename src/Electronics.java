@@ -8,8 +8,8 @@ public class Electronics extends Item {
     private double weight;
 
 
-    public Electronics(String name, String description, double price, String brand, int power, double voltage, double current, String status, String color, double weight) {
-        super(name,description,price,"E");
+    public Electronics(String name, String description, double price, String brand, int power, double voltage, double current, String status, String color, double weight,String sellerId) {
+        super(name,description,price,"E",sellerId);
         this.brand = brand;
         this.power = power;
         this.voltage = voltage;
@@ -18,7 +18,9 @@ public class Electronics extends Item {
         this.color = color;
         this.weight = weight;
     }
-
+    public Electronics(String name, String description, Double price, String sellerId) {
+        super(name, description, price,"E", sellerId);
+    }
     public String getBrand() {
         return brand;
     }

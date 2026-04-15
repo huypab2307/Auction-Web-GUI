@@ -1,3 +1,3 @@
 public enum Role {
-    SELLER, BIDDER;
+    SELLER, BIDDER, ADMIN;
 }

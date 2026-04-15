@@ -3,12 +3,15 @@ public class Arts extends Item {
     private String yearOfcreation; //Năm sáng tác
     private String dimensions; //Kích thước
     private String medium; //Chất liệu 
-    public Arts (String name, String description, Double price, String artist, String yearOfcreation, String dimensions, String medium) {
-        super(name, description, price, "A");
+    public Arts (String name, String description, Double price,String seller_id, String artist, String yearOfcreation, String dimensions, String medium) {
+        super(name, description, price, "A", seller_id);
         this.artist = artist;
         this.yearOfcreation = yearOfcreation;
         this.dimensions = dimensions;
         this.medium = medium;
+    }
+    public Arts(String name, String description, double price, String seller_id){
+        super(name, description, price, "A", seller_id);
     }
     // Artist
     public String getArtist(){
