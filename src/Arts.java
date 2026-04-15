@@ -15,9 +15,8 @@ public class Arts extends Item {
     public String getArtist(){
         return this.artist;
     }
-
     // YearOfCreation
-    public String getYearOfcreation(){
+    public int getYearOfcreation(){
         return this.yearOfcreation;
     }
     
@@ -30,7 +29,7 @@ public class Arts extends Item {
     public String getMedium(){
         return this.medium;
     }
-    static private class Builder{
+    static class Builder{
         private String name;
         private String description;
         private double price;
