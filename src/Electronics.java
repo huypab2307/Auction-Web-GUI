@@ -9,7 +9,7 @@ public class Electronics extends Item {
 
 
     public Electronics(Builder build) {
-        super(build.name,build.description,build.price,"E",build.sellerId);
+        super(build.name,build.description,build.price,"E",build.seller_id);
         this.brand = build.brand;
         this.power = build.power;
         this.voltage = build.voltage;
@@ -49,7 +49,7 @@ public class Electronics extends Item {
         private String name;
         private String description;
         private double price;
-        private String sellerId;
+        private String seller_id;
         private String brand;
         private int power;
         private double voltage;
@@ -57,34 +57,41 @@ public class Electronics extends Item {
         private String status;
         private String color;
         private double weight;
-        public Builder(String name, String description, double price, String sellerId){
+        public Builder(String name, String description, double price, String seller_id){
             this.name = name;
             this.description = description;
             this.price = price;
             this.sellerId = sellerId;
         }
-        public void withBrand (String brand){
+        public Builder withBrand (String brand){
             this.brand = brand;
+            return this;
         }
-        public void withPower (int power){
+        public Builder withPower (int power){
             this.power = power;
+            return this;
         }
-        public void withVoltage (double voltage){
+        public Builder withVoltage (double voltage){
             this.voltage = voltage;
+            return this;
         }
-        public void withCurrent (double current){
+        public Builder withCurrent (double current){
             this.current = current;
+            return this;
         }
-        public void withStatus(String status){
+        public Builder withStatus(String status){
             this.status = status;
+            return this;
         }
-        public void withColor (String color){
+        public Builder withColor (String color){
             this.color = color;
+            return this;
         }
-        public void withWeight (double weight){
+        public Builder withWeight (double weight){
             this.weight = weight;
+            return this;
         }
-        public Item build(){
+        public Electronics build(){
             return new Electronics(this);
         }
     }
