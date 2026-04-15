@@ -9,7 +9,7 @@ public class Electronics extends Item {
 
 
     public Electronics(Builder build) {
-        super(build.name,build.description,build.price,"E",build.sellerId);
+        super(build.name,build.description,build.price,"E",build.seller_id);
         this.brand = build.brand;
         this.power = build.power;
         this.voltage = build.voltage;
@@ -49,7 +49,7 @@ public class Electronics extends Item {
         private String name;
         private String description;
         private double price;
-        private String sellerId;
+        private String seller_id;
         private String brand;
         private int power;
         private double voltage;
@@ -57,7 +57,7 @@ public class Electronics extends Item {
         private String status;
         private String color;
         private double weight;
-        public Builder(String name, String description, double price, String sellerId){
+        public Builder(String name, String description, double price, String seller_id){
             this.name = name;
             this.description = description;
             this.price = price;
