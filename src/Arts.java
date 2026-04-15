@@ -44,21 +44,26 @@ public class Arts extends Item {
             this.price = price;
             this.seller_id = seller_id;
         }
-        public void withArtist(String name){
+        public Builder withArtist(String name){
             this.artist = name;
+            return this;
         }
-        public void withyearOfCreation(int year ){
+        public Builder withyearOfCreation(int year ){
             this.yearOfCreation = year;
+            return this;
         }
-        public void withDimensions(String dimensions){
+        public Builder withDimensions(String dimensions){
             this.dimensions = dimensions;
+            return this;
         }
-        public void medium(String medium){
+        public Builder medium(String medium){
             this.medium = medium;
+            return this;
         }
 
-        public Item build(){
+        public Arts build(){
             return new Arts(this);
+
         }
     }
 }
