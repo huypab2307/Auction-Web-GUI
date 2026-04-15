@@ -14,8 +14,8 @@ class Main{
                         .withStatus("New")
                         .withVoltage(300)
                         .withWeight(100)
-                        .build()
-        System.out.println(electronic);
+                        .build();
+        System.out.println(electronic.getBrand());
 
         Vehicle vehicle = FactoryItem.createBuilder(Vehicle.Builder.class, "SH","This is an SH", 1000, "V001")
                         .withMileage(8463)
