@@ -61,7 +61,7 @@ public class Electronics extends Item {
             this.name = name;
             this.description = description;
             this.price = price;
-            this.sellerId = sellerId;
+            this.seller_id = seller_id;
         }
         public Builder withBrand (String brand){
             this.brand = brand;

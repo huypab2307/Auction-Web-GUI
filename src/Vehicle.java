@@ -40,27 +40,27 @@ public class Vehicle extends Item {
             return this;
         }
 
-        public Builder withMFG(double mileage) {
+        public Builder withMFG(int mFG) {
             this.mFG = mFG;
             return this;
         }
 
-        public Builder withBrand(double mileage) {
+        public Builder withBrand(String brand) {
             this.brand = brand;
             return this;
         }
 
-        public Builder withModel(double mileage) {
+        public Builder withModel(String model) {
             this.model = model;
             return this;
         }
 
-        public Builder withTrim(double mileage) {
+        public Builder withTrim(String trim) {
             this.trim = trim;
             return this;
         }
 
-        public Builder withTitleStatus(double mileage) {
+        public Builder withTitleStatus(String titleStatus) {
             this.titleStatus = titleStatus;
             return this;
         }
