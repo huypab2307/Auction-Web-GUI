@@ -1,11 +1,23 @@
-public class User extends Person {
-    Role role;
+public abstract class User {
+    protected String username;
+    protected String password;
 
     public User(String username, String password) {
-        super(username, password);
-        this.role = Role.BIDDER;
+        this.username = username;
+        this.password = password;
     }
-    public void updateRole(ROLE role){
-        
+
+    public String getUsername() {
+        return username;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public User changeRole(Role newRole) {
+        return UserFactory.createUser(newRole, this.username, this.password);
+    }
+
+    public abstract void showRole();
 }
