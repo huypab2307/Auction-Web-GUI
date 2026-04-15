@@ -1,62 +1,102 @@
 public class Vehicle extends Item {
-    private double mileage; //Số km đã đi
-    private int mFG;  // Ngày sản xuất
-    private String brand; // nhà sản xuất
-    private String model; //dòng xe
-    private String trim; // phiên bản
-    private String titleStatus; //Tình trạng giấy tờ
-    public Vehicle(double mileage, int mFG, String brand, String model, String trim,String titleStatus,String name, String description, Double price,String seller_id) {
-        super(name, description, price, "V",seller_id);
-        this.mileage = mileage;
-        this.mFG = mFG;
-        this. brand = brand;
-        this.model = model;
-        this.trim = trim;
-        this.titleStatus = titleStatus;
+    private final double mileage; //Số km đã đi
+    private final int mFG;  // Ngày sản xuất
+    private final String brand; // nhà sản xuất
+    private final String model; //dòng xe
+    private final String trim; // phiên bản
+    private final String titleStatus; //Tình trạng giấy tờ
+    
+    public Vehicle(Builder build) {
+        super(build.name,build.description,build.price,"V",build.sellerId);
+        this.mileage = build.mileage;
+        this.mFG = build.mFG;
+        this. brand = build.brand;
+        this.model = build.model;
+        this.trim = build.trim;
+        this.titleStatus = build.titleStatus;
     }
-    public Vehicle(String name, String description, Double price, String sellerId){
-        super(name, description, price, "V",sellerId);
+
+    static class Builder {
+        private double mileage;
+        private int mFG;
+        private String brand;
+        private String model;
+        private String trim;
+        private String titleStatus;
+        private String name;
+        private String description;
+        private double price;
+        private String sellerId;
+
+        public Builder(String name, String description, double price, String sellerId) {
+            this.name = name;
+            this.description = description;
+            this.price = price;
+            this.sellerId = sellerId; 
+        }
+
+        public Builder withMileage(double mileage) {
+            this.mileage = mileage;
+            return this;
+        }
+
+        public Builder withMFG(double mileage) {
+            this.mFG = mFG;
+            return this;
+        }
+
+        public Builder withBrand(double mileage) {
+            this.brand = brand;
+            return this;
+        }
+
+        public Builder withModel(double mileage) {
+            this.model = model;
+            return this;
+        }
+
+        public Builder withTrim(double mileage) {
+            this.trim = trim;
+            return this;
+        }
+
+        public Builder withTitleStatus(double mileage) {
+            this.titleStatus = titleStatus;
+            return this;
+        }
+
+        public Vehicle build() {
+            return new Vehicle(this);
+        }
     }
+
     // Mileage
     public double getMileage() {
         return this.mileage;
     }
-    public void setMileage(double mileage) {
-        this.mileage = mileage;
-    }
+
     // MFG
     public int getMFG() {
         return this.mFG;
     }
-    public void setMFG(int mFG) {
-        this.mFG = mFG;
-    }
+
     // AutoMaker
     public String getBrand() {
         return this.brand;
     }
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
+
     // model
     public String getModel() {
         return this.model;
     }
-    public void setModel(String model) {
-        this.model = model;
-    }
+
     //trim
     public String getTrim() {
         return this.trim;
     }
-    public void setTrim(String trim) {
-        this.trim = trim;
-    }
+
     // title
     public String getTitleStatus() {
         return this.titleStatus;
-    }
-    public void setTitleStatus(String titleStatus) {
-        this.titleStatus = titleStatus;
     }
 }    
