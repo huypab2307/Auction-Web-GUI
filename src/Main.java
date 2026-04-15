@@ -5,5 +5,14 @@ class Main{
                         .withDimensions("500 x 400")
                         .build();
         System.out.println(art.getArtist());
+        Electronics electronic = FactoryItem.createBuilder(Electronics.Builder.class, "Fridge", "Day la cai tu lanh", 6767, "FR01")
+                        .withBrand("Samsung")
+                        .withColor("blue")
+                        .withCurrent(500)
+                        .withPower(1000)
+                        .withStatus("New")
+                        .withVoltage(300)
+                        .withWeight(100)
+                        .build();
     }
 }
