@@ -20,4 +20,20 @@ abstract class Item {
     public String getDescription() {
         return description;
     }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public String getSeller_id() {
+        return seller_id;
+    }
+
+    public static int getCur_id() {
+        return cur_id;
+    }
+    
+    public String getId() {
+        return id;
+    }
 }
