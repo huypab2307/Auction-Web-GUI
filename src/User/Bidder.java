@@ -1,7 +1,8 @@
+package User;
 public class Bidder extends User {
 
-    public Bidder(String username, String password) {
-        super(username, password);
+    public Bidder(String username, String password, int id) {
+        super(username, password, id);
     }
 
     @Override

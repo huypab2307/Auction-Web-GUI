@@ -1,3 +1,5 @@
+import User.*;
+
 class Main{
     public static void main(String[] args) {
         Arts art = FactoryItem.createBuilder(Arts.Builder.class, "monaliza","day la buc tranh nang mozlasdai", 4324, "A001")

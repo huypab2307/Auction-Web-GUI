@@ -1,10 +1,14 @@
+package User;
+
 public abstract class User {
     protected String username;
     protected String password;
+    protected int id;
 
-    public User(String username, String password) {
+    public User(String username, String password, int id) {
         this.username = username;
         this.password = password;
+        this.id = id;
     }
 
     public String getUsername() {

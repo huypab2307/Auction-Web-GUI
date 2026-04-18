@@ -1,7 +1,8 @@
+package User;
 public class Seller extends User {
 
-    public Seller(String username, String password) {
-        super(username, password);
+    public Seller(String username, String password, int id) {
+        super(username, password, id);
     }
 
     @Override
