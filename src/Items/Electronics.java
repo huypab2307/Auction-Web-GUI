@@ -1,3 +1,4 @@
+package Items;
 public class Electronics extends Item {
     private final String brand;
     private final int power;
@@ -45,7 +46,7 @@ public class Electronics extends Item {
     public double getWeight() {
         return weight;
     }
-    static class Builder {
+    public static class Builder {
         private String name;
         private String description;
         private double price;

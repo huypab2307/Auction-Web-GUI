@@ -1,3 +1,4 @@
+package Items;
 public class Vehicle extends Item {
     private final double mileage; //Số km đã đi
     private final int mFG;  // Ngày sản xuất
@@ -16,7 +17,7 @@ public class Vehicle extends Item {
         this.titleStatus = build.titleStatus;
     }
 
-    static class Builder {
+    public static class Builder {
         private double mileage;
         private int mFG;
         private String brand;

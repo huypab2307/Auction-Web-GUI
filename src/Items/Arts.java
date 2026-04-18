@@ -1,3 +1,5 @@
+package Items;
+
 public class Arts extends Item {
     private String artist; //Tác giả
     private int yearOfcreation; //Năm sáng tác
@@ -29,7 +31,7 @@ public class Arts extends Item {
     public String getMedium(){
         return this.medium;
     }
-    static class Builder{
+    public static class Builder{
         private String name;
         private String description;
         private double price;
