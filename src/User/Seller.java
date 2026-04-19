@@ -1,6 +1,9 @@
 package User;
 
+import Auction.AuctionManager;
+import Database.AuctionDAO;
 import Items.FactoryItem;
+import Items.Item;
 
 public class Seller extends User {
 
@@ -13,7 +16,10 @@ public class Seller extends User {
         System.out.println(username + " is a Seller");
     }
 
-    public <T> T sellItem(Class<T> clazz, String name, String desc, double price) {
-        return FactoryItem.createBuilder(clazz, name, desc, price, this.id);
+    public <T> T createItem(Class<T> clazz, String name, String desc) {
+        return FactoryItem.createBuilder(clazz, name, desc, this.id);
+    }
+    public void uploadItem(Item item, double price, double stepPrice, int durationDays) {
+        AuctionManager.getAuction().uploadItem(item, price, stepPrice, durationDays, this);
     }
 }

@@ -2,7 +2,6 @@ CREATE TABLE items (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL, 
     sellerId INT NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
     description VARCHAR(500) NOT NULL, 
     type ENUM('ELECTRONICS', 'ARTS', 'VEHICLE', 'OTHER') NOT NULL,
     FOREIGN KEY (sellerId) REFERENCES user(id)
@@ -33,7 +32,7 @@ CREATE TABLE vehicles (
     model VARCHAR(100),
     brand VARCHAR(100),
     mileage DECIMAL(10,2),
-    mFG DATETIME,
+    mFG INT,
     Foreign Key (itemId) REFERENCES items(id) ON DELETE CASCADE
 
 );

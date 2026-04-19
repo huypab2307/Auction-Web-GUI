@@ -10,7 +10,7 @@ public class Electronics extends Item {
 
 
 public Electronics(Builder build) {
-    super(build.name,build.description,build.price,ItemType.ELECTRONICS,build.sellerId,-1);
+    super(build.name,build.description,ItemType.ELECTRONICS,build.sellerId,-1);
     this.brand = build.brand;
     this.power = build.power;
     this.voltage = build.voltage;
@@ -49,7 +49,6 @@ public Electronics(Builder build) {
     public static class Builder {
         private String name;
         private String description;
-        private double price;
         private int sellerId;
         private String brand;
         private int power;
@@ -58,10 +57,9 @@ public Electronics(Builder build) {
         private String status;
         private String color;
         private double weight;
-        public Builder(String name, String description, double price, int sellerId){
+        public Builder(String name, String description, int sellerId){
             this.name = name;
             this.description = description;
-            this.price = price;
             this.sellerId = sellerId;
         }
         public Builder withBrand (String brand){
@@ -108,7 +106,6 @@ public Electronics(Builder build) {
             ", color='" + color + '\'' +
             ", weight=" + weight + "kg" +
             ", status='" + status + '\'' +
-            ", price=" + getPrice() +
             ", seller='" + getSellerId() + '\'' +
             '}';
     }

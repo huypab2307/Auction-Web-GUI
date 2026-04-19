@@ -1,6 +1,11 @@
 // package Auction;
+
 // import Items.*;
 // import java.util.*;
-// class Auction{
-//     ArrayList<Items> arr;
+
+// public class Auction{
+//     private int id;
+//     private int itemId;
+//     private int sellerId;
+//     private  
 // }

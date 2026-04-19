@@ -13,7 +13,7 @@ public abstract class BaseDAO {
         dataSource.setPassword("Duong107@");
         dataSource.setUser("root");
     }
-    protected Connection getConnect() throws SQLException{
+    public Connection getConnect() throws SQLException{
         return dataSource.getConnection();
     }
 }

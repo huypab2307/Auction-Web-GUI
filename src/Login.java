@@ -8,26 +8,27 @@ class Login {
         UserDAO users = UserDAO.getInstance();
         // u.register("DuongDuong","jennyhuyn"); 
         // u.register("Jenny","Matkhau");
+        
         User user = users.login("Jenny","Matkhau");
         user.showRole();
         Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         
-        Arts draft = newUser.sellItem(Arts.Builder.class,"Kaguya","phim cosmic princess kaguya",100)
+        Arts draft = newUser.createItem(Arts.Builder.class,"Kaguya","phim cosmic princess kaguya")
             .withArtist("duong")
             .withyearOfCreation(2025)
             .build();
-        auction.uploadItem(draft, newUser);
+        newUser.uploadItem(draft,1000,10, 2);
 
-        Electronics draft1 = newUser.sellItem(Electronics.Builder.class, "Samsung", "nokia 2043", 1000)
+        Electronics draft1 = newUser.createItem(Electronics.Builder.class, "Samsung", "nokia 2043")
                                     .withBrand("Xiami")
                                     .withColor("Red")
                                     .build();
-        auction.uploadItem(draft1, newUser);
+        newUser.uploadItem(draft1,1000,10,3);
 
-        Vehicle draft2 = newUser.sellItem(Vehicle.Builder.class, "Honda", "đây là xe jupiter", 2000)
+        Vehicle draft2 = newUser.createItem(Vehicle.Builder.class, "Honda", "đây là xe jupiter")
                                 .withBrand("sámung")
                                 .build();
-        auction.uploadItem(draft2, newUser);
+        newUser.uploadItem(draft2,200,12,4);
     } 
 }

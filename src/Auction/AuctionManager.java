@@ -1,9 +1,12 @@
 package Auction;
 import Database.ArtsDAO;
+import Database.AuctionDAO;
 import Database.ElectronicsDAO;
 import Database.VehicleDAO;
 import Items.*;
 import User.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class AuctionManager {
     private static final AuctionManager instance = new AuctionManager();
@@ -11,31 +14,44 @@ public class AuctionManager {
     public static AuctionManager getAuction(){
         return instance;
     }
-    public void uploadItem(Item item, User seller) {
+    public void uploadItem(Item item,double price,double stepPrice,int durations, User seller) {
         if (seller.getRole() != Role.SELLER) {
             System.out.println("Lỗi: Người dùng không có quyền bán!");
             return;
         }
-
-        if (item.getPrice() <= 0) {
-            System.out.println("Lỗi: Giá phải lớn hơn 0!");
+        if (price <= 0 || stepPrice <= 0 || stepPrice > price) {
+            System.out.println("Lỗi: Giá khởi điểm và bước giá không hợp lệ!");
             return;
         }
-        ItemType type = item.getType();
-        switch (type) {
-            case ARTS:
-                ArtsDAO.getInstance().createItem((Arts) item);
-                break;
-            case ELECTRONICS:
-                ElectronicsDAO.getInstance().createItem((Electronics) item);
-                break;
-            case VEHICLE:
-                VehicleDAO.getInstance().createItem((Vehicle) item);
-                break;
-            default:
-                System.out.println("Lỗi: Loại sản phẩm không hỗ trợ!");
+        try(Connection connection = AuctionDAO.getInstance().getConnect()){
+            connection.setAutoCommit(false);
+            ItemType type = item.getType();
+            int id = -1;
+            switch (type) {
+                case ARTS:
+                    id = ArtsDAO.getInstance().createItem(connection, (Arts) item);
+                    break;
+                case ELECTRONICS:
+                    id = ElectronicsDAO.getInstance().createItem(connection,(Electronics) item);
+                    break;
+                case VEHICLE:
+                    id = VehicleDAO.getInstance().createItem(connection, (Vehicle) item);
+                    break;
+                default:
+                    System.out.println("Lỗi: Loại sản phẩm không hỗ trợ!");
+                    return;
+            }
+
+            if (id > 0){
+                System.out.println("Manager: Đã đăng bán món hàng " + item.getName());
+                AuctionDAO.getInstance().createAuction(connection, id, price, stepPrice, durations);
+                connection.commit();
                 return;
+            }   
+            connection.rollback();
+            throw new SQLException("có lỗi xảy ra trong khi upload sản phẩm");
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
         }
-        System.out.println("Manager: Đã đăng bán món hàng " + item.getName());
     }
 }
