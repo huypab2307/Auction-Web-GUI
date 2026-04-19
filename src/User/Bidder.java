@@ -2,7 +2,7 @@ package User;
 public class Bidder extends User {
 
     public Bidder(String username, String password, int id) {
-        super(username, password, id);
+        super(username, password, id,Role.BIDDER);
     }
 
     @Override

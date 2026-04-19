@@ -1,19 +1,21 @@
 package Items;
-abstract class Item {
+public abstract class Item {
     private String name;
     private String description;
     private Double price;
-    private String sellerId;
-    private static int cur_id = 00000; 
-    private String id; //auto-generated
+    private int sellerId;
+    private int id;
+    private ItemType type;
 
-    public Item(String name, String description, Double price,String type, String sellerId) {
+    public Item(String name, String description, Double price,ItemType type, int sellerId,int id) {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.id = type + cur_id++;
         this.sellerId = sellerId;
+        this.type = type;
+        this.id = id;
     }
+
     public String getName() {
         return name;
     }
@@ -26,15 +28,11 @@ abstract class Item {
         return price;
     }
 
-    public String getSellerId() {
+    public int getSellerId() {
         return sellerId;
     }
 
-    public static int getCur_id() {
-        return cur_id;
-    }
-
-    public String getId() {
+    public int getId() {
         return id;
     }
 }

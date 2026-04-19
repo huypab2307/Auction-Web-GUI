@@ -4,11 +4,13 @@ public abstract class User {
     protected String username;
     protected String password;
     protected int id;
+    protected Role role;
 
-    public User(String username, String password, int id) {
+    public User(String username, String password, int id, Role role) {
         this.username = username;
         this.password = password;
         this.id = id;
+        this.role = role;
     }
 
     public String getUsername() {
@@ -18,10 +20,13 @@ public abstract class User {
     public String getPassword() {
         return password;
     }
-
-    public User changeRole(Role newRole) {
-        return UserFactory.createUser(newRole, this.username, this.password);
+    public int getId(){
+        return id;
     }
 
+    public User changeRole(Role newRole) {
+        return UserFactory.createUser(newRole, this);
+    }
+    public Role getRole(){return role;}
     public abstract void showRole();
 }

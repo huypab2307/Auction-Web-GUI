@@ -2,7 +2,7 @@ package User;
 public class Admin extends User {
 
     public Admin(String username, String password, int id) {
-        super(username, password, id);
+        super(username, password, id,Role.ADMIN);
     }
 
     @Override

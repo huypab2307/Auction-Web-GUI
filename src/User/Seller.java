@@ -1,8 +1,11 @@
 package User;
+
+import Items.FactoryItem;
+
 public class Seller extends User {
 
     public Seller(String username, String password, int id) {
-        super(username, password, id);
+        super(username, password, id,Role.SELLER);
     }
 
     @Override
@@ -10,7 +13,7 @@ public class Seller extends User {
         System.out.println(username + " is a Seller");
     }
 
-    public void sellItem() {
-        System.out.println(username + " is selling an item");
+    public <T> T sellItem(Class<T> clazz, String name, String desc, double price) {
+        return FactoryItem.createBuilder(clazz, name, desc, price, this.id);
     }
 }

@@ -8,7 +8,7 @@ public class Vehicle extends Item {
     private final String titleStatus; //Tình trạng giấy tờ
     
     public Vehicle(Builder build) {
-        super(build.name,build.description,build.price,"V",build.sellerId);
+        super(build.name,build.description,build.price,ItemType.VEHICLE,build.sellerId,id);
         this.mileage = build.mileage;
         this.mFG = build.mFG;
         this. brand = build.brand;
@@ -27,9 +27,9 @@ public class Vehicle extends Item {
         private String name;
         private String description;
         private double price;
-        private String sellerId;
+        private int sellerId;
 
-        public Builder(String name, String description, double price, String sellerId) {
+        public Builder(String name, String description, double price, int sellerId) {
             this.name = name;
             this.description = description;
             this.price = price;

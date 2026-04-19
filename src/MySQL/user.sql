@@ -1,0 +1,8 @@
+-- Active: 1774790809341@@localhost@3306@auction
+CREATE DATABASE auction;
+CREATE TABLE USER (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+SELECT * FROM user;
