@@ -14,7 +14,7 @@ public class AuctionManager {
     public static AuctionManager getAuction(){
         return instance;
     }
-    public void uploadItem(Item item,double price,double stepPrice,int durations, User seller) {
+    public void uploadItem(Item item,double price,double stepPrice,int durations, Seller seller) {
         if (seller.getRole() != Role.SELLER) {
             System.out.println("Lỗi: Người dùng không có quyền bán!");
             return;
