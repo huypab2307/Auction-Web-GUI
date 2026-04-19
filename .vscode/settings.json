@@ -1,6 +1,21 @@
 {
+    "java.project.sourcePaths": [
+        "src"
+    ],
+
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
         "libs/mysql-connector-j-9.6.0.jar"
-    ]
+    ],
+    "files.encoding": "utf8",
+    "java.debug.settings.vmArgs": "-Dfile.encoding=UTF-8",
+    "java.jdt.ls.vmargs": "-Dfile.encoding=UTF-8",
+
+    "terminal.integrated.profiles.windows": {
+        "PowerShell UTF-8": {
+            "source": "PowerShell",
+            "args": ["-NoExit", "-Command", "chcp 65001"]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell UTF-8"
 }

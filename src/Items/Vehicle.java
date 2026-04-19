@@ -8,7 +8,7 @@ public class Vehicle extends Item {
     private final String titleStatus; //Tình trạng giấy tờ
     
     public Vehicle(Builder build) {
-        super(build.name,build.description,build.price,ItemType.VEHICLE,build.sellerId,id);
+        super(build.name,build.description,build.price,ItemType.VEHICLE,build.sellerId,-1);
         this.mileage = build.mileage;
         this.mFG = build.mFG;
         this. brand = build.brand;
@@ -99,6 +99,9 @@ public class Vehicle extends Item {
     // title
     public String getTitleStatus() {
         return this.titleStatus;
+    }
+    public int getmFG() {
+        return mFG;
     }
     @Override
     public String toString() {

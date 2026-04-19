@@ -9,15 +9,15 @@ public class Electronics extends Item {
     private final double weight;
 
 
-    public Electronics(Builder build) {
-        super(build.name,build.description,build.price,"E",build.seller_id);
-        this.brand = build.brand;
-        this.power = build.power;
-        this.voltage = build.voltage;
-        this.current = build.current;
-        this.status = build.status;
-        this.color = build.color;
-        this.weight = build.weight;
+public Electronics(Builder build) {
+    super(build.name,build.description,build.price,ItemType.ELECTRONICS,build.sellerId,-1);
+    this.brand = build.brand;
+    this.power = build.power;
+    this.voltage = build.voltage;
+    this.current = build.current;
+    this.status = build.status;
+    this.color = build.color;
+    this.weight = build.weight;
     }
     public String getBrand() {
         return brand;
@@ -50,7 +50,7 @@ public class Electronics extends Item {
         private String name;
         private String description;
         private double price;
-        private String seller_id;
+        private int sellerId;
         private String brand;
         private int power;
         private double voltage;
@@ -58,11 +58,11 @@ public class Electronics extends Item {
         private String status;
         private String color;
         private double weight;
-        public Builder(String name, String description, double price, String seller_id){
+        public Builder(String name, String description, double price, int sellerId){
             this.name = name;
             this.description = description;
             this.price = price;
-            this.seller_id = seller_id;
+            this.sellerId = sellerId;
         }
         public Builder withBrand (String brand){
             this.brand = brand;

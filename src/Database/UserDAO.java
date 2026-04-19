@@ -1,12 +1,12 @@
 package Database;
-import java.sql.*;
-
 import User.Bidder;
 import User.User;
+import java.sql.*;
 
 public class UserDAO extends BaseDAO {
     private static final UserDAO user = new UserDAO();
-    public static UserDAO getUserDAO(){
+    private UserDAO(){}
+    public static UserDAO getInstance(){
         return user;
     }
 

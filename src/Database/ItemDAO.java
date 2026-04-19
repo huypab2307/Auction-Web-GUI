@@ -1,7 +1,6 @@
 package Database;
-import java.sql.*;
-
 import Items.*;
+import java.sql.*;
 
 
 
@@ -14,13 +13,13 @@ public abstract class ItemDAO extends BaseDAO {
             pr.setInt(2, item.getSellerId());
             pr.setDouble(3, item.getPrice());
             pr.setString(4, item.getDescription());
-            pr.setString(5, type); // 'ARTS', 'ELECTRONICS', v.v.
+            pr.setString(5, type); 
 
             pr.executeUpdate();
             
             ResultSet rs = pr.getGeneratedKeys();
             if (rs.next()) {
-                return rs.getInt(1); // Trả về ID vừa tạo
+                return rs.getInt(1); 
             }
         }
         throw new SQLException("Không lấy được ID từ bảng items.");

@@ -35,4 +35,7 @@ public abstract class Item {
     public int getId() {
         return id;
     }
+    public ItemType getType(){
+        return type;
+    }
 }
