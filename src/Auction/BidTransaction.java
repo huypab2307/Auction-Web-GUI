@@ -1,20 +1,38 @@
-// import java.time.LocalDateTime;
-// import java.util.HashMap;
+package Auction;
+import java.time.*;
 
-// class BidTransaction {
-//     private static HashMap<Auction,LocalDateTime> log = new HashMap<>();
-//     public static Auction bill(Auction auction){
-//         // if (auction.user thanh toán = true){
+public class BidTransaction {
+    private int id;
+    private int userId;
+    private int auctionId;
+    private double bidAmount;
+    private LocalDateTime createdAt; 
 
-//         // }
-//     }
-//     public static Update_history(Auction autcion){
-//       //BidTransaction.log.put(autcion, thời gian hiện tại);
-//     }
-//     public static void extract(){
-//         log.forEach((k,v) -> {System.out.println(k); System.out.println(v);});
-//     }
-//     public static void find(id id){
-//         //tìm nếu thấy trả id và thời gian giao dịch;
-//     }
-// }
+    public int getId() {
+        return id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public int getAuctionId() {
+        return auctionId;
+    }
+
+    public double getBidAmount() {
+        return bidAmount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public BidTransaction(int id, int userId, int auctionId, double bidAmount, LocalDateTime createdAt) {
+        this.id = id;
+        this.userId = userId;
+        this.auctionId = auctionId;
+        this.bidAmount = bidAmount;
+        this.createdAt = createdAt;
+    }
+
+}

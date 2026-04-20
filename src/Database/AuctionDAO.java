@@ -3,6 +3,9 @@ package Database;
 import Auction.*;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+import User.*;
 
 public class AuctionDAO extends BaseDAO {
     private static final AuctionDAO instance = new AuctionDAO();
@@ -31,10 +34,9 @@ public class AuctionDAO extends BaseDAO {
             }
         }
     }
-    public Auction findById(int id) throws SQLException{
-        try (Connection connection = getConnect()){
-            String query = "SELECT * FROM auctions WHERE id = ?;";
-            PreparedStatement pr = connection.prepareStatement(query);
+    public Auction findById(Connection connection, int id) throws SQLException{
+        String query = "SELECT * FROM auctions WHERE id = ?;";
+        try(PreparedStatement pr = connection.prepareStatement(query)){
             pr.setInt(1, id);
             ResultSet rs = pr.executeQuery();
             if (rs.next()) {
@@ -52,14 +54,11 @@ public class AuctionDAO extends BaseDAO {
                 return new Auction(id, itemId, startTime, endTime, price, stepPrice, curPrice, lastBidder, status);
             }
             throw new SQLException("Không tìm thấy id");
-        }catch( SQLException e){
-            throw e;
         }
     }
-    public void updateAuction(Auction auction, int bidderId) throws SQLException{
-        try(Connection connection = getConnect()) {
-            String query = "UPDATE auctions SET curPrice = ?, lastBidderId = ? WHERE id = ?;";
-            PreparedStatement pr = connection.prepareStatement(query);
+    public void updateAuction(Connection connection ,Auction auction, int bidderId) throws SQLException{
+        String query = "UPDATE auctions SET curPrice = ?, lastBidderId = ? WHERE id = ?;";
+        try(PreparedStatement pr = connection.prepareStatement(query)){
             pr.setDouble(1, auction.getCurPrice() + auction.getStepPrice());
             pr.setInt(2, bidderId);
             pr.setInt(3,auction.getId());
@@ -68,9 +67,20 @@ public class AuctionDAO extends BaseDAO {
                 return;
             }
             throw new SQLException("đấu giá không thành công");
+        }
+    }
+    public void updateTransaction(Connection connection, Auction auction, int bidderId) throws SQLException{
+        String query = "INSERT INTO bidTransactions(userId,auctionId,bidAmount) VALUES (?,?,?);";
+        try(PreparedStatement pr = connection.prepareStatement(query)){
+            pr.setInt(1,bidderId);
+            pr.setInt(2, auction.getId());
+            pr.setDouble(3, auction.getCurPrice() + auction.getStepPrice());
 
-        } catch (SQLException e) {
-            throw e;
+            if(pr.executeUpdate() > 0){
+                System.out.println("Thêm thành công");
+                return;
+            }
+            throw new SQLException("thêm không thành công");
         }
     }
 }

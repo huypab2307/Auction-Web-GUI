@@ -1,5 +1,7 @@
 package User;
 
+import Auction.AuctionManager;
+
 public abstract class User {
     protected String username;
     protected String password;
@@ -28,5 +30,9 @@ public abstract class User {
         return UserFactory.createUser(newRole, this);
     }
     public Role getRole(){return role;}
+    public void checkNotifications(){
+        AuctionManager.getAuction().readNotification(this);
+    }
     public abstract void showRole();
+
 }

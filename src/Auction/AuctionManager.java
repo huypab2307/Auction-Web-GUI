@@ -1,12 +1,10 @@
 package Auction;
-import Database.ArtsDAO;
-import Database.AuctionDAO;
-import Database.ElectronicsDAO;
-import Database.VehicleDAO;
+import Database.*;
 import Items.*;
 import User.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class AuctionManager {
     private static final AuctionManager instance = new AuctionManager();
@@ -56,12 +54,30 @@ public class AuctionManager {
     }
 
     public void placebid(Bidder bidder, int id){
-        try{
+        try(Connection connection = AuctionDAO.getInstance().getConnect()){
+            connection.setAutoCommit(false);
             AuctionDAO auctions = AuctionDAO.getInstance();
-            Auction auction = auctions.findById(id);
-            auctions.updateAuction(auction, bidder.getId());
+            NotificationDAO notificaions = NotificationDAO.getInstance();
+            Auction auction = auctions.findById(connection, id);
+            auctions.updateAuction(connection, auction, bidder.getId());
+            auctions.updateTransaction(connection, auction, bidder.getId());
+            Notifications notification = notificaions.subscribeAuction(connection, auction, bidder);
+            ArrayList<Integer> log = notificaions.findNotificationList(connection, auction.getId());
+            notificaions.notiAll(connection, notification, log);
+            connection.commit();
         }catch (SQLException e){
             System.out.println(e.getMessage());
+        }
+    }
+    public void readNotification(User user){
+        NotificationDAO notification = NotificationDAO.getInstance();
+        try(Connection connection = notification.getConnect()){
+            connection.setAutoCommit(false);
+            ArrayList<Notifications> notifications = notification.checkNotifications(connection, user.getId(), false);
+            notifications.forEach(s -> s.readNotification());
+            connection.commit();
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
     }
 }

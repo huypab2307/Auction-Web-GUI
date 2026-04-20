@@ -14,3 +14,24 @@ CREATE TABLE auctions (
     CONSTRAINT chk_price_step CHECK (priceStep <= startingPrice AND priceStep > 0),
     CONSTRAINT chk_time CHECK (endTime > startTime)
 );
+CREATE TABLE bidTransactions (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    auctionId INT NOT NULL,
+    bidAmount DOUBLE NOT NULL,         
+    createdAt DATETIME DEFAULT NOW(),  
+    FOREIGN KEY (userId) REFERENCES user(id),
+    FOREIGN KEY (auctionId) REFERENCES auctions(id)
+);
+
+CREATE TABLE notification (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    auctionId INT NOT NULL,
+    message VARCHAR(255) NOT NULL, 
+    isChecked BOOLEAN NOT NULL DEFAULT false, 
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES user(id),
+    FOREIGN KEY (auctionId) REFERENCES auctions(id)
+);
+SELECT DISTINCT userId FROM notification

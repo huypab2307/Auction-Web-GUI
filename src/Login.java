@@ -6,12 +6,13 @@ class Login {
         AuctionManager auction = AuctionManager.getAuction();
         UserDAO users = UserDAO.getInstance();
         // u.register("DuongDuong","jennyhuyn"); 
-        users.register("togedemaru","Matkhau");
+        // users.register("togedemaru","Matkhau");
         
-        User user = users.login("togedemaru","Matkhau");
-        user.showRole();
-        Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);
-        newUser.placeBid(21);
+        User user = users.login("jenny","Matkhau");
+        user.checkNotifications();
+        // user.showRole();
+        // Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);
+        // newUser.placeBid(22);
         // Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         
