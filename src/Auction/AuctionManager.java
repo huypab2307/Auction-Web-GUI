@@ -54,4 +54,14 @@ public class AuctionManager {
             System.out.println(e.getMessage());
         }
     }
+
+    public void placebid(Bidder bidder, int id){
+        try{
+            AuctionDAO auctions = AuctionDAO.getInstance();
+            Auction auction = auctions.findById(id);
+            auctions.updateAuction(auction, bidder.getId());
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
 }

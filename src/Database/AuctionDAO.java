@@ -1,5 +1,6 @@
 package Database;
 
+import Auction.*;
 import java.sql.*;
 import java.time.LocalDateTime;
 
@@ -28,6 +29,48 @@ public class AuctionDAO extends BaseDAO {
                 connection.rollback();
                 throw new SQLException("Lỗi: Không thể tạo phiên đấu giá.");
             }
+        }
+    }
+    public Auction findById(int id) throws SQLException{
+        try (Connection connection = getConnect()){
+            String query = "SELECT * FROM auctions WHERE id = ?;";
+            PreparedStatement pr = connection.prepareStatement(query);
+            pr.setInt(1, id);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                int itemId = rs.getInt("itemId");
+                double price = rs.getDouble("startingPrice");
+                double stepPrice = rs.getDouble("priceStep");
+                double curPrice = rs.getDouble("curPrice");
+                int lastBidder = rs.getInt("lastBidderId");
+
+                LocalDateTime startTime = rs.getObject("startTime", LocalDateTime.class);
+                LocalDateTime endTime = rs.getObject("endTime", LocalDateTime.class);
+                String statusStr = rs.getString("status");
+                AuctionStatus status = AuctionStatus.valueOf(statusStr.toUpperCase());
+
+                return new Auction(id, itemId, startTime, endTime, price, stepPrice, curPrice, lastBidder, status);
+            }
+            throw new SQLException("Không tìm thấy id");
+        }catch( SQLException e){
+            throw e;
+        }
+    }
+    public void updateAuction(Auction auction, int bidderId) throws SQLException{
+        try(Connection connection = getConnect()) {
+            String query = "UPDATE auctions SET curPrice = ?, lastBidderId = ? WHERE id = ?;";
+            PreparedStatement pr = connection.prepareStatement(query);
+            pr.setDouble(1, auction.getCurPrice() + auction.getStepPrice());
+            pr.setInt(2, bidderId);
+            pr.setInt(3,auction.getId());
+            if (pr.executeUpdate() > 0){
+                System.out.println("đấu giá thành công");
+                return;
+            }
+            throw new SQLException("đấu giá không thành công");
+
+        } catch (SQLException e) {
+            throw e;
         }
     }
 }
