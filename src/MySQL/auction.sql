@@ -1,7 +1,8 @@
--- Active: 1774790809341@@localhost@3306@auction
+-- Active: 1776668276741@@bnh4szqalzeyaqls8eup-mysql.services.clever-cloud.com@3306@bnh4szqalzeyaqls8eup
 CREATE TABLE auctions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     itemId INT,
+    sellerId INT,
     startingPrice DECIMAL(10,2) NOT NULL,
     priceStep DECIMAL(10,2) NOT NULL,
     curPrice DECIMAL(10,2),
@@ -11,8 +12,10 @@ CREATE TABLE auctions (
     status ENUM('PENDING', 'OPEN', 'CLOSED', 'CANCELED') DEFAULT 'PENDING',
     FOREIGN KEY (itemId) REFERENCES items(id),
     FOREIGN KEY (lastBidderId) REFERENCES user(id),
+    FOREIGN KEY (sellerId) REFERENCES user(id),
     CONSTRAINT chk_price_step CHECK (priceStep <= startingPrice AND priceStep > 0),
     CONSTRAINT chk_time CHECK (endTime > startTime)
+    
 );
 CREATE TABLE bidTransactions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -42,7 +42,7 @@ public class AuctionManager {
 
             if (id > 0){
                 System.out.println("Manager: Đã đăng bán món hàng " + item.getName());
-                AuctionDAO.getInstance().createAuction(connection, id, price, stepPrice, durations);
+                AuctionDAO.getInstance().createAuction(connection, id,seller.getId(), price, stepPrice, durations);
                 connection.commit();
                 return;
             }   
@@ -75,6 +75,7 @@ public class AuctionManager {
             connection.setAutoCommit(false);
             ArrayList<Notifications> notifications = notification.checkNotifications(connection, user.getId(), false);
             notifications.forEach(s -> s.readNotification());
+            notification.markAllAsRead(connection, user.getId());
             connection.commit();
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());

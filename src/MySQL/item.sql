@@ -1,3 +1,4 @@
+-- Active: 1776668276741@@bnh4szqalzeyaqls8eup-mysql.services.clever-cloud.com@3306@bnh4szqalzeyaqls8eup
 CREATE TABLE items (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL, 

@@ -53,7 +53,6 @@ public class NotificationDAO extends BaseDAO {
         String query = "INSERT INTO notification(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
         
         try (PreparedStatement pr = connection.prepareStatement(query)) {
-            System.out.println(log);
             for (int userId : log) {
           
                 if (userId != notification.getUserId()) {
@@ -82,7 +81,6 @@ public class NotificationDAO extends BaseDAO {
     }
     public ArrayList<Notifications> checkNotifications(Connection connection,int userId, boolean isReaded) throws SQLException{
         String query = "SELECT * FROM notification WHERE userId = ? AND isChecked = ?";
-        String update = "UPDATE notification SET isCheck = false WHERE userId = ?";
         ArrayList<Notifications> notifications = new ArrayList<>();
         try(PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1,userId);
@@ -91,10 +89,27 @@ public class NotificationDAO extends BaseDAO {
             while(rs.next()){
                 notifications.add(mapNotification(rs));
             }
-        try(PreparedStatement upd = connection.prepareStatement(update)){
-            upd.setInt(1, userId);
-        }
         return notifications;
         } 
+    }
+    public void markAllAsRead(Connection connection, int userId) throws SQLException {
+        String query = "UPDATE notification SET isChecked = true WHERE userId = ? AND isChecked = false";
+        
+        try (PreparedStatement pr = connection.prepareStatement(query)) {
+            pr.setInt(1, userId);
+            int rowsAffected = pr.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("Sytem: Đã đánh dấu " + rowsAffected + " thông báo là đã đọc.");
+            }
+        }
+    }
+    public void markByIdAsRead(Connection connection, int notificationId) throws SQLException {
+        String query = "UPDATE notification SET isChecked = true WHERE id = ?";
+        
+        try (PreparedStatement pr = connection.prepareStatement(query)) {
+            pr.setInt(1, notificationId);
+            pr.executeUpdate();
+        }
     }
 }

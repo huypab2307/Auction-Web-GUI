@@ -1,18 +1,20 @@
 import Auction.*;
 import Database.UserDAO;
 import User.*;
+
 class Login {
     public static void main(String[] args) {
         AuctionManager auction = AuctionManager.getAuction();
         UserDAO users = UserDAO.getInstance();
-        // u.register("DuongDuong","jennyhuyn"); 
+        // users.register("DuongDuong","jennyhuyn"); 
         // users.register("togedemaru","Matkhau");
+        // users.register("Jenny", "Matkhau");
         
         User user = users.login("jenny","Matkhau");
         user.checkNotifications();
         // user.showRole();
         // Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);
-        // newUser.placeBid(22);
+        // newUser.placeBid(1);
         // Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         

@@ -3,9 +3,6 @@ package Database;
 import Auction.*;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-
-import User.*;
 
 public class AuctionDAO extends BaseDAO {
     private static final AuctionDAO instance = new AuctionDAO();
@@ -15,16 +12,17 @@ public class AuctionDAO extends BaseDAO {
 
 
 
-    public void createAuction(Connection connection, int itemId, double price, double stepPrice, int durations) throws SQLException {
+    public void createAuction(Connection connection, int itemId,int sellerId, double price, double stepPrice, int durations) throws SQLException {
         LocalDateTime endDateTime = LocalDateTime.now().plusDays(durations);
-        String query = "INSERT INTO auctions(itemId, startingPrice, priceStep, curPrice, endTime) VALUES(?,?,?,?,?);";
+        String query = "INSERT INTO auctions(itemId,sellerId, startingPrice, priceStep, curPrice, endTime) VALUES(?,?,?,?,?,?);";
         
         try (PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1, itemId);
-            pr.setDouble(2, price);
-            pr.setDouble(3, stepPrice);
-            pr.setDouble(4, price); 
-            pr.setTimestamp(5, Timestamp.valueOf(endDateTime));
+            pr.setInt(2, sellerId);
+            pr.setDouble(3, price);
+            pr.setDouble(4, stepPrice);
+            pr.setDouble(5, price); 
+            pr.setTimestamp(6, Timestamp.valueOf(endDateTime));
 
             if (pr.executeUpdate() > 0) {
                 System.out.println("Manager: Đã đưa sản phẩm lên sàn, kết thúc sau " + durations + " ngày.");
@@ -41,6 +39,7 @@ public class AuctionDAO extends BaseDAO {
             ResultSet rs = pr.executeQuery();
             if (rs.next()) {
                 int itemId = rs.getInt("itemId");
+                int sellerId = rs.getInt("sellerId");
                 double price = rs.getDouble("startingPrice");
                 double stepPrice = rs.getDouble("priceStep");
                 double curPrice = rs.getDouble("curPrice");
@@ -51,7 +50,7 @@ public class AuctionDAO extends BaseDAO {
                 String statusStr = rs.getString("status");
                 AuctionStatus status = AuctionStatus.valueOf(statusStr.toUpperCase());
 
-                return new Auction(id, itemId, startTime, endTime, price, stepPrice, curPrice, lastBidder, status);
+                return new Auction(id, itemId, sellerId, startTime, endTime, price, stepPrice, curPrice, lastBidder, status);
             }
             throw new SQLException("Không tìm thấy id");
         }

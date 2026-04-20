@@ -5,6 +5,7 @@ import java.time.*;
 public class Auction{
     private int id;
     private int itemId;
+    private int sellerId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private double price;
@@ -19,6 +20,9 @@ public class Auction{
 
     public int getItemId() {
         return itemId;
+    }
+    public int getSellerId(){
+        return sellerId;
     }
 
     public LocalDateTime getStartTime() {
@@ -49,9 +53,10 @@ public class Auction{
         return status;
     }
 
-    public Auction(int id,int itemId,LocalDateTime startTime,LocalDateTime endTime, double price, double stepPrice, double curPrice,  int LastBidder,AuctionStatus status) {
+    public Auction(int id,int itemId,int sellerId, LocalDateTime startTime,LocalDateTime endTime, double price, double stepPrice, double curPrice,  int LastBidder,AuctionStatus status) {
         this.LastBidder = LastBidder;
         this.curPrice = curPrice;
+        this.sellerId = sellerId;
         this.endTime = endTime;
         this.id = id;
         this.itemId = itemId;
