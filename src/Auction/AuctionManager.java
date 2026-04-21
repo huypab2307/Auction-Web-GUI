@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class AuctionManager {
     private static final AuctionManager instance = new AuctionManager();
 
-    public static AuctionManager getAuction(){
+    public static AuctionManager getInstance(){
         return instance;
     }
     public void uploadItem(Item item,double price,double stepPrice,int durations, Seller seller) {
@@ -54,31 +54,20 @@ public class AuctionManager {
     }
 
     public void placebid(Bidder bidder, int id){
-        try(Connection connection = AuctionDAO.getInstance().getConnect()){
+        AuctionDAO auctionDAO = AuctionDAO.getInstance();
+
+        try(Connection connection = auctionDAO.getConnect()){
             connection.setAutoCommit(false);
-            AuctionDAO auctions = AuctionDAO.getInstance();
-            NotificationDAO notificaions = NotificationDAO.getInstance();
-            Auction auction = auctions.findById(connection, id);
-            auctions.updateAuction(connection, auction, bidder.getId());
-            auctions.updateTransaction(connection, auction, bidder.getId());
-            Notifications notification = notificaions.subscribeAuction(connection, auction, bidder);
-            ArrayList<Integer> log = notificaions.findNotificationList(connection, auction.getId());
-            notificaions.notiAll(connection, notification, log);
+            Auction auction = auctionDAO.findById(connection, id);
+            auctionDAO.updateAuction(connection, auction, bidder.getId());
+            auctionDAO.updateTransaction(connection, auction, bidder.getId());
+
+            Notifications notification = NotificationManager.getInstance().subscribeAuction(connection, auction, bidder);
+            if (notification == null) throw new SQLException("Có lỗi xảy ra khi thống báo");
             connection.commit();
+
         }catch (SQLException e){
             System.out.println(e.getMessage());
-        }
-    }
-    public void readNotification(User user){
-        NotificationDAO notification = NotificationDAO.getInstance();
-        try(Connection connection = notification.getConnect()){
-            connection.setAutoCommit(false);
-            ArrayList<Notifications> notifications = notification.checkNotifications(connection, user.getId(), false);
-            notifications.forEach(s -> s.readNotification());
-            notification.markAllAsRead(connection, user.getId());
-            connection.commit();
-        } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
         }
     }
     public void findAuction(int id){
@@ -88,5 +77,9 @@ public class AuctionManager {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public ArrayList<Auction> auctionList(){
+        return AuctionDAO.getInstance().getAllAuctions();
     }
 }

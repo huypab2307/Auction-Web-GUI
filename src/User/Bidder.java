@@ -14,7 +14,7 @@ public class Bidder extends User {
     }
 
     public void placeBid(int id) {
-        AuctionManager.getAuction().placebid(this, id);
+        AuctionManager.getInstance().placebid(this, id);
     }
 
 }

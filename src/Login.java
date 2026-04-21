@@ -1,30 +1,21 @@
 import Auction.*;
-import Database.NotificationDAO;
 import Database.UserDAO;
 import User.*;
-import java.sql.Connection;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import Items.*;
 
 class Login {
     public static void main(String[] args) {
-        AuctionManager auction = AuctionManager.getAuction();
+        AuctionManager auction = AuctionManager.getInstance();
         UserDAO users = UserDAO.getInstance();
 
         // users.register("togedemaru","Matkhau");
-        // users.register("Jenny", "Matkhau");
+        // users.register("jenny", "Matkhau");
         
         User user = users.login("jenny","Matkhau");
-        String name = user.getUsername();
 
-        // user.showRole();
-        // Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);
-        // newUser.placeBid(1);
-        Seller newUser = (Seller) user.changeRole(Role.SELLER);
+        user.showRole();
+        Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);
+        newUser.placeBid(1);
+        // Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         
         // Arts draft = newUser.createItem(Arts.Builder.class,"Kaguya","phim cosmic princess kaguya")

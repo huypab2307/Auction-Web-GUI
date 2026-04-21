@@ -1,6 +1,6 @@
 package User;
 
-import Auction.AuctionManager;
+import Auction.NotificationManager;
 
 public abstract class User {
     protected String username;
@@ -31,7 +31,7 @@ public abstract class User {
     }
     public Role getRole(){return role;}
     public void checkNotifications(){
-        AuctionManager.getAuction().readNotification(this);
+        NotificationManager.getInstance().readNotification(this);
     }
     public abstract void showRole();
 

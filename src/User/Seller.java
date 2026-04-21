@@ -1,7 +1,6 @@
 package User;
 
 import Auction.AuctionManager;
-import Database.AuctionDAO;
 import Items.FactoryItem;
 import Items.Item;
 
@@ -20,6 +19,6 @@ public class Seller extends User {
         return FactoryItem.createBuilder(clazz, name, desc, this.id);
     }
     public void uploadItem(Item item, double price, double stepPrice, int durationDays) {
-        AuctionManager.getAuction().uploadItem(item, price, stepPrice, durationDays, this);
+        AuctionManager.getInstance().uploadItem(item, price, stepPrice, durationDays, this);
     }
 }

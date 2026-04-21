@@ -84,10 +84,8 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
-    // Thêm hàm này vào trong class AuctionDAO
     public ArrayList<Auction> getAllAuctions() {
         ArrayList<Auction> list = new ArrayList<>();
-        // Lấy tất cả hoặc có thể thêm WHERE status = 'ACTIVE' để chỉ lấy phiên đang mở
         String query = "SELECT * FROM auctions"; 
         
         try (Connection connection = this.getConnect();

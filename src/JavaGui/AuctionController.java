@@ -2,7 +2,7 @@ package JavaGui;
 
 import Auction.Auction;
 import Database.AuctionDAO;
-import User.Bidder; // Import class Bidder của bạn
+import User.*; 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -65,12 +65,12 @@ public class AuctionController implements Initializable {
         imageBox.setStyle("-fx-background-color: #bdc3c7; -fx-background-radius: 5;");
 
         // --- LẤY THÔNG TIN TỪ DATABASE ---
-        User.User seller = Database.UserDAO.getInstance().findById(auction.getSellerId());
+        User seller = Database.UserDAO.getInstance().findById(auction.getSellerId());
         String sellerName = (seller != null) ? seller.getUsername() : "Không xác định";
 
         String bidderName = "Chưa có ai đặt giá";
         if (auction.getLastBidder() > 0) {
-            User.User bidder = Database.UserDAO.getInstance().findById(auction.getLastBidder());
+            User bidder = Database.UserDAO.getInstance().findById(auction.getLastBidder());
             if (bidder != null) {
                 bidderName = bidder.getUsername();
             }

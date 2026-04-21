@@ -6,6 +6,13 @@
             "name": "Login",
             "request": "launch",
             "mainClass": "Login",
+            "projectName": "Auction-Web-GUI_2519a4d1"
+        },
+        {
+            "type": "java",
+            "name": "Login",
+            "request": "launch",
+            "mainClass": "Login",
             "projectName": "Auction-Web-GUI_bb8c2822"
         },
         {

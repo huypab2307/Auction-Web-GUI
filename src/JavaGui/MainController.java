@@ -26,8 +26,6 @@ public class MainController {
     @FXML
     private Label messageLabel;
 
-    // Trong class MainController.java
-// Trong hàm handleLogin của MainController.java
     @FXML
     protected void handleLogin(ActionEvent event) {
         UserDAO users = UserDAO.getInstance();
@@ -38,19 +36,15 @@ public class MainController {
             messageLabel.setText("Vui lòng nhập đầy đủ thông tin!");
         }
         else {
-            // Thay đổi ở đây: Lấy đối tượng Bidder trả về
-            Bidder loggedInUser = users.login(username, password);
+            User loggedInUser = users.login(username, password);
             
             if (loggedInUser != null) {
                 try {
-                    // ĐĂNG NHẬP THÀNH CÔNG -> Chuyển trang và truyền User
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("auction.fxml"));
                     Parent root = loader.load();
 
-                    // Lấy controller của trang đấu giá
                     AuctionController auctionController = loader.getController();
-                    // Truyền user đang đăng nhập vào controller
-                    auctionController.setCurrentUser(loggedInUser); 
+                    auctionController.setCurrentUser((Bidder) loggedInUser); 
 
                     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     Scene scene = new Scene(root, 800, 600);
@@ -68,7 +62,6 @@ public class MainController {
         }
     }
 
-    // --- THÊM ĐOẠN NÀY ĐỂ CHUYỂN TRANG ĐĂNG KÝ ---
     @FXML
     public void switchToRegister(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("register.fxml")));
