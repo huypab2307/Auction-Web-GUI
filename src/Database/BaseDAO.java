@@ -10,15 +10,15 @@ public abstract class BaseDAO {
     static {
         try {
             dataSource = new MysqlDataSource();
-            dataSource.setServerName("bnh4szqalzeyaqls8eup-mysql.services.clever-cloud.com");
+            dataSource.setServerName("gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com");
 
-            dataSource.setPortNumber(3306);
-            dataSource.setDatabaseName("bnh4szqalzeyaqls8eup");
-            dataSource.setUser("ufyndotvxda0ocgn");
+            dataSource.setPortNumber(4000);
+            dataSource.setDatabaseName("auction");
+            dataSource.setUser("PWSDsNZJuvGcy6w.root");
             
-            dataSource.setPassword("CCyKF6mywYnkWPG8KEDo");
+            dataSource.setPassword("8J7BStoMgALGAgFW");
 
-            dataSource.setUseSSL(false); 
+            dataSource.setUseSSL(true); 
             dataSource.setAllowPublicKeyRetrieval(true); 
             dataSource.setCharacterEncoding("UTF-8"); 
 

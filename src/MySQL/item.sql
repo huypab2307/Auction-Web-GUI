@@ -1,10 +1,11 @@
--- Active: 1776668276741@@bnh4szqalzeyaqls8eup-mysql.services.clever-cloud.com@3306@bnh4szqalzeyaqls8eup
+-- Active: 1776779132143@@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com@4000@auction
 CREATE TABLE items (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL, 
     sellerId INT NOT NULL,
     description VARCHAR(500) NOT NULL, 
     type ENUM('ELECTRONICS', 'ARTS', 'VEHICLE', 'OTHER') NOT NULL,
+    imagePath VARCHAR(255),
     FOREIGN KEY (sellerId) REFERENCES user(id)
 );
 CREATE TABLE arts (
