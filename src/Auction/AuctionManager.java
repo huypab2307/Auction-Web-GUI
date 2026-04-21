@@ -81,4 +81,12 @@ public class AuctionManager {
             System.out.println(ex.getMessage());
         }
     }
+    public void findAuction(int id){
+        try(Connection connection = AuctionDAO.getInstance().getConnect()) {
+            Auction auction = AuctionDAO.getInstance().findById(connection, id);
+            System.out.println("giá hiện tại của vật phẩm: " + auction.getCurPrice());
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }
