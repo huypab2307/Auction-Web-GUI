@@ -3,9 +3,17 @@ import User.*;
 import Database.UserDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader; // Thêm thư viện này
+import javafx.scene.Node;       // Thêm thư viện này
+import javafx.scene.Parent;     // Thêm thư viện này
+import javafx.scene.Scene;      // Thêm thư viện này
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;      // Thêm thư viện này
+
+import java.io.IOException;     // Thêm thư viện này
+import java.util.Objects;       // Thêm thư viện này
 
 public class MainController {
 
@@ -18,6 +26,7 @@ public class MainController {
     @FXML
     private Label messageLabel;
 
+    // Trong class MainController.java
     @FXML
     protected void handleLogin(ActionEvent event) {
         UserDAO users = UserDAO.getInstance();
@@ -25,17 +34,38 @@ public class MainController {
         String password = passwordField.getText();
 
         if (username.trim().isEmpty() || password.trim().isEmpty()) {
-            messageLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;"); // Màu đỏ
             messageLabel.setText("Vui lòng nhập đầy đủ thông tin!");
         }
         else if (users.login(username, password) != null) {
-            messageLabel.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold;"); // Màu xanh lá
-            messageLabel.setText("Đăng nhập thành công!");
-            System.out.println("Chuyển hướng vào trang Sàn Đấu Giá...");
+            try {
+                // ĐĂNG NHẬP THÀNH CÔNG -> Chuyển trang
+                Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("auction.fxml")));
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                
+                // Trang đấu giá cần rộng hơn (800x600)
+                Scene scene = new Scene(root, 800, 600);
+                stage.setScene(scene);
+                stage.centerOnScreen(); // Căn giữa màn hình vì kích thước thay đổi
+                stage.show();
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+                messageLabel.setText("Lỗi khi tải trang đấu giá!");
+            }
         }
         else {
-            messageLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
             messageLabel.setText("Tên đăng nhập hoặc mật khẩu không đúng.");
         }
     }
+
+    // --- THÊM ĐOẠN NÀY ĐỂ CHUYỂN TRANG ĐĂNG KÝ ---
+    @FXML
+    public void switchToRegister(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("register.fxml")));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Scene scene = new Scene(root, 400, 500);
+        stage.setScene(scene);
+        stage.show();
+    }
 }
+

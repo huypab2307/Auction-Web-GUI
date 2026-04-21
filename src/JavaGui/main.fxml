@@ -66,7 +66,7 @@
             </VBox.margin>
         </Button>
 
-        <Hyperlink text="Chưa có tài khoản? Đăng ký ngay" textFill="#2980b9">
+        <Hyperlink onAction="#switchToRegister" text="Chưa có tài khoản? Đăng ký ngay" textFill="#2980b9">
             <VBox.margin>
                 <Insets top="15.0" />
             </VBox.margin>
