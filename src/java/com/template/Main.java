@@ -1,4 +1,4 @@
-package com.template;
+package java.com.template;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

@@ -1,5 +1,6 @@
 package com.template;
-
+import User.*;
+import Database.UserDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -19,6 +20,7 @@ public class MainController {
 
     @FXML
     protected void handleLogin(ActionEvent event) {
+        UserDAO users = UserDAO.getInstance();
         String username = usernameField.getText();
         String password = passwordField.getText();
 
@@ -26,7 +28,7 @@ public class MainController {
             messageLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;"); // Màu đỏ
             messageLabel.setText("Vui lòng nhập đầy đủ thông tin!");
         }
-        else if ("admin".equals(username) && "123456".equals(password)) {
+        else if (users.login(username, password) != null) {
             messageLabel.setStyle("-fx-text-fill: #2ecc71; -fx-font-weight: bold;"); // Màu xanh lá
             messageLabel.setText("Đăng nhập thành công!");
             System.out.println("Chuyển hướng vào trang Sàn Đấu Giá...");
