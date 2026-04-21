@@ -8,6 +8,7 @@ import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import Items.*;
 
 class Login {
     public static void main(String[] args) {
@@ -18,13 +19,12 @@ class Login {
         // users.register("Jenny", "Matkhau");
         
         User user = users.login("jenny","Matkhau");
-        Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);  
         String name = user.getUsername();
 
         // user.showRole();
         // Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);
         // newUser.placeBid(1);
-        // Seller newUser = (Seller) user.changeRole(Role.SELLER);
+        Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         
         // Arts draft = newUser.createItem(Arts.Builder.class,"Kaguya","phim cosmic princess kaguya")

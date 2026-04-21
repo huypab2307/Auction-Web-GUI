@@ -3,6 +3,7 @@ package Database;
 import Auction.*;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class AuctionDAO extends BaseDAO {
     private static final AuctionDAO instance = new AuctionDAO();
@@ -81,5 +82,38 @@ public class AuctionDAO extends BaseDAO {
             }
             throw new SQLException("thêm không thành công");
         }
+    }
+
+    // Thêm hàm này vào trong class AuctionDAO
+    public ArrayList<Auction> getAllAuctions() {
+        ArrayList<Auction> list = new ArrayList<>();
+        // Lấy tất cả hoặc có thể thêm WHERE status = 'ACTIVE' để chỉ lấy phiên đang mở
+        String query = "SELECT * FROM auctions"; 
+        
+        try (Connection connection = this.getConnect();
+             PreparedStatement pr = connection.prepareStatement(query);
+             ResultSet rs = pr.executeQuery()) {
+             
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int itemId = rs.getInt("itemId");
+                int sellerId = rs.getInt("sellerId");
+                double price = rs.getDouble("startingPrice");
+                double stepPrice = rs.getDouble("priceStep");
+                double curPrice = rs.getDouble("curPrice");
+                int lastBidder = rs.getInt("lastBidderId");
+
+                LocalDateTime startTime = rs.getObject("startTime", LocalDateTime.class);
+                LocalDateTime endTime = rs.getObject("endTime", LocalDateTime.class);
+                String statusStr = rs.getString("status");
+                AuctionStatus status = AuctionStatus.valueOf(statusStr.toUpperCase());
+
+                Auction auction = new Auction(id, itemId, sellerId, startTime, endTime, price, stepPrice, curPrice, lastBidder, status);
+                list.add(auction);
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi tải danh sách đấu giá: " + e.getMessage());
+        }
+        return list;
     }
 }

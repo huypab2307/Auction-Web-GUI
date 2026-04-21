@@ -27,6 +27,7 @@ public class MainController {
     private Label messageLabel;
 
     // Trong class MainController.java
+// Trong hàm handleLogin của MainController.java
     @FXML
     protected void handleLogin(ActionEvent event) {
         UserDAO users = UserDAO.getInstance();
@@ -36,25 +37,34 @@ public class MainController {
         if (username.trim().isEmpty() || password.trim().isEmpty()) {
             messageLabel.setText("Vui lòng nhập đầy đủ thông tin!");
         }
-        else if (users.login(username, password) != null) {
-            try {
-                // ĐĂNG NHẬP THÀNH CÔNG -> Chuyển trang
-                Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("auction.fxml")));
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                
-                // Trang đấu giá cần rộng hơn (800x600)
-                Scene scene = new Scene(root, 800, 600);
-                stage.setScene(scene);
-                stage.centerOnScreen(); // Căn giữa màn hình vì kích thước thay đổi
-                stage.show();
-                
-            } catch (IOException e) {
-                e.printStackTrace();
-                messageLabel.setText("Lỗi khi tải trang đấu giá!");
-            }
-        }
         else {
-            messageLabel.setText("Tên đăng nhập hoặc mật khẩu không đúng.");
+            // Thay đổi ở đây: Lấy đối tượng Bidder trả về
+            Bidder loggedInUser = users.login(username, password);
+            
+            if (loggedInUser != null) {
+                try {
+                    // ĐĂNG NHẬP THÀNH CÔNG -> Chuyển trang và truyền User
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("auction.fxml"));
+                    Parent root = loader.load();
+
+                    // Lấy controller của trang đấu giá
+                    AuctionController auctionController = loader.getController();
+                    // Truyền user đang đăng nhập vào controller
+                    auctionController.setCurrentUser(loggedInUser); 
+
+                    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    Scene scene = new Scene(root, 800, 600);
+                    stage.setScene(scene);
+                    stage.centerOnScreen();
+                    stage.show();
+                    
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    messageLabel.setText("Lỗi khi tải trang đấu giá!");
+                }
+            } else {
+                messageLabel.setText("Tên đăng nhập hoặc mật khẩu không đúng.");
+            }
         }
     }
 

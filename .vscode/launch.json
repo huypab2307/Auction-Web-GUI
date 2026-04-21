@@ -3,9 +3,16 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Login",
+            "request": "launch",
+            "mainClass": "Login",
+            "projectName": "Auction-Web-GUI_bb8c2822"
+        },
+        {
+            "type": "java",
             "name": "Chạy App Đấu Giá",
             "request": "launch",
-            "mainClass": "JavaGui.Main", 
+            "mainClass": "JavaGui.Main",
             "vmArgs": "--module-path \"${workspaceFolder}/libs/javafx-sdk-21.0.10/lib\" --add-modules javafx.controls,javafx.fxml"
         }
     ]
