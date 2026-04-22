@@ -256,4 +256,24 @@ public class AuctionController implements Initializable {
             alert.showAndWait();
         }
     }
+    @FXML
+    public void openChatWindow(ActionEvent event) {
+        if (currentUser == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("chat.fxml"));
+            Parent root = loader.load();
+
+            ChatController chatController = loader.getController();
+            chatController.setCurrentUser(currentUser); // Chuyền User ID sang trang chat
+
+            Stage chatStage = new Stage();
+            chatStage.setTitle("Nhắn tin - " + currentUser.getUsername());
+            chatStage.setScene(new Scene(root, 800, 600));
+            chatStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Lỗi mở cửa sổ Chat: " + e.getMessage());
+        }
+    }
 }

@@ -66,4 +66,18 @@ public class UserDAO extends BaseDAO {
         }
     return null;    
     }
+    public User findByUsername(String username){
+        String query = "SELECT * FROM user WHERE username = ?";
+        try(Connection connect = getConnect()){
+            PreparedStatement st = connect.prepareStatement(query);
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            if(rs.next()){
+                return new Bidder(rs.getString("username"), rs.getString("password"), rs.getInt("id"));
+            }
+        } catch (SQLException ex) {
+            System.out.println("Lỗi tìm user: " + ex.getMessage());
+        }
+        return null;
+    }
 }

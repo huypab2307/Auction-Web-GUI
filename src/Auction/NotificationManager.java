@@ -57,4 +57,20 @@ public class NotificationManager {
         }
         return null;
     }
+    public boolean sendChatMessage(int senderId, int receiverId, String content) {
+        MessageDAO messageDAO = MessageDAO.getInstance();
+        try (Connection connection = messageDAO.getConnect()){
+            connection.setAutoCommit(false);
+            boolean isSuccess = messageDAO.sendMessage(connection, senderId, receiverId, content);
+            if (isSuccess) {
+                connection.commit();
+                return true;
+            } else {
+                connection.rollback();
+            }
+        } catch(SQLException e) {
+            System.out.println("Lỗi gửi tin nhắn: " + e.getMessage());
+        }
+        return false;
+    }
 }

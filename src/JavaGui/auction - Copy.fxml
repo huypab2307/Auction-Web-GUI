@@ -21,11 +21,9 @@
             
             <TextField promptText="Tìm kiếm sản phẩm..." style="-fx-background-radius: 20; -fx-padding: 5 15;" HBox.hgrow="ALWAYS" />
             
-            <Button mnemonicParsing="false" onAction="#openChatWindow" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 15; -fx-padding: 5 15;" text="💬 Nhắn tin" />
-
             <Button mnemonicParsing="false" onAction="#showNotifications" style="-fx-background-color: #f1c40f; -fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 15; -fx-padding: 5 15;" text="🔔 Thông báo" />
 
-            <Button mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 15; -fx-padding: 5 15;" text="Đăng xuất" />
+            <Button mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Đăng xuất" />
          </children>
       </HBox>
 

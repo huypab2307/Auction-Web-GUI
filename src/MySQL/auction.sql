@@ -1,4 +1,4 @@
--- Active: 1776779132143@@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com@4000@auction
+-- Active: 1776845156931@@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com@4000@auction
 CREATE TABLE auctions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     itemId INT,
@@ -49,4 +49,4 @@ CREATE TABLE messages (
     FOREIGN KEY (senderId) REFERENCES user(id),
     FOREIGN KEY (receiverId) REFERENCES user(id)
 );
-SELECT DISTINCT userId FROM notification
+ALTER TABLE messages MODIFY COLUMN auctionId INT NULL;

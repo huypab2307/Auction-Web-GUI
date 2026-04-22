@@ -37,15 +37,26 @@ public class MessageDAO extends BaseDAO {
     }
     
     public List<Integer> loadUser(Connection connection, int userId) throws SQLException{
-        String query = "SELECT DISTINCT receiverId FROM messages WHERE senderId = ? ORDER BY createdAt; ";
-        List<Integer> list = new ArrayList<>();
-        try (PreparedStatement pr = connection.prepareStatement(query)){
-            pr.setInt(1, userId);
-            ResultSet rs = pr.executeQuery();
-            while (rs.next()){
-                list.add(rs.getInt("receiverId"));
+            // SỬA LẠI CÂU QUERY Ở ĐÂY
+            String query = "SELECT receiverId FROM messages WHERE senderId = ? GROUP BY receiverId ORDER BY MAX(createdAt) DESC;";
+            
+            List<Integer> list = new ArrayList<>();
+            try (PreparedStatement pr = connection.prepareStatement(query)){
+                pr.setInt(1, userId);
+                ResultSet rs = pr.executeQuery();
+                while (rs.next()){
+                    list.add(rs.getInt("receiverId"));
+                }
+                return list;
             }
-            return list;
+    }
+    public boolean sendMessage(Connection connection, int senderId, int receiverId, String content) throws SQLException {
+        String query = "INSERT INTO messages (senderId, receiverId, content) VALUES (?, ?, ?);";
+        try (PreparedStatement pr = connection.prepareStatement(query)) {
+            pr.setInt(1, senderId);
+            pr.setInt(2, receiverId);
+            pr.setString(3, content);
+            return pr.executeUpdate() > 0;
         }
     }
 }
