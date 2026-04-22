@@ -9,10 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="500.0" prefWidth="400.0" spacing="15.0" 
-      style="-fx-background-color: #f4f7f6; -fx-padding: 30;" 
-      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="JavaGui.RegisterController">
+<VBox alignment="CENTER" prefHeight="500.0" prefWidth="400.0" spacing="15.0" style="-fx-background-color: #f4f7f6; -fx-padding: 30;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="JavaGui.RegisterController">
    <children>
       <Label text="ĐĂNG KÝ TÀI KHOẢN" textFill="#2c3e50">
          <font>
@@ -44,7 +41,7 @@
 
       <Label fx:id="regMessageLabel" text="" />
 
-      <Button mnemonicParsing="false" onAction="#handleRegister" prefHeight="40.0" prefWidth="300.0" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5; -fx-cursor: hand;" text="TẠO TÀI KHOẢN">
+      <Button mnemonicParsing="false" onAction="#handleRegister" prefHeight="40.0" prefWidth="300.0" style="-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;" text="TẠO TÀI KHOẢN">
          <VBox.margin><Insets top="10.0" /></VBox.margin>
       </Button>
 
