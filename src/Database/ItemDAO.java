@@ -29,7 +29,7 @@ public abstract class ItemDAO extends BaseDAO {
         StringBuilder details = new StringBuilder();
         
         // Giả sử khóa chính của bảng items là id
-        String sql = "SELECT * FROM items WHERE id = ?"; 
+         String sql = "SELECT * FROM items WHERE id = ?"; 
         
         try (Connection conn = this.getConnect();
              PreparedStatement pr = conn.prepareStatement(sql)) {

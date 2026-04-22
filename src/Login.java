@@ -9,11 +9,19 @@ class Login {
 
         // users.register("togedemaru","Matkhau");
         // users.register("jenny", "Matkhau");
-        
-        Bidder user1 = (Bidder) users.login("jenny","Matkhau");
-        Bidder user2 = (Bidder) users.login("giahuy","123");
+                
+        Bidder user1 = (Bidder) users.login("hhh", "ccc"); // Xóa khoảng trắng thừa đi nhé
+        Bidder user2 = (Bidder) users.login("giahuy", "123");
+
+        // Kiểm tra xem có ông nào bị null không trước khi chạy thread
+        if (user1 == null || user2 == null) {
+            System.out.println("Lỗi: Tài khoản không tồn tại, kiểm tra lại username/password đi Dương ơi!");
+            return;
+        }
+
         var chay1 = new Thread(() -> user1.placeBid(1));
         var chay2 = new Thread(() -> user2.placeBid(1));
+
         chay1.start();
         chay2.start();
 
