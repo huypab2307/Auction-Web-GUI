@@ -25,5 +25,6 @@
             "args": ["-NoExit", "-Command", "chcp 65001"]
         }
     },
-    "terminal.integrated.defaultProfile.windows": "PowerShell UTF-8"
+    "terminal.integrated.defaultProfile.windows": "PowerShell UTF-8",
+    "java.debug.settings.onBuildFailureProceed": true
 }

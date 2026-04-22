@@ -1,6 +1,6 @@
 package JavaGui;
 
-import Auction.Auction;
+import Auction.*;
 import Database.AuctionDAO;
 import User.*; 
 import javafx.event.ActionEvent;
@@ -165,5 +165,95 @@ public class AuctionController implements Initializable {
         stage.setScene(scene);
         stage.centerOnScreen();
         stage.show();
+    }
+    @FXML
+    public void showNotifications(ActionEvent event) {
+        if (currentUser == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Cảnh báo");
+            alert.setHeaderText(null);
+            alert.setContentText("Người dùng chưa đăng nhập!");
+            alert.showAndWait();
+            return;
+        }
+
+        try (java.sql.Connection conn = Database.NotificationDAO.getInstance().getConnect()) {
+            Database.NotificationDAO notifDAO = Database.NotificationDAO.getInstance();
+
+            // 1. Lấy danh sách thông báo chưa đọc (isReaded = false) và đã đọc (isReaded = true)
+            java.util.ArrayList<Notifications> unreadList = notifDAO.checkNotifications(conn, currentUser.getId(), false);
+            java.util.ArrayList<Notifications> readList = notifDAO.checkNotifications(conn, currentUser.getId(), true);
+
+            // Gộp chung vào 1 danh sách
+            java.util.ArrayList<Notifications> allNotifs = new java.util.ArrayList<>();
+            allNotifs.addAll(unreadList);
+            allNotifs.addAll(readList);
+
+            // Sắp xếp lại để thông báo mới nhất nổi lên trên cùng
+            allNotifs.sort((n1, n2) -> n2.getCreatedAt().compareTo(n1.getCreatedAt()));
+
+            // 2. Tạo Dialog (Cửa sổ Pop-up)
+            javafx.scene.control.Dialog<Void> dialog = new javafx.scene.control.Dialog<>();
+            dialog.setTitle("Thông báo hệ thống");
+            dialog.setHeaderText("Toàn bộ thông báo của bạn (" + unreadList.size() + " chưa đọc)");
+            
+            // Thêm nút Đóng (Close) vào Dialog
+            dialog.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);
+
+            // 3. Tạo vùng chứa VBox để vẽ từng thông báo
+            javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(10);
+            vbox.setStyle("-fx-padding: 15; -fx-background-color: white;");
+
+            if (allNotifs.isEmpty()) {
+                vbox.getChildren().add(new javafx.scene.control.Label("Bạn không có thông báo nào."));
+            } else {
+                for (Notifications n : allNotifs) {
+                    javafx.scene.layout.VBox item = new javafx.scene.layout.VBox(5);
+                    
+                    // Kiểm tra xem tin này chưa đọc hay đã đọc để tô màu nền
+                    boolean isUnread = unreadList.stream().anyMatch(u -> u.getId() == n.getId());
+                    
+                    // Nền màu xanh nhạt nếu chưa đọc, màu xám nếu đã đọc
+                    String bgColor = isUnread ? "#eafaf1" : "#f8f9fa"; 
+                    String borderColor = isUnread ? "#2ecc71" : "#dee2e6";
+                    
+                    item.setStyle("-fx-background-color: " + bgColor + "; -fx-padding: 12; -fx-border-color: " + borderColor + "; -fx-border-radius: 8; -fx-background-radius: 8;");
+                    
+                    javafx.scene.control.Label msgLabel = new javafx.scene.control.Label(n.getMessage());
+                    msgLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+                    msgLabel.setWrapText(true); // Tự xuống dòng nếu chữ dài
+                    
+                    java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                    javafx.scene.control.Label timeLabel = new javafx.scene.control.Label(n.getCreatedAt().format(formatter));
+                    timeLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-style: italic;");
+                    
+                    item.getChildren().addAll(msgLabel, timeLabel);
+                    vbox.getChildren().add(item);
+                }
+            }
+
+            // Đưa vào ScrollPane để cuộn được nếu có quá nhiều thông báo
+            javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(vbox);
+            scrollPane.setFitToWidth(true);
+            scrollPane.setPrefSize(450, 400); // Khung Pop-up rộng 450x400
+            scrollPane.setStyle("-fx-background-color: transparent; -fx-background: white;");
+
+            dialog.getDialogPane().setContent(scrollPane);
+
+            // 4. Đánh dấu đã đọc trên CSDL
+            if (!unreadList.isEmpty()) {
+                notifDAO.markAllAsRead(conn, currentUser.getId());
+            }
+
+            // Mở Pop-up
+            dialog.showAndWait();
+
+        } catch (java.sql.SQLException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Lỗi");
+            alert.setHeaderText("Không thể tải thông báo!");
+            alert.setContentText("Có lỗi xảy ra kết nối CSDL: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 }
