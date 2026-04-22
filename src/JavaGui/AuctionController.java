@@ -27,6 +27,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+import javafx.application.Platform;
 
 public class AuctionController implements Initializable {
 
@@ -35,15 +39,38 @@ public class AuctionController implements Initializable {
 
     // Biến lưu trữ người dùng đang đăng nhập
     private Bidder currentUser; 
+    private Timeline realtimeTimeline;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        loadAuctionList();
+        
+        // 2. Kích hoạt chế độ "Dò tìm giá mới" tự động
+        startRealtimeUpdate();
+    }
+
+    private void startRealtimeUpdate() {
+        // Tạo một chu kỳ: Cứ mỗi 3 giây sẽ chạy lệnh bên trong một lần
+        realtimeTimeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
+            // Chạy lệnh cập nhật (nên dùng Platform.runLater để đảm bảo an toàn cho giao diện)
+            Platform.runLater(() -> {
+                System.out.println("[System] Đang kiểm tra giá mới từ TiDB Cloud...");
+                refreshPricesOnly(); 
+            });
+        }));
+
+        realtimeTimeline.setCycleCount(Timeline.INDEFINITE); // Chạy vô tận cho đến khi đóng App
+        realtimeTimeline.play();
+    }
 
     // Hàm để MainController truyền User vào
     public void setCurrentUser(Bidder user) {
         this.currentUser = user;
     }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        loadAuctionList();
+    private void refreshPricesOnly() {
+            // Trong 2 tuần cuối, cách an toàn nhất là gọi lại hàm load cũ của bạn
+            // Nó sẽ vẽ lại các Card với giá mới nhất từ DB
+            loadAuctionList(); 
     }
 
     private void loadAuctionList() {
@@ -158,6 +185,9 @@ public class AuctionController implements Initializable {
 
     @FXML
     public void handleLogout(ActionEvent event) throws IOException {
+        if (realtimeTimeline != null) {
+            realtimeTimeline.stop();
+        }
         currentUser = null; // Xóa phiên đăng nhập khi đăng xuất
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("main.fxml")));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
