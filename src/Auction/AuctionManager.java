@@ -53,22 +53,24 @@ public class AuctionManager {
         }
     }
 
-    public void placebid(Bidder bidder, int id){
+    public boolean placebid(Bidder bidder, int id, double oldPrice){
         AuctionDAO auctionDAO = AuctionDAO.getInstance();
 
         try(Connection connection = auctionDAO.getConnect()){
             connection.setAutoCommit(false);
             Auction auction = auctionDAO.findById(connection, id);
-            auctionDAO.updateAuction(connection, auction, bidder.getId(),auction.getCurPrice());
+            auctionDAO.updateAuction(connection, auction, bidder.getId(),oldPrice);
             auctionDAO.updateTransaction(connection, auction, bidder.getId());
 
             Notifications notification = NotificationManager.getInstance().subscribeAuction(connection, auction, bidder);
             if (notification == null) throw new SQLException("Có lỗi xảy ra khi thống báo");
             connection.commit();
+            return true;
 
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
+        return false;
     }
     public void findAuction(int id){
         try(Connection connection = AuctionDAO.getInstance().getConnect()) {

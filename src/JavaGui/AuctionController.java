@@ -121,13 +121,19 @@ public class AuctionController implements Initializable {
             if (currentUser != null) {
                 try {
                     // Gọi method placeBid có sẵn trong class Bidder của bạn
-                    currentUser.placeBid(auction.getId());
+                    boolean check = currentUser.placeBid(auction.getId(),auction.getCurPrice());
 
                     // Hiện thông báo thành công
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Thành công");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Bạn đã đặt giá thành công cho sản phẩm: " + itemTitle);
+                    if (check){
+                        alert.setTitle("Thành công");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Bạn đã đặt giá thành công cho sản phẩm: " + itemTitle);
+                    } else{
+                        alert.setTitle(" Không Thành công");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Bạn đã đặt giá Không thành công cho sản phẩm: " + itemTitle);
+                    }
                     alert.showAndWait();
 
                     // Tải lại danh sách giao diện ngay lập tức để cập nhật giá mới

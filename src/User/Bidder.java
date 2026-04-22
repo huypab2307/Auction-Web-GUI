@@ -13,7 +13,7 @@ public class Bidder extends User {
         System.out.println(username + " is a Bidder");
     }
 
-    public void placeBid(int id) {
-        AuctionManager.getInstance().placebid(this, id);
+    public boolean placeBid(int id, double oldPrice) {
+        return AuctionManager.getInstance().placebid(this, id,oldPrice);
     }
 }
