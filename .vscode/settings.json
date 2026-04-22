@@ -13,7 +13,10 @@
         "libs/javafx-sdk-21.0.10/lib/javafx.media.jar",
         "libs/javafx-sdk-21.0.10/lib/javafx.swing.jar",
         "libs/javafx-sdk-21.0.10/lib/javafx.web.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx-swt.jar"
+        "libs/javafx-sdk-21.0.10/lib/javafx-swt.jar",
+        "libs/HikariCP-7.0.2.jar",
+        "libs/slf4j-api-2.0.17.jar",
+        "libs/slf4j-simple-2.0.17.jar"
     ],
     "files.encoding": "utf8",
     "java.debug.settings.vmArgs": "-Dfile.encoding=UTF-8",

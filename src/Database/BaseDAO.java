@@ -1,44 +1,52 @@
 package Database;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-import com.mysql.cj.jdbc.MysqlDataSource;
+
 
 public abstract class BaseDAO {
-    private static MysqlDataSource dataSource;
+    private static final HikariDataSource dataSource;
 
     static {
-        dataSource = new MysqlDataSource();
         try {
-            dataSource.setServerName("gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com");
-            dataSource.setPortNumber(4000);
-            dataSource.setDatabaseName("auction");
-            dataSource.setUser("PWSDsNZJuvGcy6w.root");
-            dataSource.setPassword("8J7BStoMgALGAgFW");
+            HikariConfig config = new HikariConfig();
 
-            // Quan trọng: Ép múi giờ Asia/Ho_Chi_Minh
-            dataSource.setServerTimezone("Asia/Ho_Chi_Minh");
+            String jdbcUrl = "jdbc:mysql://gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/auction"
+                           + "?useSSL=true"
+                           + "&allowPublicKeyRetrieval=true"
+                           + "&serverTimezone=Asia/Ho_Chi_Minh"
+                           + "&characterEncoding=UTF-8";
             
-            dataSource.setUseSSL(true);
-            dataSource.setAllowPublicKeyRetrieval(true);
-            dataSource.setCharacterEncoding("UTF-8");
+            config.setJdbcUrl(jdbcUrl);
+            config.setUsername("PWSDsNZJuvGcy6w.root");
+            config.setPassword("8J7BStoMgALGAgFW");
 
-        } catch (SQLException e) {
-            System.err.println("Lỗi cấu hình DataSource: " + e.getMessage());
+            config.setMaximumPoolSize(10);        
+            config.setMinimumIdle(2);              
+            config.setConnectionTimeout(30000);     
+            config.setMaxLifetime(1800000);        
+
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            config.addDataSourceProperty("useServerPrepStmts", "true");
+
+            config.setConnectionInitSql("SET time_zone = '+07:00'");
+
+            dataSource = new HikariDataSource(config);
+            System.out.println("[INFO] HikariCP Connection Pool đã được khởi tạo thành công.");
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Không thể khởi tạo HikariCP: " + e.getMessage());
+            throw new RuntimeException("Lỗi cấu hình Database.");
         }
     }
-
     public Connection getConnect() throws SQLException {
-        Connection conn = dataSource.getConnection();
-        
-
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("SET time_zone = '+07:00'");
-        } catch (SQLException e) {
-            System.err.println("Không thể thiết lập time_zone: " + e.getMessage());
+        if (dataSource == null) {
+            throw new SQLException("DataSource chưa được khởi tạo!");
         }
-        
-        return conn;
+        return dataSource.getConnection();
     }
 }
