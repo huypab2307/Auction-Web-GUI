@@ -23,7 +23,7 @@ public abstract class ItemDAO extends BaseDAO {
         }
         throw new SQLException("Không lấy được ID từ bảng items.");
     }
-    // Thêm hàm này vào trong ItemDAO.java
+
     public String[] getItemDisplayInfo(int itemId) {
         String title = "Sản phẩm không xác định";
         StringBuilder details = new StringBuilder();

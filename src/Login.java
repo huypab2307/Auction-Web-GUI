@@ -10,11 +10,17 @@ class Login {
         // users.register("togedemaru","Matkhau");
         // users.register("jenny", "Matkhau");
         
-        User user = users.login("jenny","Matkhau");
+        Bidder user1 = (Bidder) users.login("jenny","Matkhau");
+        Bidder user2 = (Bidder) users.login("giahuy","123");
+        var chay1 = new Thread(() -> user1.placeBid(1));
+        var chay2 = new Thread(() -> user2.placeBid(1));
+        chay1.start();
+        chay2.start();
 
-        user.showRole();
-        Bidder newUser = (Bidder) user.changeRole(Role.BIDDER);
-        newUser.placeBid(1);
+        // user1.showRole();
+        // Bidder newUser = (Bidder) user1.changeRole(Role.BIDDER);
+        // newUser.placeBid(1);
+        // newUser.checkNotifications();
         // Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         

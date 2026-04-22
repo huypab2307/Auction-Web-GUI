@@ -56,8 +56,12 @@ public class AuctionDAO extends BaseDAO {
             throw new SQLException("Không tìm thấy id");
         }
     }
-    public void updateAuction(Connection connection ,Auction auction, int bidderId) throws SQLException{
+    public void updateAuction(Connection connection ,Auction auction, int bidderId, double curPrice) throws SQLException{
         String query = "UPDATE auctions SET curPrice = ?, lastBidderId = ? WHERE id = ?;";
+        if (curPrice != AuctionDAO.getInstance().findById(connection, auction.getId()).getCurPrice()){
+            throw new SQLException("người khác đấu giá trước");
+        }
+        
         try(PreparedStatement pr = connection.prepareStatement(query)){
             pr.setDouble(1, auction.getCurPrice() + auction.getStepPrice());
             pr.setInt(2, bidderId);

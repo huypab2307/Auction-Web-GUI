@@ -59,7 +59,7 @@ public class AuctionManager {
         try(Connection connection = auctionDAO.getConnect()){
             connection.setAutoCommit(false);
             Auction auction = auctionDAO.findById(connection, id);
-            auctionDAO.updateAuction(connection, auction, bidder.getId());
+            auctionDAO.updateAuction(connection, auction, bidder.getId(),auction.getCurPrice());
             auctionDAO.updateTransaction(connection, auction, bidder.getId());
 
             Notifications notification = NotificationManager.getInstance().subscribeAuction(connection, auction, bidder);
