@@ -27,8 +27,8 @@ public class LoginController {
     @FXML
     private Label status;
 
-    public void initilize(){
-        loginButton.setDisable(false);
+    public void initialize(){
+        loginButton.setDisable(true);
     }
     @FXML
     public void onHandleLogin(ActionEvent e){
@@ -49,16 +49,24 @@ public class LoginController {
 
             // }
         }else{
+            loginButton.setDisable(true);
             username.clear();
             password.clear();
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
             status.setTextFill(Paint.valueOf("red"));
         }
     }
     public void onKeyReleased(){
         String text1 = username.getText();
         String text2 = password.getText();
-        boolean disable = text1.isEmpty() || text1.isEmpty() || text1.trim().isEmpty() || text2.trim().isEmpty();
-        loginButton.setDisable(disable);
+        boolean disable1 = text1.isEmpty() || text1.trim().isEmpty();
+        boolean disable2 = text2.trim().isEmpty() || text2.isEmpty();
+        if (!disable1 || !disable2){ 
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+        }
+        loginButton.setDisable(disable1 || disable2);
     }
     public void onRegisterHandle() throws IOException {
         Parent root = FXMLLoader.load((getClass().getResource("register.fxml")));

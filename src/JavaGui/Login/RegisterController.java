@@ -50,6 +50,7 @@ public class RegisterController {
             });
             pause.play();
         }else{
+            registerButton.setDisable(true);
             status.setText("tên đăng nhập tồn tại");
             status.setTextFill(Paint.valueOf("red"));
             username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
@@ -67,8 +68,10 @@ public class RegisterController {
         String text2 = password.getText();
         boolean disable1 = text1.isEmpty() || text1.trim().isEmpty();
         boolean disable2 = text2.trim().isEmpty() || text2.isEmpty();
-        if (!disable1) username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
-        if (!disable2) password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+        if (!disable1 || !disable2){ 
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+        }
         registerButton.setDisable(disable1 || disable2);
     }
     @FXML
