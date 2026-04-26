@@ -12,17 +12,18 @@ public class UserDAO extends BaseDAO {
         return user;
     }
 
-    public void register(String username, String password){
+    public boolean register(String username, String password){
         String query = "INSERT INTO user(username,password) VALUES (?,?);";
         try(Connection connect = getConnect()){
             PreparedStatement st = connect.prepareStatement(query);
             st.setString(1, username);
             st.setString(2, password);
             st.executeUpdate();
-
+            return true;
 
         } catch (SQLException ex) {
             System.out.println("add khong thanh cong");
+            return false;
         }
     }
     public User findById(int id){

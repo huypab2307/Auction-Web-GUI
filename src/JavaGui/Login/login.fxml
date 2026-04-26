@@ -18,7 +18,7 @@
                     <Font name="Arial" size="17.0" />
                 </font>
             </Label>
-            <Hyperlink layoutX="230.0" layoutY="486.0" text="Đăng ký ngay">
+            <Hyperlink onAction="#onRegisterHandle" layoutX="230.0" layoutY="486.0" text="Đăng ký ngay">
                 <font>
                     <Font name="Arial" size="17.0" />
                 </font></Hyperlink>

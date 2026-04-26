@@ -1,12 +1,15 @@
 package JavaGui.Login;
 
+import java.io.IOException;
+
 import Database.UserDAO;
-import JavaGui.Auction.AuctionController;
+// import JavaGui.Auction.AuctionController;
 import User.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -25,7 +28,7 @@ public class LoginController {
     private Label status;
 
     public void initilize(){
-        loginButton.setDisable(true);
+        loginButton.setDisable(false);
     }
     @FXML
     public void onHandleLogin(ActionEvent e){
@@ -34,17 +37,17 @@ public class LoginController {
         UserDAO userDAO = UserDAO.getInstance();
         User user = userDAO.login(text1,text2);
         if (user != null){
-            try{
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("JavaGui/Auction/auction.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) loginButton.getScene().getWindow();
-                AuctionController auctionController= loader.getController();
-                auctionController.setUser(user);
-                auctionController.loadAuction();
-            }
-            catch (Exception ex){
+            // try{
+            //     FXMLLoader loader = new FXMLLoader(getClass().getResource("JavaGui/Auction/auction.fxml"));
+            //     Parent root = loader.load();
+            //     Stage stage = (Stage) loginButton.getScene().getWindow();
+            //     AuctionController auctionController= loader.getController();
+            //     auctionController.setUser(user);
+            //     auctionController.loadAuction();
+            // }
+            // catch (Exception ex){
 
-            }
+            // }
         }else{
             username.clear();
             password.clear();
@@ -56,5 +59,11 @@ public class LoginController {
         String text2 = password.getText();
         boolean disable = text1.isEmpty() || text1.isEmpty() || text1.trim().isEmpty() || text2.trim().isEmpty();
         loginButton.setDisable(disable);
+    }
+    public void onRegisterHandle() throws IOException {
+        Parent root = FXMLLoader.load((getClass().getResource("register.fxml")));
+        Stage stage = (Stage) loginButton.getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.show();
     }
 }
