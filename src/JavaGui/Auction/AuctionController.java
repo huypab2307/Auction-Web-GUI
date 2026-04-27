@@ -1,6 +1,5 @@
 package JavaGui.Auction;
 
-import Auction.Auction;
 import Auction.AuctionInfo;
 import Database.AuctionDAO;
 import Items.ItemType;
@@ -9,12 +8,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
+import javafx.scene.Scene;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class AuctionController {
@@ -28,12 +28,19 @@ public class AuctionController {
     private ToggleButton electronicButton;
     @FXML
     private ToggleButton vehicleButton;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ToggleButton searchButton;
 
     private User user;
 
 
     public void setUser(User user){
         this.user = user;
+    }
+    public void initialize(){
+        searchButton.setDisable(true);
     }
     private void renderAuctions(ArrayList<AuctionInfo> list) throws IOException {
         mainContainer.getChildren().clear();
@@ -64,12 +71,35 @@ public class AuctionController {
         } else if (source == electronicButton) {
             itemType = ItemType.ELECTRONICS;
         } else {
-            loadAuction(); // Nếu bấm "Tất cả"
+            loadAuction();
             return;
         }
 
         AuctionDAO auctionDAO = AuctionDAO.getInstance();
         ArrayList<AuctionInfo> auctionArrayList = auctionDAO.getAuctionsType(itemType);
         renderAuctions(auctionArrayList);
+    }
+    @FXML
+    public void onKeySearchHandle(){
+        String text = searchField.getText();
+        boolean disable = text.isEmpty() || text.trim().isEmpty();
+        searchButton.setDisable(disable);
+    }
+    public void searchHandle() throws IOException{
+        AuctionDAO auctionDAO = AuctionDAO.getInstance();
+        ArrayList<AuctionInfo> auctionArrayList = auctionDAO.searchAuction(searchField.getText().toUpperCase());
+        renderAuctions(auctionArrayList);
+    }
+
+    @FXML
+    public void logoutHandle() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(("/JavaGui/Login/Login.fxml")));
+        Parent root = loader.load();
+        Stage stage = (Stage) mainContainer.getScene().getWindow();
+        setUser(null);
+        stage.setTitle("Login");
+        stage.setScene(new Scene(root));
+        stage.show();
+
     }
 }

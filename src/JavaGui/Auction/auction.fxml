@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
-
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
-<?import java.net.URL?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="JavaGui.Auction.AuctionController">
     <fx:define>
@@ -16,6 +13,7 @@
     </fx:define>
     <stylesheets>
         <URL value="@../Style/buttonStyle.css" />
+        <URL value="@/JavaGui/Style/menuItem.css"/>
     </stylesheets>
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="20.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);">
@@ -27,7 +25,12 @@
 
                 <HBox alignment="CENTER_LEFT" maxHeight="40.0" prefHeight="40.0" style="-fx-background-color: #f1f3f4; -fx-background-radius: 20; -fx-padding: 0 15;" HBox.hgrow="ALWAYS">
                     <children>
-                        <TextField promptText="Tìm kiếm phiên đấu giá..." style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="searchField" prefHeight="25.0" prefWidth="663.0" promptText="Tìm kiếm phiên đấu giá..." style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" onKeyReleased="#onKeySearchHandle"/>
+                        <ToggleButton toggleGroup="$categoryGroup" fx:id="searchButton" mnemonicParsing="false" style="-fx-background-color: transparent" text="🔍" textFill="grey" onAction="#searchHandle">
+                         <font>
+                            <Font size="14.0" />
+                         </font>
+                        </ToggleButton>
                     </children>
                     <HBox.margin><Insets left="50.0" right="50.0" /></HBox.margin>
                 </HBox>
@@ -44,12 +47,13 @@
                                 </ImageView>
                             </graphic>
                             <items>
-                                <MenuItem mnemonicParsing="false" text="👤 Thông tin cá nhân" />
-                                <MenuItem mnemonicParsing="false" text="👤 Đến trang người bán" />
-                                <MenuItem mnemonicParsing="false" text="👤 lịch sử giao dịch" />
-                                <MenuItem mnemonicParsing="false" text="⚙️ Cài đặt" />
+                                <MenuItem styleClass="menuItem" mnemonicParsing="false" text="👤 Thông tin cá nhân" />
+                                <MenuItem styleClass="menuItem" mnemonicParsing="false" text="👤 Đến trang người bán" />
+                                <MenuItem styleClass="menuItem" mnemonicParsing="false" text="👤 lịch sử giao dịch" />
+                                <MenuItem styleClass="menuItem" mnemonicParsing="false" text="⚙️ Cài đặt" />
                                 <SeparatorMenuItem mnemonicParsing="false" />
-                                <MenuItem mnemonicParsing="false" text="🚪 Đăng xuất" />
+                                <MenuItem onAction="#logoutHandle" styleClass="menuItem" mnemonicParsing="false" text="🚪 Đăng xuất" />
+
                             </items>
                         </MenuButton>
                     </children>
@@ -66,10 +70,10 @@
                     <font><Font name="System Bold" size="12.0" /></font>
                     <VBox.margin><Insets bottom="10.0" top="20.0" /></VBox.margin>
                 </Label>
-                <ToggleButton onAction="#loadAuctionType" fx:id="allButton" maxWidth="Infinity" selected="true" styleClass="buttonStyle" text="🌐 tất cả" toggleGroup="$categoryGroup"/>
-                <ToggleButton onAction="#loadAuctionType" fx:id="artButton" maxWidth="Infinity" styleClass="buttonStyle" text="🎨 Art" toggleGroup="$categoryGroup"/>
-                <ToggleButton onAction="#loadAuctionType" fx:id="electronicButton" maxWidth="Infinity" styleClass="buttonStyle" text="📈 Electronic" toggleGroup="$categoryGroup"/>
-                <ToggleButton onAction="#loadAuctionType" fx:id="vehicleButton" maxWidth="Infinity" styleClass="buttonStyle" text="🎵 Vehicle" toggleGroup="$categoryGroup"/>
+                <ToggleButton fx:id="allButton" maxWidth="Infinity" onAction="#loadAuctionType" selected="true" styleClass="buttonStyle" text="🌐 tất cả" toggleGroup="$categoryGroup" />
+                <ToggleButton fx:id="artButton" maxWidth="Infinity" onAction="#loadAuctionType" styleClass="buttonStyle" text="🎨 Art" toggleGroup="$categoryGroup" />
+                <ToggleButton fx:id="electronicButton" maxWidth="Infinity" onAction="#loadAuctionType" styleClass="buttonStyle" text="📈 Electronic" toggleGroup="$categoryGroup" />
+                <ToggleButton fx:id="vehicleButton" maxWidth="Infinity" onAction="#loadAuctionType" styleClass="buttonStyle" text="🎵 Vehicle" toggleGroup="$categoryGroup" />
             </children>
             <padding><Insets left="15.0" right="15.0" /></padding>
         </VBox>

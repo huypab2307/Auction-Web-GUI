@@ -42,6 +42,7 @@ public class LoginController {
                  FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaGui/Auction/auction.fxml"));
                  Parent root = loader.load();
                  Stage stage = (Stage) loginButton.getScene().getWindow();
+                 stage.setTitle("Auction Hub - " + user.getUsername());
 
                  AuctionController auctionController= loader.getController();
                  auctionController.setUser(user);
