@@ -5,8 +5,10 @@ public abstract class Item {
     private int sellerId;
     private int id;
     private ItemType type;
+    private String imagePath;
 
-    public Item(String name, String description,ItemType type, int sellerId,int id) {
+    public Item(String name, String description,ItemType type, int sellerId,int id, String imagePath) {
+        this.imagePath = imagePath;
         this.name = name;
         this.description = description;
         this.sellerId = sellerId;
@@ -31,5 +33,8 @@ public abstract class Item {
     }
     public ItemType getType(){
         return type;
+    }
+    public String getImagePath(){
+        return imagePath;
     }
 }

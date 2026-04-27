@@ -46,7 +46,6 @@ public class LoginController {
                  AuctionController auctionController= loader.getController();
                  auctionController.setUser(user);
                  auctionController.loadAuction();
-
                  stage.setScene(new Scene(root));
                  stage.show();
              }

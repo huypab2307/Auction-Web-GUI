@@ -7,7 +7,7 @@ public class Arts extends Item {
     private String medium; //Chất liệu 
 
     public Arts(Builder build){
-        super(build.name, build.description,ItemType.ARTS, build.sellerId,-1);
+        super(build.name, build.description,ItemType.ARTS, build.sellerId,-1,build.imagePath);
         this.artist = build.artist;
         this.yearOfcreation = build.yearOfCreation;
         this.dimensions = build.dimensions;
@@ -39,8 +39,10 @@ public class Arts extends Item {
         private int yearOfCreation; //Năm sáng tác
         private String dimensions; //Kích thước
         private String medium; //Chất liệu 
-        public Builder(String name, String description, int sellerId){
+        private String imagePath;
+        public Builder(String name, String description, int sellerId, String imagePath){
             this.name = name;
+            this.imagePath = imagePath;
             this.description = description;
             this.sellerId = sellerId;
         }

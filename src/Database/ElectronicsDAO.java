@@ -10,9 +10,9 @@ public class ElectronicsDAO extends ItemDAO {
     public static ElectronicsDAO getInstance(){
         return electronicsDAO;
     }
-    public int createItem(Connection connection, Electronics electronic) throws SQLException{
+    public int createItem(Connection connection, Electronics electronic, String imagePath) throws SQLException{
         String query = "INSERT INTO electronics(itemId,brand,power,voltage,current,status,color,weight) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-        int generatedId = insertBaseItem(connection, electronic, "ELECTRONICS");
+        int generatedId = insertBaseItem(connection, electronic, "ELECTRONICS", imagePath);
         try{
             try (PreparedStatement pr = connection.prepareStatement(query)){
                 pr.setInt(1,generatedId);

@@ -8,10 +8,10 @@ class Login {
         AuctionManager auction = AuctionManager.getInstance();
         UserDAO users = UserDAO.getInstance();
 
-        // users.register("togedemaru","Matkhau");
+        // users.register("doraemon","nobita");
         // users.register("jenny", "Matkhau");
                 
-        Bidder user = (Bidder) users.login("hhh", "ccc"); 
+        Bidder user = (Bidder) users.login("duong", "1"); 
 
         // user1.showRole();
         // Bidder newUser = (Bidder) user1.changeRole(Role.BIDDER);
@@ -20,11 +20,11 @@ class Login {
         Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         
-        Arts draft = newUser.createItem(Arts.Builder.class,"Kaguya","phim cosmic princess kaguya")
-            .withArtist("duong")
-            .withyearOfCreation(2025)
-            .build();
-        newUser.uploadItem(draft,1000,10, 2);
+        // Arts draft = newUser.createItem(Arts.Builder.class,"The Screaming","doraemo","/JavaGui/doraemon.jpg")
+        //     .withArtist("duong")
+        //     .withyearOfCreation(2025)
+        //     .build();
+        // newUser.uploadItem(draft,7000,1230, 5);
 
         // Electronics draft1 = newUser.createItem(Electronics.Builder.class, "Samsung", "nokia 2043")
         //                             .withBrand("Xiami")
@@ -32,9 +32,10 @@ class Login {
         //                             .build();
         // newUser.uploadItem(draft1,1000,10,3);
 
-        // Vehicle draft2 = newUser.createItem(Vehicle.Builder.class, "Honda", "đây là xe jupiter")
-        //                         .withBrand("sámung")
-        //                         .build();
-        // newUser.uploadItem(draft2,200,12,4);
+        Vehicle draft2 = newUser.createItem(Vehicle.Builder.class, "xe tương lai", "đây là xe tương lai","/JavaGui/testlo.jpg")
+                                .withBrand("tesla")
+                                .withMileage(1000)
+                                .build();
+        newUser.uploadItem(draft2,50000000,100000,5);
     } 
 }

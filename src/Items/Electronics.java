@@ -10,7 +10,7 @@ public class Electronics extends Item {
 
 
 public Electronics(Builder build) {
-    super(build.name,build.description,ItemType.ELECTRONICS,build.sellerId,-1);
+    super(build.name,build.description,ItemType.ELECTRONICS,build.sellerId,-1,build.imagePath);
     this.brand = build.brand;
     this.power = build.power;
     this.voltage = build.voltage;
@@ -57,8 +57,10 @@ public Electronics(Builder build) {
         private String status;
         private String color;
         private double weight;
-        public Builder(String name, String description, int sellerId){
+        private String imagePath;
+        public Builder(String name, String description, int sellerId, String imagePath){
             this.name = name;
+            this.imagePath = imagePath;
             this.description = description;
             this.sellerId = sellerId;
         }

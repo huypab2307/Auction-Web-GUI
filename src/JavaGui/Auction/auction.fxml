@@ -8,7 +8,15 @@
 
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import java.net.URL?>
+
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="JavaGui.Auction.AuctionController">
+    <fx:define>
+        <ToggleGroup fx:id="categoryGroup" />
+    </fx:define>
+    <stylesheets>
+        <URL value="@../Style/buttonStyle.css" />
+    </stylesheets>
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="20.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);">
             <children>
@@ -58,10 +66,10 @@
                     <font><Font name="System Bold" size="12.0" /></font>
                     <VBox.margin><Insets bottom="10.0" top="20.0" /></VBox.margin>
                 </Label>
-                <ToggleButton maxWidth="Infinity" selected="true" style="-fx-background-color: #e3f2fd; -fx-text-fill: #1976d2; -fx-alignment: CENTER_LEFT;" text="🌐 tất cả" />
-                <ToggleButton maxWidth="Infinity" style="-fx-background-color: transparent; -fx-alignment: CENTER_LEFT;" text="🎨 Art" />
-                <ToggleButton maxWidth="Infinity" style="-fx-background-color: transparent; -fx-alignment: CENTER_LEFT;" text="📈 Kinh doanh" />
-                <ToggleButton maxWidth="Infinity" style="-fx-background-color: transparent; -fx-alignment: CENTER_LEFT;" text="🎵 Âm nhạc" />
+                <ToggleButton onAction="#loadAuctionType" fx:id="allButton" maxWidth="Infinity" selected="true" styleClass="buttonStyle" text="🌐 tất cả" toggleGroup="$categoryGroup"/>
+                <ToggleButton onAction="#loadAuctionType" fx:id="artButton" maxWidth="Infinity" styleClass="buttonStyle" text="🎨 Art" toggleGroup="$categoryGroup"/>
+                <ToggleButton onAction="#loadAuctionType" fx:id="electronicButton" maxWidth="Infinity" styleClass="buttonStyle" text="📈 Electronic" toggleGroup="$categoryGroup"/>
+                <ToggleButton onAction="#loadAuctionType" fx:id="vehicleButton" maxWidth="Infinity" styleClass="buttonStyle" text="🎵 Vehicle" toggleGroup="$categoryGroup"/>
             </children>
             <padding><Insets left="15.0" right="15.0" /></padding>
         </VBox>

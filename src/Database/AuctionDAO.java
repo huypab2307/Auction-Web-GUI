@@ -92,9 +92,9 @@ public class AuctionDAO extends BaseDAO {
         ArrayList<AuctionInfo> list = new ArrayList<>();
         String query = "SELECT a.id, i.title AS itemName,i.type AS type, i.imagePath, u_seller.username AS sellerName, u_bidder.username AS bidderName, a.curPrice, a.status,  a.endTime FROM auctions a INNER JOIN items i ON a.itemId = i.id INNER JOIN user u_seller ON a.sellerId = u_seller.id LEFT JOIN user u_bidder ON a.lastBidderId = u_bidder.id";
         
-        try (Connection connection = this.getConnect();
+        try (Connection connection = this.getConnect()){
              PreparedStatement pr = connection.prepareStatement(query);
-             ResultSet rs = pr.executeQuery()) {
+             ResultSet rs = pr.executeQuery();
              
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -112,6 +112,38 @@ public class AuctionDAO extends BaseDAO {
                 AuctionInfo auction = new AuctionInfo(id, itemName,itemType, imagePath, sellerName, lastBidder, curPrice, status, endTime);
                 list.add(auction);
             }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi tải danh sách đấu giá: " + e.getMessage());
+        }
+        return list;
+    }
+    
+    public ArrayList<AuctionInfo> getAuctionsType(ItemType type) {
+        ArrayList<AuctionInfo> list = new ArrayList<>();
+        String query = "SELECT a.id, i.title AS itemName,i.type AS type, i.imagePath, u_seller.username AS sellerName, u_bidder.username AS bidderName, a.curPrice, a.status,  a.endTime FROM auctions a INNER JOIN items i ON a.itemId = i.id AND i.type = ? INNER JOIN user u_seller ON a.sellerId = u_seller.id LEFT JOIN user u_bidder ON a.lastBidderId = u_bidder.id";
+        
+        try (Connection connection = this.getConnect()){
+             PreparedStatement pr = connection.prepareStatement(query);
+             pr.setString(1, type.name());
+             ResultSet rs = pr.executeQuery();
+             
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String itemName = rs.getString("itemName");
+                String imagePath = rs.getString("imagePath");
+                String sellerName = rs.getString("sellerName");
+                String lastBidder = rs.getString("BidderName");
+                double curPrice = rs.getDouble("curPrice");
+                LocalDateTime endTime = rs.getObject("endTime", LocalDateTime.class);
+                String statusStr = rs.getString("status");
+                AuctionStatus status = AuctionStatus.valueOf(statusStr.toUpperCase());
+                String itemTypeStr = rs.getString("type");
+                ItemType itemType = ItemType.valueOf(itemTypeStr.toUpperCase());
+
+                AuctionInfo auction = new AuctionInfo(id, itemName,itemType, imagePath, sellerName, lastBidder, curPrice, status, endTime);
+                list.add(auction);
+            }
+        
         } catch (SQLException e) {
             System.out.println("Lỗi khi tải danh sách đấu giá: " + e.getMessage());
         }

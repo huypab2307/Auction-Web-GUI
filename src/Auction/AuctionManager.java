@@ -25,15 +25,16 @@ public class AuctionManager {
             connection.setAutoCommit(false);
             ItemType type = item.getType();
             int id = -1;
+            String imagePath = item.getImagePath();
             switch (type) {
                 case ARTS:
-                    id = ArtsDAO.getInstance().createItem(connection, (Arts) item);
+                    id = ArtsDAO.getInstance().createItem(connection, (Arts) item, imagePath);
                     break;
                 case ELECTRONICS:
-                    id = ElectronicsDAO.getInstance().createItem(connection,(Electronics) item);
+                    id = ElectronicsDAO.getInstance().createItem(connection,(Electronics) item, imagePath);
                     break;
                 case VEHICLE:
-                    id = VehicleDAO.getInstance().createItem(connection, (Vehicle) item);
+                    id = VehicleDAO.getInstance().createItem(connection, (Vehicle) item, imagePath);
                     break;
                 default:
                     System.out.println("Lỗi: Loại sản phẩm không hỗ trợ!");

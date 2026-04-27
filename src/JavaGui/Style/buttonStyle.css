@@ -1,0 +1,18 @@
+.buttonStyle {
+    -fx-background-color: transparent;
+    -fx-padding: 10 15;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-text-fill: #555555;
+}
+
+.buttonStyle:hover {
+    -fx-background-color: #f0f0f0;
+    -fx-translate-x: 5;
+}
+
+.buttonStyle:selected {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #1976d2;
+    -fx-font-weight: bold;
+}

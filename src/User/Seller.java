@@ -15,8 +15,8 @@ public class Seller extends User {
         System.out.println(username + " is a Seller");
     }
 
-    public <T> T createItem(Class<T> clazz, String name, String desc) {
-        return FactoryItem.createBuilder(clazz, name, desc, this.id);
+    public <T> T createItem(Class<T> clazz, String name, String desc, String imagePath) {
+        return FactoryItem.createBuilder(clazz, name, desc, this.id,imagePath);
     }
     public void uploadItem(Item item, double price, double stepPrice, int durationDays) {
         AuctionManager.getInstance().uploadItem(item, price, stepPrice, durationDays, this);

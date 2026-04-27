@@ -9,11 +9,11 @@ public class ArtsDAO extends ItemDAO {
     private ArtsDAO() {}
     public static ArtsDAO getInstance() { return instance; }
 
-    public int createItem(Connection connection, Arts art) throws SQLException {
+    public int createItem(Connection connection, Arts art, String imagePath) throws SQLException {
         String sqlArts = "INSERT INTO arts(itemId, artist, yearOfcreation, dimensions, medium) VALUES(?, ?, ?, ?, ?)";
         connection.setAutoCommit(false);
         try {
-            int generatedId = insertBaseItem(connection, art, "ARTS");
+            int generatedId = insertBaseItem(connection, art, "ARTS",imagePath);
 
             try (PreparedStatement pr = connection.prepareStatement(sqlArts)) {
                 pr.setInt(1, generatedId);
