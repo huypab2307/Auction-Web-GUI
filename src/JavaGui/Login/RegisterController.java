@@ -85,6 +85,4 @@ public class RegisterController {
             System.out.println(e.getMessage());
         }
     }
-
-
 }

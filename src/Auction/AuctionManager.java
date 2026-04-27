@@ -81,7 +81,7 @@ public class AuctionManager {
         }
     }
 
-    public ArrayList<Auction> auctionList(){
+    public ArrayList<AuctionInfo> auctionList(){
         return AuctionDAO.getInstance().getAllAuctions();
     }
 }

@@ -1,6 +1,8 @@
 package Database;
 
 import Auction.*;
+import Items.ItemType;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -86,9 +88,9 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
-    public ArrayList<Auction> getAllAuctions() {
-        ArrayList<Auction> list = new ArrayList<>();
-        String query = "SELECT * FROM auctions"; 
+    public ArrayList<AuctionInfo> getAllAuctions() {
+        ArrayList<AuctionInfo> list = new ArrayList<>();
+        String query = "SELECT a.id, i.title AS itemName,i.type AS type, i.imagePath, u_seller.username AS sellerName, u_bidder.username AS bidderName, a.curPrice, a.status,  a.endTime FROM auctions a INNER JOIN items i ON a.itemId = i.id INNER JOIN user u_seller ON a.sellerId = u_seller.id LEFT JOIN user u_bidder ON a.lastBidderId = u_bidder.id";
         
         try (Connection connection = this.getConnect();
              PreparedStatement pr = connection.prepareStatement(query);
@@ -96,19 +98,18 @@ public class AuctionDAO extends BaseDAO {
              
             while (rs.next()) {
                 int id = rs.getInt("id");
-                int itemId = rs.getInt("itemId");
-                int sellerId = rs.getInt("sellerId");
-                double price = rs.getDouble("startingPrice");
-                double stepPrice = rs.getDouble("priceStep");
+                String itemName = rs.getString("itemName");
+                String imagePath = rs.getString("imagePath");
+                String sellerName = rs.getString("sellerName");
+                String lastBidder = rs.getString("BidderName");
                 double curPrice = rs.getDouble("curPrice");
-                int lastBidder = rs.getInt("lastBidderId");
-
-                LocalDateTime startTime = rs.getObject("startTime", LocalDateTime.class);
                 LocalDateTime endTime = rs.getObject("endTime", LocalDateTime.class);
                 String statusStr = rs.getString("status");
                 AuctionStatus status = AuctionStatus.valueOf(statusStr.toUpperCase());
+                String itemTypeStr = rs.getString("type");
+                ItemType itemType = ItemType.valueOf(itemTypeStr.toUpperCase());
 
-                Auction auction = new Auction(id, itemId, sellerId, startTime, endTime, price, stepPrice, curPrice, lastBidder, status);
+                AuctionInfo auction = new AuctionInfo(id, itemName,itemType, imagePath, sellerName, lastBidder, curPrice, status, endTime);
                 list.add(auction);
             }
         } catch (SQLException e) {

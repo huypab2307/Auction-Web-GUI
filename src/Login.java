@@ -11,7 +11,7 @@ class Login {
         // users.register("togedemaru","Matkhau");
         // users.register("jenny", "Matkhau");
                 
-        Bidder user = (Bidder) users.login("hhh", "ccc"); // Xóa khoảng trắng thừa đi nhé
+        Bidder user = (Bidder) users.login("hhh", "ccc"); 
 
         // user1.showRole();
         // Bidder newUser = (Bidder) user1.changeRole(Role.BIDDER);

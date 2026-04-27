@@ -53,7 +53,7 @@ public class Auction{
         return status;
     }
 
-    public Auction(int id,int itemId,int sellerId, LocalDateTime startTime,LocalDateTime endTime, double price, double stepPrice, double curPrice,  int LastBidder,AuctionStatus status) {
+    public Auction(int id,int itemId,int sellerId, LocalDateTime startTime,LocalDateTime endTime, double price, double stepPrice, double curPrice,  int LastBidder,AuctionStatus status ) {
         this.LastBidder = LastBidder;
         this.curPrice = curPrice;
         this.sellerId = sellerId;

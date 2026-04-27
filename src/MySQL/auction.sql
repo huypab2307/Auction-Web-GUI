@@ -1,4 +1,4 @@
--- Active: 1776845156931@@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com@4000@auction
+-- Active: 1776779132143@@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com@4000@auction
 CREATE TABLE auctions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     itemId INT,
@@ -50,3 +50,20 @@ CREATE TABLE messages (
     FOREIGN KEY (receiverId) REFERENCES user(id)
 );
 ALTER TABLE messages MODIFY COLUMN auctionId INT NULL;
+
+SELECT 
+    a.id, 
+    i.title AS itemName, 
+    i.type AS type,
+    u_seller.username AS sellerName, 
+    u_bidder.username AS bidderName, 
+    a.curPrice, 
+    a.status, 
+    a.endTime 
+FROM auctions a
+INNER JOIN items i ON a.itemId = i.id
+INNER JOIN user u_seller ON a.sellerId = u_seller.id
+LEFT JOIN user u_bidder ON a.lastBidderId = u_bidder.id;
+ALTER TABLE items MODIFY imagePath VARCHAR(255) NOT NULL DEFAULT '/images/earth.png';
+-- Cập nhật tất cả các dòng đang bị NULL về ảnh mặc định
+UPDATE items SET imagePath = "/images/xiaomi.jpg" WHERE id = 2;

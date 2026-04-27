@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import Database.UserDAO;
 // import JavaGui.Auction.AuctionController;
+import JavaGui.Auction.AuctionController;
 import User.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -37,17 +38,21 @@ public class LoginController {
         UserDAO userDAO = UserDAO.getInstance();
         User user = userDAO.login(text1,text2);
         if (user != null){
-            // try{
-            //     FXMLLoader loader = new FXMLLoader(getClass().getResource("JavaGui/Auction/auction.fxml"));
-            //     Parent root = loader.load();
-            //     Stage stage = (Stage) loginButton.getScene().getWindow();
-            //     AuctionController auctionController= loader.getController();
-            //     auctionController.setUser(user);
-            //     auctionController.loadAuction();
-            // }
-            // catch (Exception ex){
+             try{
+                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaGui/Auction/auction.fxml"));
+                 Parent root = loader.load();
+                 Stage stage = (Stage) loginButton.getScene().getWindow();
 
-            // }
+                 AuctionController auctionController= loader.getController();
+                 auctionController.setUser(user);
+                 auctionController.loadAuction();
+
+                 stage.setScene(new Scene(root));
+                 stage.show();
+             }
+             catch (Exception ex){
+                System.out.println(ex.getMessage());
+             }
         }else{
             loginButton.setDisable(true);
             username.clear();
