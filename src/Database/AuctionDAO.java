@@ -1,9 +1,9 @@
 package Database;
 
 import Auction.*;
+import DTO.AuctionInfo;
+import DTO.ItemSummary;
 import Items.ItemType;
-import JustToDisplayInfo.AuctionInfo;
-import JustToDisplayInfo.ItemSummary;
 
 import java.sql.*;
 import java.time.LocalDateTime;

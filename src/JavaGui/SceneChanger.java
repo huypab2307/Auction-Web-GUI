@@ -1,6 +1,5 @@
 package JavaGui;
 
-import JustToDisplayInfo.*;
 import JavaGui.MainMenu.AuctionHubController;
 import JavaGui.Auction.AuctionItemController;
 import User.User;
@@ -10,6 +9,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import DTO.*;
 
 public class SceneChanger {
     private Stage mainStage;

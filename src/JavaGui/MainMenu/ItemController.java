@@ -1,8 +1,6 @@
 package JavaGui.MainMenu;
 
-import JustToDisplayInfo.AuctionInfo;
 import JavaGui.SceneChanger;
-import JustToDisplayInfo.ItemSummary;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -11,6 +9,9 @@ import javafx.scene.image.ImageView;
 import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
+
+import DTO.AuctionInfo;
+import DTO.ItemSummary;
 
 public class ItemController {
     @FXML

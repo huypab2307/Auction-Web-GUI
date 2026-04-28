@@ -20,9 +20,9 @@
                 <VBox>
                     <StackPane prefHeight="350.0" style="-fx-background-color: #1c1d1f;">
                         <children>
-                            <HBox spacing="50.0" style="-fx-padding: 40 400 40 100;">
+                            <Pane style="-fx-padding: 40 400 40 100; -fx-background-color: linear-gradient(to bottom right,#08088e,#6f26c1);">
                                 <children>
-                                    <VBox prefHeight="205.0" prefWidth="830.0" spacing="15.0" style="-fx-padding: 50 0 0 0" HBox.hgrow="ALWAYS">
+                                    <VBox layoutX="84.0" layoutY="46.0" prefHeight="205.0" prefWidth="830.0" spacing="15.0" style="-fx-padding: 50 0 0 0" HBox.hgrow="ALWAYS">
                                         <children>
                                             <Label fx:id="title" prefHeight="10.0" prefWidth="607.0" style="-fx-font-weight: bold; -fx-font-size: 32;" text="Tác phẩm: 'Kaguya - Nữ thần mặt trăng'" textFill="WHITE" wrapText="true" />
                                             <Label fx:id="description" prefWidth="677.0" style="-fx-font-size: 16;" text="Description" textFill="WHITE" wrapText="true" />
@@ -40,8 +40,28 @@
                                             </HBox>
                                         </children>
                                     </VBox>
+                                    <ImageView fitHeight="56.0" fitWidth="56.0" layoutX="688.0" layoutY="39.0" pickOnBounds="true" preserveRatio="true">
+                                        <image>
+                                            <Image url="@../../images/star1.png" />
+                                        </image>
+                                    </ImageView>
+                           <ImageView fitHeight="27.0" fitWidth="21.0" layoutX="46.0" layoutY="296.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                 <Image url="@../../images/star1.png" />
+                              </image>
+                           </ImageView>
+                           <ImageView fitHeight="28.0" fitWidth="25.0" layoutX="1129.0" layoutY="216.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                 <Image url="@../../images/star1.png" />
+                              </image>
+                           </ImageView>
+                           <ImageView fitHeight="30.0" fitWidth="51.0" layoutX="1078.0" layoutY="28.0" pickOnBounds="true" preserveRatio="true">
+                              <image>
+                                 <Image url="@../../images/star1.png" />
+                              </image>
+                           </ImageView>
                                 </children>
-                            </HBox>
+                            </Pane>
                         </children>
                     </StackPane>
 
@@ -52,7 +72,7 @@
                                     <VBox spacing="20.0" style="-fx-border-color: #e0e0e0; -fx-padding: 25; -fx-border-width: 1;">
                                         <children>
                                             <Label style="-fx-font-weight: bold; -fx-font-size: 20;" text="Mô tả vật phẩm" />
-                                            <TilePane fx:id="attributeBox" hgap="20.0" vgap="10.0"/>
+                                            <TilePane fx:id="attributeBox" hgap="20.0" vgap="10.0" />
 
                                         </children>
                                     </VBox>
@@ -82,7 +102,7 @@
                                             </HBox>
                                             <Label fx:id="datetime" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
 
-                                            <Button fx:id="bidButton" onAction="#onBidHandle" maxWidth="Infinity" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
+                                            <Button fx:id="bidButton" maxWidth="Infinity" onAction="#onBidHandle" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
                                             <Button maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />
 
                                             <VBox spacing="10.0" style="-fx-padding: 15 0 0 0;">

@@ -1,6 +1,5 @@
 package JavaGui.MainMenu;
 
-import JustToDisplayInfo.AuctionInfo;
 import Database.AuctionDAO;
 import Items.ItemType;
 import JavaGui.SceneChanger;
@@ -16,6 +15,8 @@ import javafx.scene.layout.FlowPane;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import DTO.AuctionInfo;
 
 public class AuctionHubController implements SearchListener {
     @FXML

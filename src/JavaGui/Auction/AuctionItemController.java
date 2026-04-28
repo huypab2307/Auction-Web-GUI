@@ -4,8 +4,6 @@ import Database.AuctionDAO;
 import Database.UserDAO;
 import Items.FactoryItem;
 import JavaGui.SceneChanger;
-import JustToDisplayInfo.AuctionInfo;
-import JustToDisplayInfo.ItemSummary;
 import User.User;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
@@ -23,6 +21,9 @@ import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
+
+import DTO.AuctionInfo;
+import DTO.ItemSummary;
 
 
 public class AuctionItemController implements JavaGui.TopBar.SearchListener {
@@ -107,7 +108,7 @@ public class AuctionItemController implements JavaGui.TopBar.SearchListener {
     }
     public void updateDynamicInfo() {
         curPrice.setText(auctionInfo.getCurPrice() + "đ");
-        curBidder.setText(auctionInfo.getLastBidderName() != null ? auctionInfo.getLastBidderName() : "Chưa có người ra giá");
+        curBidder.setText(auctionInfo.getLastBidderName() != null ? "người giữ giá: " + auctionInfo.getLastBidderName() : "Chưa có người ra giá");
 
     }
 

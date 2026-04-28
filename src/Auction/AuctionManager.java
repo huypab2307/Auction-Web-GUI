@@ -1,11 +1,12 @@
 package Auction;
 import Database.*;
 import Items.*;
-import JustToDisplayInfo.AuctionInfo;
 import User.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import DTO.AuctionInfo;
 
 public class AuctionManager {
     private static final AuctionManager instance = new AuctionManager();

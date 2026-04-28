@@ -1,6 +1,5 @@
 package JavaGui.TopBar;
 
-import JustToDisplayInfo.AuctionInfo;
 import Database.AuctionDAO;
 import JavaGui.SceneChanger;
 import User.User;
@@ -11,6 +10,8 @@ import javafx.scene.control.ToggleButton;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import DTO.AuctionInfo;
 
 public class TopBarController {
     @FXML private TextField searchField;

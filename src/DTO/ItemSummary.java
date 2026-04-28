@@ -1,4 +1,4 @@
-package JustToDisplayInfo;
+package DTO;
 
 import Items.ItemType;
 
