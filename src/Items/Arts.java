@@ -3,6 +3,8 @@ package Items;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import Auction.Auction;
 import Database.ArtsDAO;
@@ -46,5 +48,14 @@ public class Arts extends Item {
     public boolean upload(Connection connection, double price, double stepPrice, int durations) throws SQLException {
         int id = ArtsDAO.getInstance().createItem(connection, this);
         return AuctionDAO.getInstance().createAuction(connection, id ,this.getSellerId(), price, stepPrice, durations);
+    }
+    @Override
+    public Map<String, String> getSpecificInfo() {
+        Map<String, String> info = new LinkedHashMap<>();
+        info.put("Tác giả", artist);
+        info.put("Năm sáng tác", String.valueOf(yearOfcreation));
+        info.put("Kích thước", dimensions);
+        info.put("Chất liệu", medium);
+        return info;
     }
 }

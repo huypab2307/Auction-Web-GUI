@@ -3,6 +3,8 @@ package Items;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Map;
 
 public abstract class Item {
     private String name;
@@ -43,4 +45,6 @@ public abstract class Item {
         return imagePath;
     }
     public abstract boolean upload(Connection connection,double price, double stepPrice, int durations) throws SQLException;
+    public abstract Map<String,String> getSpecificInfo();
+
 }

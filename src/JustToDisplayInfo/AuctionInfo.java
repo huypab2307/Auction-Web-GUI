@@ -1,32 +1,24 @@
-package Auction;
+package JustToDisplayInfo;
 
 import java.time.LocalDateTime;
 
+import Auction.AuctionStatus;
 import Items.Item;
 import Items.ItemType;
-
+//this class is made only to display info quickly rather than query all of Auction and Item and User
 public class AuctionInfo {
     private int id;
-    private String itemTitle;  
-    private String imagePath;
     private String sellerUsername;
-    private String lastBidderName; 
-    private ItemType type;
+    private String lastBidderName;
     private double curPrice;
+    private double bidStep;
     private AuctionStatus status;
     private LocalDateTime endTime;
+    private LocalDateTime startTime;
+    private ItemSummary itemInfo;
 
     public int getId() {
         return id;
-    }
-    public String imagePath(){
-        return imagePath;
-    }
-    public ItemType getItemType(){
-        return type;
-    }
-    public String getItemTitle() {
-        return itemTitle;
     }
     public String getSellerUsername() {
         return sellerUsername;
@@ -43,16 +35,20 @@ public class AuctionInfo {
     public LocalDateTime getEndTime() {
         return endTime;
     }
-    public AuctionInfo(int id, String itemTitle, ItemType type,String imagePath, String sellerUsername, String lastBidderName, double curPrice,
-            AuctionStatus status, LocalDateTime endTime) {
+    public double getBidStep() {return bidStep;}
+    public ItemSummary getItemInfo(){return itemInfo;}
+    public LocalDateTime getStartTime(){ return startTime;}
+
+    public AuctionInfo(ItemSummary itemInfo, int id, String sellerUsername, String lastBidderName, double curPrice,
+            AuctionStatus status,LocalDateTime startTime, LocalDateTime endTime, double bidStep) {
         this.id = id;
-        this.itemTitle = itemTitle;
-        this.type = type;
-        this.imagePath = imagePath;
+        this.itemInfo = itemInfo;
         this.sellerUsername = sellerUsername;
         this.lastBidderName = lastBidderName;
         this.curPrice = curPrice;
         this.status = status;
         this.endTime = endTime;
+        this.bidStep = bidStep;
+        this.startTime = startTime;
     }
 }

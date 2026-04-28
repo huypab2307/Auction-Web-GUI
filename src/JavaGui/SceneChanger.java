@@ -1,6 +1,6 @@
 package JavaGui;
 
-import Auction.AuctionInfo;
+import JustToDisplayInfo.*;
 import JavaGui.MainMenu.AuctionHubController;
 import JavaGui.Auction.AuctionItemController;
 import User.User;
@@ -48,12 +48,22 @@ public class SceneChanger {
         });
     }
     public void toAuction(AuctionInfo auctionInfo, int userId){
-        navigate("/JavaGui/Auction/auctionitem.fxml", "Auction: " + auctionInfo.getItemTitle(), loader -> {
+        navigate("/JavaGui/Auction/auctionitem.fxml", "Auction: " + auctionInfo.getItemInfo().getTitle(), loader -> {
             AuctionItemController controller = loader.getController();
             controller.setUser(userId);
-            controller.renderAuction(auctionInfo);
+            controller.setAuctionInfo(auctionInfo);
+            controller.renderStaticInfo();
+            controller.updateDynamicInfo();
         });
     }
+//    public void toAuction(AuctionInfo auctionInfo, User user){
+//        navigate("/JavaGui/Auction/auctionitem.fxml", "Auction: " + auctionInfo.getItemInfo().getTitle(), loader -> {
+//            AuctionItemController controller = loader.getController();
+//            controller.setUser(user);
+//            controller.setAuctionInfo(auctionInfo);
+//            controller.renderAuction();
+//        });
+//    }
 
     private void navigate(String fxmlPath, String title, ControllerConsumer consumer) {
         try {

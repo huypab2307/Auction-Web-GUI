@@ -1,21 +1,33 @@
 package JavaGui.Auction;
 
-import Auction.*;
+import Database.AuctionDAO;
 import Database.UserDAO;
+import Items.FactoryItem;
 import JavaGui.SceneChanger;
+import JustToDisplayInfo.AuctionInfo;
+import JustToDisplayInfo.ItemSummary;
 import User.User;
+import javafx.animation.PauseTransition;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.TilePane;
+import User.Bidder;
+import User.Role;
+import javafx.util.Duration;
 
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
+import java.util.Map;
 
 
 public class AuctionItemController implements JavaGui.TopBar.SearchListener {
+    @FXML
+    private Label startTime;
     @FXML
     private Label sellerName;
     @FXML
@@ -32,9 +44,16 @@ public class AuctionItemController implements JavaGui.TopBar.SearchListener {
     private Label title;
     @FXML
     private ImageView image;
+    @FXML
+    private TilePane attributeBox;
     private User user;
     @FXML
     private JavaGui.TopBar.TopBarController topBarController;
+    @FXML
+    private Label type;
+    private AuctionInfo auctionInfo;
+    @FXML
+    private Button bidButton;
 
     @FXML
     public void initialize() {
@@ -49,25 +68,78 @@ public class AuctionItemController implements JavaGui.TopBar.SearchListener {
             topBarController.setUser(this.user);
         }
     }
+    public void setUser(User user){
+        this.user = user;
+
+    }
+    public void setAuctionInfo(AuctionInfo auctionInfo){
+        this.auctionInfo = auctionInfo;
+    }
 
     @Override
     public void onSearchPerformed(ArrayList<AuctionInfo> results) {
         SceneChanger.getInstance().toMainMenu(user, results);
     }
-    public void renderAuction(AuctionInfo auctionInfo){
-        sellerName.setText(sellerName.getText() +"  " + auctionInfo.getSellerUsername());
-        description.setText("");
-        title.setText(auctionInfo.getItemTitle());
-        curPrice.setText(auctionInfo.getCurPrice() +"đ");
-        bidStep.setText("");
-        curBidder.setText("");
-        datetime.setText(auctionInfo.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        URL src = getClass().getResource(auctionInfo.imagePath());
-        if (src != null) {
-            Image img = new Image(src.toExternalForm());
-            image.setImage(img);
-        } else {
-            image.setImage(new Image("/images/earth.png"));
+
+    public void renderStaticInfo() {
+        try {
+            ItemSummary itemSummary = auctionInfo.getItemInfo();
+
+            title.setText(itemSummary.getTitle());
+            description.setText(itemSummary.getDescription());
+            sellerName.setText("Người bán: " + auctionInfo.getSellerUsername());
+            bidStep.setText("• Bước giá: " + auctionInfo.getBidStep() + "đ");
+            datetime.setText(auctionInfo.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            startTime.setText(auctionInfo.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            type.setText("Loại: " + itemSummary.getItemType().name());
+
+            URL src = getClass().getResource(itemSummary.getImagePath());
+            image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
+
+            attributeBox.getChildren().clear();
+            Map<String, String> itemInfo = FactoryItem.findItemById(itemSummary.getItemType(), itemSummary.getItemId()).getSpecificInfo();
+            itemInfo.forEach((label, value) -> {
+                attributeBox.getChildren().add(new Label(label + ": " + value));
+            });
+        }catch (Exception e){
+            System.err.println(e.getMessage());
         }
+    }
+    public void updateDynamicInfo() {
+        curPrice.setText(auctionInfo.getCurPrice() + "đ");
+        curBidder.setText(auctionInfo.getLastBidderName() != null ? auctionInfo.getLastBidderName() : "Chưa có người ra giá");
+
+    }
+
+
+    public void onBidHandle(ActionEvent actionEvent) {
+        Button bidButton = (Button) actionEvent.getSource();
+
+        bidButton.setDisable(true);
+        bidButton.setText("Đang xử lý...");
+
+        try {
+            Bidder tempUser = (Bidder) user.changeRole(Role.BIDDER);
+            if (tempUser.placeBid(auctionInfo.getId(), auctionInfo.getCurPrice())) {
+                auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+
+
+                System.out.println("Đặt giá thành công!");
+            } else {
+                System.err.println("Đặt giá thất bại! Có thể đã có người trả giá cao hơn.");
+                auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi hệ thống: " + e.getMessage());
+        }
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(1));
+        pause.setOnFinished(e -> {
+            bidButton.setDisable(false);
+            updateDynamicInfo();
+            bidButton.setText("Đặt giá ngay");
+        });
+        pause.play();
     }
 }

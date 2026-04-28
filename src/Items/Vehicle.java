@@ -2,6 +2,8 @@ package Items;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import Database.ArtsDAO;
 import Database.AuctionDAO;
@@ -66,19 +68,16 @@ public class Vehicle extends Item {
     public int getmFG() {
         return mFG;
     }
-    
+
     @Override
-    public String toString() {
-        return "Vehicle {" +
-                "id='" + getId() + '\'' +
-                ", name='" + getName() + '\'' +
-                ", brand='" + brand + '\'' +
-                ", model='" + model + '\'' +
-                ", trim='" + trim + '\'' +
-                ", year=" + mFG +
-                ", mileage=" + mileage + " km" +
-                ", status='" + titleStatus + '\'' +
-                ", seller='" + getSellerId() + '\'' +
-                '}';
+    public Map<String, String> getSpecificInfo() {
+        Map<String, String> info = new LinkedHashMap<>();
+        info.put("Số km đã đi", mileage + " km");
+        info.put("Năm sản xuất", String.valueOf(mFG));
+        info.put("Hãng xe", brand);
+        info.put("Dòng xe", model);
+        info.put("Phiên bản", trim);
+        info.put("Giấy tờ", titleStatus);
+        return info;
     }
 }    

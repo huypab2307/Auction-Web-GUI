@@ -1,9 +1,8 @@
 package JavaGui.TopBar;
 
-import Auction.AuctionInfo;
+import JustToDisplayInfo.AuctionInfo;
 import Database.AuctionDAO;
 import JavaGui.SceneChanger;
-import JavaGui.TopBar.SearchListener;
 import User.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

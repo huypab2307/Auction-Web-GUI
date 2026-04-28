@@ -2,6 +2,8 @@ package Items;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import Database.ArtsDAO;
 import Database.AuctionDAO;
@@ -62,20 +64,16 @@ public class Electronics extends Item {
         int id = ElectronicsDAO.getInstance().createItem(connection, this);
         return AuctionDAO.getInstance().createAuction(connection, id,this.getSellerId(), price, stepPrice, durations);
     }
-
     @Override
-    public String toString() {
-    return "Electronics {" +
-            "id='" + getId() + '\'' +
-            ", name='" + getName() + '\'' +
-            ", brand='" + brand + '\'' +
-            ", power=" + power + "W" +
-            ", voltage=" + voltage + "V" +
-            ", current=" + current + "A" +
-            ", color='" + color + '\'' +
-            ", weight=" + weight + "kg" +
-            ", status='" + status + '\'' +
-            ", seller='" + getSellerId() + '\'' +
-            '}';
+    public Map<String, String> getSpecificInfo() {
+        Map<String, String> info = new LinkedHashMap<>();
+        info.put("Thương hiệu", brand);
+        info.put("Công suất", power + " W");
+        info.put("Điện áp", voltage + " V");
+        info.put("Dòng điện", current + " A");
+        info.put("Tình trạng", status);
+        info.put("Màu sắc", color);
+        info.put("Trọng lượng", weight + " kg");
+        return info;
     }
 }

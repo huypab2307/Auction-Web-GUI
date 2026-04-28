@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.net.*?>
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
-<BorderPane fx:controller="JavaGui.Auction.AuctionItemController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="JavaGui.Auction.AuctionItemController">
     <stylesheets>
         <URL value="@../Style/buttonStyle.css" />
         <URL value="@/JavaGui/Style/menuItem.css" />
@@ -36,8 +34,8 @@
                                             </HBox>
                                             <HBox spacing="20.0" style="-fx-padding: 10 0;">
                                                 <children>
-                                                    <Label text="📅 Ngày đăng: 20/04/2026" textFill="WHITE" />
-                                                    <Label text="Thể loại: " textFill="WHITE" />
+                                                    <Label fx:id="startTime" text="📅 Ngày đăng: 20/04/2026" textFill="WHITE" />
+                                                    <Label fx:id="type" text="Thể loại: " textFill="WHITE" />
                                                 </children>
                                             </HBox>
                                         </children>
@@ -53,30 +51,16 @@
                                 <children>
                                     <VBox spacing="20.0" style="-fx-border-color: #e0e0e0; -fx-padding: 25; -fx-border-width: 1;">
                                         <children>
-                                            <Label style="-fx-font-weight: bold; -fx-font-size: 20;" text="Bạn sẽ nhận được gì?" />
-                                            <GridPane hgap="20.0" vgap="10.0">
-                                                <columnConstraints>
-                                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                </columnConstraints>
-                                                <children>
-                                                    <Label text="✅ Tệp gốc độ phân giải 8K" GridPane.columnIndex="0" />
-                                                    <Label text="✅ Giấy chứng nhận sở hữu NFT" GridPane.columnIndex="1" />
-                                                    <Label text="✅ Quyền sử dụng thương mại" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                                                    <Label text="✅ Chữ ký kỹ thuật số của tác giả" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                </children>
-                                    <rowConstraints>
-                                       <RowConstraints />
-                                       <RowConstraints />
-                                    </rowConstraints>
-                                            </GridPane>
+                                            <Label style="-fx-font-weight: bold; -fx-font-size: 20;" text="Mô tả vật phẩm" />
+                                            <TilePane fx:id="attributeBox" hgap="20.0" vgap="10.0"/>
+
                                         </children>
                                     </VBox>
 
                                     <VBox spacing="15.0">
                                         <children>
-                                            <Label style="-fx-font-weight: bold; -fx-font-size: 20;" text="Mô tả vật phẩm" />
-                                            <Label lineSpacing="5.0" text="Tác phẩm mô tả vẻ đẹp huyền bí của Kaguya trong truyền thuyết Nhật Bản dưới góc nhìn tương lai (Cyberpunk). Sử dụng hơn 200 lớp màu và mất 500 giờ thực hiện. Đây là phiên bản duy nhất được đấu giá trong năm nay." wrapText="true" />
+                                            <Label style="-fx-font-weight: bold; -fx-font-size: 20;" text="Future Feature" />
+                                            <Label lineSpacing="5.0" text="All bid transaction will be updated soon!" wrapText="true" />
                                         </children>
                                     </VBox>
                                 </children>
@@ -98,7 +82,7 @@
                                             </HBox>
                                             <Label fx:id="datetime" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
 
-                                            <Button maxWidth="Infinity" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
+                                            <Button fx:id="bidButton" onAction="#onBidHandle" maxWidth="Infinity" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
                                             <Button maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />
 
                                             <VBox spacing="10.0" style="-fx-padding: 15 0 0 0;">

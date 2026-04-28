@@ -1,6 +1,6 @@
 package JavaGui.TopBar;
 
-import Auction.AuctionInfo;
+import JustToDisplayInfo.AuctionInfo;
 
 import java.util.ArrayList;
 
