@@ -13,51 +13,7 @@
         <URL value="@/JavaGui/Style/menuItem.css" />
     </stylesheets>
     <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="20.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-            <children>
-                <Button text="COSMIC" textFill="#2575fc" style="-fx-background-color: transparent">
-                    <font><Font name="System Bold" size="24.0" /></font>
-                    <HBox.margin><Insets left="20.0" /></HBox.margin>
-                </Button>
-
-                <HBox alignment="CENTER_LEFT" maxHeight="40.0" prefHeight="40.0" style="-fx-background-color: #f1f3f4; -fx-background-radius: 20; -fx-padding: 0 15;" HBox.hgrow="ALWAYS">
-                    <children>
-                        <TextField fx:id="searchField" prefHeight="25.0" prefWidth="663.0" promptText="Tìm kiếm phiên đấu giá..." style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
-                        <ToggleButton fx:id="searchButton" mnemonicParsing="false" style="-fx-background-color: transparent" text="🔍" textFill="grey">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                        </ToggleButton>
-                    </children>
-                    <HBox.margin><Insets left="50.0" right="50.0" /></HBox.margin>
-                </HBox>
-
-                <HBox alignment="CENTER" spacing="15.0">
-                    <children>
-                        <Button style="-fx-background-color: transparent;" text="🔔" />
-                        <MenuButton mnemonicParsing="false" style="-fx-background-color: transparent;">
-                            <graphic>
-                                <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-size: cover;-fx-background-position: center;-fx-background-radius: 10;">
-                                    <image>
-                                        <Image url="@../../images/earth.png" />
-                                    </image>
-                                </ImageView>
-                            </graphic>
-                            <items>
-                                <MenuItem mnemonicParsing="false" styleClass="menuItem" text="👤 Thông tin cá nhân" />
-                                <MenuItem mnemonicParsing="false" styleClass="menuItem" text="👤 Đến trang người bán" />
-                                <MenuItem mnemonicParsing="false" styleClass="menuItem" text="👤 lịch sử giao dịch" />
-                                <MenuItem mnemonicParsing="false" styleClass="menuItem" text="⚙️ Cài đặt" />
-                                <SeparatorMenuItem mnemonicParsing="false" />
-                                <MenuItem mnemonicParsing="false" styleClass="menuItem" text="🚪 Đăng xuất" />
-
-                            </items>
-                        </MenuButton>
-                    </children>
-                    <HBox.margin><Insets right="20.0" /></HBox.margin>
-                </HBox>
-            </children>
-        </HBox>
+        <fx:include fx:id="topBar" source="../TopBar/topbar.fxml" />
     </top>
 
     <center>
@@ -70,12 +26,12 @@
                                 <children>
                                     <VBox prefHeight="205.0" prefWidth="830.0" spacing="15.0" style="-fx-padding: 50 0 0 0" HBox.hgrow="ALWAYS">
                                         <children>
-                                            <Label prefHeight="10.0" prefWidth="607.0" style="-fx-font-weight: bold; -fx-font-size: 32;" text="Tác phẩm: 'Kaguya - Nữ thần mặt trăng'" textFill="WHITE" wrapText="true" />
-                                            <Label prefWidth="677.0" style="-fx-font-size: 16;" text="Description" textFill="WHITE" wrapText="true" />
+                                            <Label fx:id="title" prefHeight="10.0" prefWidth="607.0" style="-fx-font-weight: bold; -fx-font-size: 32;" text="Tác phẩm: 'Kaguya - Nữ thần mặt trăng'" textFill="WHITE" wrapText="true" />
+                                            <Label fx:id="description" prefWidth="677.0" style="-fx-font-size: 16;" text="Description" textFill="WHITE" wrapText="true" />
                                             <HBox alignment="CENTER_LEFT" spacing="15.0">
                                                 <children>
                                                     <Label text="⭐ 4.9 (2.5k lượt quan tâm)" textFill="#f4c150" />
-                                                    <Label style="-fx-underline: true;" text="Người bán:" textFill="#a1d2ff" />
+                                                    <Label fx:id="sellerName" style="-fx-underline: true;" text="Người bán:" textFill="#a1d2ff" />
                                                 </children>
                                             </HBox>
                                             <HBox spacing="20.0" style="-fx-padding: 10 0;">
@@ -128,7 +84,7 @@
 
                             <VBox layoutX="780.0" layoutY="-250.0" prefWidth="350.0" spacing="20.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 5); -fx-background-radius: 10; -fx-padding: 2;">
                                 <children>
-                                    <ImageView fitHeight="200.0" fitWidth="346.0" pickOnBounds="true" preserveRatio="false" style="-fx-background-radius: 10 10 0 0;">
+                                    <ImageView fx:id="image" fitHeight="200.0" fitWidth="346.0" pickOnBounds="true" preserveRatio="false" style="-fx-background-radius: 10 10 0 0;">
                                         <image><Image url="@../../images/kaguya.jpg" /></image>
                                     </ImageView>
 
@@ -136,11 +92,11 @@
                                         <children>
                                             <HBox alignment="BOTTOM_LEFT" spacing="10.0">
                                                 <children>
-                                                    <Label style="-fx-font-weight: bold; -fx-font-size: 28;" text="15,400,000đ" />
-                                                    <Label style="-fx-text-fill: gray; -fx-strikethrough: true;" text="Khởi điểm: 1,000,000đ" />
+                                                    <Label fx:id="curPrice" style="-fx-font-weight: bold; -fx-font-size: 28;" text="15,400,000đ" />
+                                                    <Label fx:id="curBidder" style="-fx-text-fill: gray; -fx-strikethrough: true;" text="Khởi điểm: 1,000,000đ" />
                                                 </children>
                                             </HBox>
-                                            <Label style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
+                                            <Label fx:id="datetime" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
 
                                             <Button maxWidth="Infinity" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
                                             <Button maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />
@@ -148,7 +104,7 @@
                                             <VBox spacing="10.0" style="-fx-padding: 15 0 0 0;">
                                                 <children>
                                                     <Label style="-fx-font-weight: bold;" text="Thông tin phiên:" />
-                                                    <Label text="• Bước giá tối thiểu: 100,000đ" />
+                                                    <Label fx:id="bidStep" text="• Bước giá tối thiểu: 100,000đ" />
                                                     <Label text="• Phí vận chuyển: Miễn phí" />
                                                     <Label text="• Kiểm định: Đã xác thực" />
                                                 </children>

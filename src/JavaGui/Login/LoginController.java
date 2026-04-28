@@ -4,7 +4,8 @@ import java.io.IOException;
 
 import Database.UserDAO;
 // import JavaGui.Auction.AuctionController;
-import JavaGui.Auction.AuctionHubController;
+import JavaGui.MainMenu.AuctionHubController;
+import JavaGui.SceneChanger;
 import User.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -39,16 +40,7 @@ public class LoginController {
         User user = userDAO.login(text1,text2);
         if (user != null){
              try{
-                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaGui/Auction/auctionhub.fxml"));
-                 Parent root = loader.load();
-                 Stage stage = (Stage) loginButton.getScene().getWindow();
-                 stage.setTitle("Auction Hub - " + user.getUsername());
-
-                 AuctionHubController auctionHubController = loader.getController();
-                 auctionHubController.setUser(user);
-                 auctionHubController.loadAuction();
-                 stage.setScene(new Scene(root));
-                 stage.show();
+                 SceneChanger.getInstance().toMainMenu(user);
              }
              catch (Exception ex){
                 System.out.println(ex.getMessage());
