@@ -12,12 +12,12 @@ class Login {
         // users.register("jenny", "Matkhau");
                 
         Bidder user = (Bidder) users.login("duong", "1"); 
-
+        // user.checkNotifications();
         // user1.showRole();
         // Bidder newUser = (Bidder) user1.changeRole(Role.BIDDER);
         // newUser.placeBid(1);
         // newUser.checkNotifications();
-        Seller newUser = (Seller) user.changeRole(Role.SELLER);
+        // Seller newUser = (Seller) user.changeRole(Role.SELLER);
 
         
         // Arts draft = newUser.createItem(Arts.Builder.class,"The Screaming","doraemo","/JavaGui/doraemon.jpg")
@@ -32,10 +32,10 @@ class Login {
         //                             .build();
         // newUser.uploadItem(draft1,1000,10,3);
 
-        Vehicle draft2 = newUser.createItem(Vehicle.Builder.class, "xe tương lai", "đây là xe tương lai","/JavaGui/testlo.jpg")
-                                .withBrand("tesla")
-                                .withMileage(1000)
-                                .build();
-        newUser.uploadItem(draft2,50000000,100000,5);
+        // Vehicle draft2 = newUser.createItem(Vehicle.Builder.class, "xe tương lai", "đây là xe tương lai","/JavaGui/testlo.jpg")
+        //                         .withBrand("tesla")
+        //                         .withMileage(1000)
+        //                         .build();
+        // newUser.uploadItem(draft2,50000000,100000,5);
     } 
 }
