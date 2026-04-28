@@ -18,7 +18,7 @@ public class Vehicle extends Item {
     @Override
     public boolean upload(Connection connection, double price, double stepPrice, int durations) throws SQLException {
         int id = VehicleDAO.getInstance().createItem(connection, this);
-        return AuctionDAO.getInstance().createAuction(connection, this.getId() , this.getSellerId(), price, stepPrice, durations);
+        return AuctionDAO.getInstance().createAuction(connection, id, this.getSellerId(), price, stepPrice, durations);
     }
 
     public void setVehicle(double mileage, int mFG, String brand, String model, String trim, String titleStatus) {

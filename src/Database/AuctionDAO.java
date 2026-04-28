@@ -18,6 +18,7 @@ public class AuctionDAO extends BaseDAO {
     public boolean createAuction(Connection connection, int itemId,int sellerId, double price, double stepPrice, int durations) throws SQLException {
         LocalDateTime endDateTime = LocalDateTime.now().plusDays(durations);
         String query = "INSERT INTO auctions(itemId,sellerId, startingPrice, priceStep, curPrice, endTime) VALUES(?,?,?,?,?,?);";
+        if (itemId < 0) return false;
         
         try (PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1, itemId);
