@@ -14,11 +14,11 @@ public class VehicleDAO extends ItemDAO {
         return instance;
     }
 
-    public int createItem(Connection connection, Vehicle vehicle, String imagePath) throws  SQLException {
+    public int createItem(Connection connection, Vehicle vehicle) throws  SQLException {
         String query = "INSERT INTO vehicles(itemId, mileage, mFG, brand, model, trim, titleStatus) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
         try {
-            int generatedId = insertBaseItem(connection, vehicle, "VEHICLE", imagePath);
+            int generatedId = insertBaseItem(connection, vehicle, "VEHICLE", vehicle.getImagePath());
 
             try (PreparedStatement pr = connection.prepareStatement(query)) {
                 pr.setInt(1, generatedId);

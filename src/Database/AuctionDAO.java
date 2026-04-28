@@ -15,7 +15,7 @@ public class AuctionDAO extends BaseDAO {
 
 
 
-    public void createAuction(Connection connection, int itemId,int sellerId, double price, double stepPrice, int durations) throws SQLException {
+    public boolean createAuction(Connection connection, int itemId,int sellerId, double price, double stepPrice, int durations) throws SQLException {
         LocalDateTime endDateTime = LocalDateTime.now().plusDays(durations);
         String query = "INSERT INTO auctions(itemId,sellerId, startingPrice, priceStep, curPrice, endTime) VALUES(?,?,?,?,?,?);";
         
@@ -29,6 +29,7 @@ public class AuctionDAO extends BaseDAO {
 
             if (pr.executeUpdate() > 0) {
                 System.out.println("Manager: Đã đưa sản phẩm lên sàn, kết thúc sau " + durations + " ngày.");
+                return true;
             } else {
                 connection.rollback();
                 throw new SQLException("Lỗi: Không thể tạo phiên đấu giá.");

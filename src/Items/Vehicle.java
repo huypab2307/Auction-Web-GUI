@@ -1,78 +1,42 @@
 package Items;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import Database.ArtsDAO;
+import Database.AuctionDAO;
+import Database.VehicleDAO;
+
 public class Vehicle extends Item {
-    private final double mileage; //Số km đã đi
-    private final int mFG;  // Ngày sản xuất
-    private final String brand; // nhà sản xuất
-    private final String model; //dòng xe
-    private final String trim; // phiên bản
-    private final String titleStatus; //Tình trạng giấy tờ
+    private double mileage; //Số km đã đi
+    private int mFG;  // Ngày sản xuất
+    private String brand; // nhà sản xuất
+    private String model; //dòng xe
+    private String trim; // phiên bản
+    private String titleStatus; //Tình trạng giấy tờ
     
-    public Vehicle(Builder build) {
-        super(build.name,build.description,ItemType.VEHICLE,build.sellerId,-1,build.imagePath);
-        this.mileage = build.mileage;
-        this.mFG = build.mFG;
-        this. brand = build.brand;
-        this.model = build.model;
-        this.trim = build.trim;
-        this.titleStatus = build.titleStatus;
+    @Override
+    public boolean upload(Connection connection, double price, double stepPrice, int durations) throws SQLException {
+        int id = VehicleDAO.getInstance().createItem(connection, this);
+        return AuctionDAO.getInstance().createAuction(connection, this.getId() , this.getSellerId(), price, stepPrice, durations);
     }
 
-    public static class Builder {
-        private double mileage;
-        private int mFG;
-        private String brand;
-        private String model;
-        private String trim;
-        private String titleStatus;
-        private String name;
-        private String description;
-        private int sellerId;
-        private String imagePath;
-        public Builder(String name, String description, int sellerId, String imagePath){
-            this.name = name;
-            this.imagePath = imagePath;
-            this.description = description;
-            this.sellerId = sellerId;
-        }
-
-        public Builder withMileage(double mileage) {
-            this.mileage = mileage;
-            return this;
-        }
-
-        public Builder withMFG(int mFG) {
-            this.mFG = mFG;
-            return this;
-        }
-
-        public Builder withBrand(String brand) {
-            this.brand = brand;
-            return this;
-        }
-
-        public Builder withModel(String model) {
-            this.model = model;
-            return this;
-        }
-
-        public Builder withTrim(String trim) {
-            this.trim = trim;
-            return this;
-        }
-
-        public Builder withTitleStatus(String titleStatus) {
-            this.titleStatus = titleStatus;
-            return this;
-        }
-
-        public Vehicle build() {
-            return new Vehicle(this);
-        }
+    public void setVehicle(double mileage, int mFG, String brand, String model, String trim, String titleStatus) {
+        this.mileage = mileage;
+        this.mFG = mFG;
+        this.brand = brand;
+        this.model = model;
+        this.trim = trim;
+        this.titleStatus = titleStatus;
     }
 
     // Mileage
     public double getMileage() {
         return this.mileage;
+    }
+
+    public Vehicle(String name, String description, ItemType type, int sellerId, String imagePath) {
+        super(name, description, type, sellerId, -1, imagePath);
     }
 
     // MFG
@@ -102,6 +66,7 @@ public class Vehicle extends Item {
     public int getmFG() {
         return mFG;
     }
+    
     @Override
     public String toString() {
         return "Vehicle {" +

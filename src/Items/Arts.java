@@ -1,21 +1,32 @@
 package Items;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+
+import Auction.Auction;
+import Database.ArtsDAO;
+import Database.AuctionDAO;
+
 public class Arts extends Item {
     private String artist; //Tác giả
     private int yearOfcreation; //Năm sáng tác
     private String dimensions; //Kích thước
     private String medium; //Chất liệu 
 
-    public Arts(Builder build){
-        super(build.name, build.description,ItemType.ARTS, build.sellerId,-1,build.imagePath);
-        this.artist = build.artist;
-        this.yearOfcreation = build.yearOfCreation;
-        this.dimensions = build.dimensions;
-        this.medium = build.medium;
-    }
-    // Artist
+    
     public String getArtist(){
         return this.artist;
+    }
+    public void setArts(String artist, int yearOfcreation, String dimensions, String medium) {
+        this.artist = artist;
+        this.yearOfcreation = yearOfcreation;
+        this.dimensions = dimensions;
+        this.medium = medium;
+    }
+
+    public Arts(String name, String description, ItemType type, int sellerId, String imagePath) {
+        super(name, description, type, sellerId, -1, imagePath);
     }
     // YearOfCreation
     public int getYearOfcreation(){
@@ -31,53 +42,9 @@ public class Arts extends Item {
     public String getMedium(){
         return this.medium;
     }
-    public static class Builder{
-        private String name;
-        private String description;
-        private int sellerId;
-        private String artist; //Tác giả
-        private int yearOfCreation; //Năm sáng tác
-        private String dimensions; //Kích thước
-        private String medium; //Chất liệu 
-        private String imagePath;
-        public Builder(String name, String description, int sellerId, String imagePath){
-            this.name = name;
-            this.imagePath = imagePath;
-            this.description = description;
-            this.sellerId = sellerId;
-        }
-        public Builder withArtist(String name){
-            this.artist = name;
-            return this;
-        }
-        public Builder withyearOfCreation(int year ){
-            this.yearOfCreation = year;
-            return this;
-        }
-        public Builder withDimensions(String dimensions){
-            this.dimensions = dimensions;
-            return this;
-        }
-        public Builder medium(String medium){
-            this.medium = medium;
-            return this;
-        }
-
-        public Arts build(){
-            return new Arts(this);
-
-        }
-    }
     @Override
-    public String toString() {
-    return "Arts {" +
-            "id='" + getId() + '\'' +
-            ", name='" + getName() + '\'' +
-            ", artist='" + artist + '\'' +
-            ", year=" + yearOfcreation +
-            ", medium='" + medium + '\'' +
-            ", dimensions='" + dimensions + '\'' +
-            ", seller='" + getSellerId() + '\'' +
-            '}';
-}
+    public boolean upload(Connection connection, double price, double stepPrice, int durations) throws SQLException {
+        int id = ArtsDAO.getInstance().createItem(connection, this);
+        return AuctionDAO.getInstance().createAuction(connection, id ,this.getSellerId(), price, stepPrice, durations);
+    }
 }

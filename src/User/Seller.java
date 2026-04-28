@@ -3,6 +3,7 @@ package User;
 import Auction.AuctionManager;
 import Items.FactoryItem;
 import Items.Item;
+import Items.ItemType;
 
 public class Seller extends User {
 
@@ -15,8 +16,8 @@ public class Seller extends User {
         System.out.println(username + " is a Seller");
     }
 
-    public <T> T createItem(Class<T> clazz, String name, String desc, String imagePath) {
-        return FactoryItem.createBuilder(clazz, name, desc, this.id,imagePath);
+    public Item createItem(ItemType type, String name, String desc, String imagePath) {
+        return FactoryItem.createBuilder(type, name, desc, this.id,imagePath);
     }
     public void uploadItem(Item item, double price, double stepPrice, int durationDays) {
         AuctionManager.getInstance().uploadItem(item, price, stepPrice, durationDays, this);

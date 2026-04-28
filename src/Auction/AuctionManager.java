@@ -21,34 +21,17 @@ public class AuctionManager {
             System.out.println("Lỗi: Giá khởi điểm và bước giá không hợp lệ!");
             return;
         }
-        try(Connection connection = AuctionDAO.getInstance().getConnect()){
+        
+        try (Connection connection = AuctionDAO.getInstance().getConnect()) { 
             connection.setAutoCommit(false);
-            ItemType type = item.getType();
-            int id = -1;
-            String imagePath = item.getImagePath();
-            switch (type) {
-                case ARTS:
-                    id = ArtsDAO.getInstance().createItem(connection, (Arts) item, imagePath);
-                    break;
-                case ELECTRONICS:
-                    id = ElectronicsDAO.getInstance().createItem(connection,(Electronics) item, imagePath);
-                    break;
-                case VEHICLE:
-                    id = VehicleDAO.getInstance().createItem(connection, (Vehicle) item, imagePath);
-                    break;
-                default:
-                    System.out.println("Lỗi: Loại sản phẩm không hỗ trợ!");
-                    return;
+        
+            if (item.upload(connection, price, stepPrice, durations)) {
+                connection.commit();
+            } else {
+                connection.rollback();
+                throw new SQLException("Upload failed");
             }
 
-            if (id > 0){
-                System.out.println("Manager: Đã đăng bán món hàng " + item.getName());
-                AuctionDAO.getInstance().createAuction(connection, id,seller.getId(), price, stepPrice, durations);
-                connection.commit();
-                return;
-            }   
-            connection.rollback();
-            throw new SQLException("có lỗi xảy ra trong khi upload sản phẩm");
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
@@ -62,9 +45,6 @@ public class AuctionManager {
             Auction auction = auctionDAO.findById(connection, id);
             auctionDAO.updateAuction(connection, auction, bidder.getId(),oldPrice);
             auctionDAO.updateTransaction(connection, auction, bidder.getId());
-
-            Notifications notification = NotificationManager.getInstance().subscribeAuction(connection, auction, bidder);
-            if (notification == null) throw new SQLException("Có lỗi xảy ra khi thống báo");
             connection.commit();
             return true;
 
@@ -72,14 +52,15 @@ public class AuctionManager {
             System.out.println(e.getMessage());
         }
         return false;
+
     }
-    public void findAuction(int id){
+    public Auction findAuction(int id){
         try(Connection connection = AuctionDAO.getInstance().getConnect()) {
-            Auction auction = AuctionDAO.getInstance().findById(connection, id);
-            System.out.println("giá hiện tại của vật phẩm: " + auction.getCurPrice());
+            return AuctionDAO.getInstance().findById(connection, id);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return null;
     }
 
     public ArrayList<AuctionInfo> auctionList(){

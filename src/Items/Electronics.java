@@ -1,30 +1,41 @@
 package Items;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import Database.ArtsDAO;
+import Database.AuctionDAO;
+import Database.ElectronicsDAO;
+
 public class Electronics extends Item {
-    private final String brand;
-    private final int power;
-    private final double voltage;
-    private final double current;
-    private final String status;
-    private final String color;
-    private final double weight;
+    private String brand;
+    private int power;
+    private double voltage;
+    private double current;
+    private String status;
+    private String color;
+    private double weight;
 
+    public Electronics(String name, String description, ItemType type, int sellerId, String imagePath) {
+        super(name, description, type, sellerId, -1, imagePath);
+    }
 
-public Electronics(Builder build) {
-    super(build.name,build.description,ItemType.ELECTRONICS,build.sellerId,-1,build.imagePath);
-    this.brand = build.brand;
-    this.power = build.power;
-    this.voltage = build.voltage;
-    this.current = build.current;
-    this.status = build.status;
-    this.color = build.color;
-    this.weight = build.weight;
+    public void setElectronics( String brand, int power, double voltage, double current, String status, String color, double weight) {
+        this.brand = brand;
+        this.power = power;
+        this.voltage = voltage;
+        this.current = current;
+        this.status = status;
+        this.color = color;
+        this.weight = weight;
     }
-    public String getBrand() {
-        return brand;
-    }
+
 
     public int getPower() {
         return power;
+    }
+    public String getBrand() {
+        return brand;
     }
 
     public double getVoltage() {
@@ -46,56 +57,12 @@ public Electronics(Builder build) {
     public double getWeight() {
         return weight;
     }
-    public static class Builder {
-        private String name;
-        private String description;
-        private int sellerId;
-        private String brand;
-        private int power;
-        private double voltage;
-        private double current;
-        private String status;
-        private String color;
-        private double weight;
-        private String imagePath;
-        public Builder(String name, String description, int sellerId, String imagePath){
-            this.name = name;
-            this.imagePath = imagePath;
-            this.description = description;
-            this.sellerId = sellerId;
-        }
-        public Builder withBrand (String brand){
-            this.brand = brand;
-            return this;
-        }
-        public Builder withPower (int power){
-            this.power = power;
-            return this;
-        }
-        public Builder withVoltage (double voltage){
-            this.voltage = voltage;
-            return this;
-        }
-        public Builder withCurrent (double current){
-            this.current = current;
-            return this;
-        }
-        public Builder withStatus(String status){
-            this.status = status;
-            return this;
-        }
-        public Builder withColor (String color){
-            this.color = color;
-            return this;
-        }
-        public Builder withWeight (double weight){
-            this.weight = weight;
-            return this;
-        }
-        public Electronics build(){
-            return new Electronics(this);
-        }
+    @Override
+    public boolean upload(Connection connection, double price, double stepPrice, int durations) throws SQLException {
+        int id = ElectronicsDAO.getInstance().createItem(connection, this);
+        return AuctionDAO.getInstance().createAuction(connection, id,this.getSellerId(), price, stepPrice, durations);
     }
+
     @Override
     public String toString() {
     return "Electronics {" +

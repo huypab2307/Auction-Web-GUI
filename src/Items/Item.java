@@ -1,4 +1,9 @@
 package Items;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+
 public abstract class Item {
     private String name;
     private String description;
@@ -37,4 +42,5 @@ public abstract class Item {
     public String getImagePath(){
         return imagePath;
     }
+    public abstract boolean upload(Connection connection,double price, double stepPrice, int durations) throws SQLException;
 }

@@ -1,14 +1,17 @@
 package Items;
 public class FactoryItem {
 
-    public static <T> T createBuilder(Class<T> clazz, String name, String desc, int sellerId, String imagePath) {
-        if (clazz == Arts.Builder.class) {
-            return clazz.cast(new Arts.Builder(name, desc, sellerId,imagePath));
-        } else if (clazz == Electronics.Builder.class) {
-            return clazz.cast(new Electronics.Builder(name, desc, sellerId,imagePath));
-        } else if (clazz == Vehicle.Builder.class){
-            return clazz.cast(new Vehicle.Builder(name, desc, sellerId,imagePath));
+    public static Item createBuilder(ItemType type, String name, String desc, int sellerId, String imagePath) {
+        switch (type.name()) {
+            case ("ARTS"):
+                return new Arts(name, desc, type, sellerId, imagePath);
+            case ("VEHICLE"):
+                return new Vehicle(name, desc, type, sellerId, imagePath); 
+            case ("ELECTRONICS"):
+                return new Electronics(name, desc, type, sellerId, imagePath);          
+            default:
+                break;
         }
-        throw new IllegalArgumentException("Class không được hỗ trợ: " + clazz.getName());
+        throw new IllegalArgumentException("type không được hỗ trợ ");
     }
 }
