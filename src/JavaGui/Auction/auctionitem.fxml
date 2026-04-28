@@ -22,7 +22,7 @@
                         <children>
                             <Pane style="-fx-padding: 40 400 40 100; -fx-background-color: linear-gradient(to bottom right,#08088e,#6f26c1);">
                                 <children>
-                                    <VBox layoutX="84.0" layoutY="46.0" prefHeight="205.0" prefWidth="830.0" spacing="15.0" style="-fx-padding: 50 0 0 0" HBox.hgrow="ALWAYS">
+                                    <VBox layoutX="124.0" layoutY="46.0" prefHeight="205.0" prefWidth="830.0" spacing="15.0" style="-fx-padding: 50 0 0 0" HBox.hgrow="ALWAYS">
                                         <children>
                                             <Label fx:id="title" prefHeight="10.0" prefWidth="607.0" style="-fx-font-weight: bold; -fx-font-size: 32;" text="Tác phẩm: 'Kaguya - Nữ thần mặt trăng'" textFill="WHITE" wrapText="true" />
                                             <Label fx:id="description" prefWidth="677.0" style="-fx-font-size: 16;" text="Description" textFill="WHITE" wrapText="true" />
