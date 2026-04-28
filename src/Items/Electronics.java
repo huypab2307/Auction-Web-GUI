@@ -16,8 +16,8 @@ public class Electronics extends Item {
     private String color;
     private double weight;
 
-    public Electronics(String name, String description, ItemType type, int sellerId, String imagePath) {
-        super(name, description, type, sellerId, -1, imagePath);
+    public Electronics(String name, String description, ItemType type, int sellerId,int id, String imagePath) {
+        super(name, description, type, sellerId, id, imagePath);
     }
 
     public void setElectronics( String brand, int power, double voltage, double current, String status, String color, double weight) {

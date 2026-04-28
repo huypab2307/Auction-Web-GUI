@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class AuctionController {
+public class AuctionHubController {
     @FXML
     private FlowPane mainContainer;
     @FXML

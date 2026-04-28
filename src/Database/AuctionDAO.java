@@ -6,6 +6,7 @@ import Items.ItemType;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AuctionDAO extends BaseDAO {
     private static final AuctionDAO instance = new AuctionDAO();

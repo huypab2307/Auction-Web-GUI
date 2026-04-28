@@ -25,8 +25,8 @@ public class Arts extends Item {
         this.medium = medium;
     }
 
-    public Arts(String name, String description, ItemType type, int sellerId, String imagePath) {
-        super(name, description, type, sellerId, -1, imagePath);
+    public Arts(String name, String description, ItemType type,int id, int sellerId, String imagePath) {
+        super(name, description, type, sellerId, id, imagePath);
     }
     // YearOfCreation
     public int getYearOfcreation(){

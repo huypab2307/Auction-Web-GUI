@@ -22,6 +22,8 @@ public class ItemController {
     private Label date;
     @FXML
     private Label curPrice;
+
+    private AuctionInfo auctionInfo;
     @FXML
     public void showDetailHandle(){
         //chưa xử lý
@@ -32,6 +34,7 @@ public class ItemController {
         sellerName.setText(i.getSellerUsername());
         curPrice.setText(String.format("%,.0f đ", i.getCurPrice()));
         date.setText(i.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        this.auctionInfo = i;
         URL src = getClass().getResource(i.imagePath());
 
         if (src != null) {

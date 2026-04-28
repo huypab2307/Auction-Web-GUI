@@ -2,6 +2,7 @@ package Auction;
 
 import java.time.LocalDateTime;
 
+import Items.Item;
 import Items.ItemType;
 
 public class AuctionInfo {

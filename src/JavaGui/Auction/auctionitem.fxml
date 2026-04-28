@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:controller="JavaGui.Auction.AuctionItemController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@../Style/buttonStyle.css" />
         <URL value="@/JavaGui/Style/menuItem.css" />
@@ -15,10 +15,10 @@
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="20.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);">
             <children>
-                <Label text="COSMIC" textFill="#2575fc">
+                <Button text="COSMIC" textFill="#2575fc" style="-fx-background-color: transparent">
                     <font><Font name="System Bold" size="24.0" /></font>
                     <HBox.margin><Insets left="20.0" /></HBox.margin>
-                </Label>
+                </Button>
 
                 <HBox alignment="CENTER_LEFT" maxHeight="40.0" prefHeight="40.0" style="-fx-background-color: #f1f3f4; -fx-background-radius: 20; -fx-padding: 0 15;" HBox.hgrow="ALWAYS">
                     <children>
@@ -68,20 +68,20 @@
                         <children>
                             <HBox spacing="50.0" style="-fx-padding: 40 400 40 100;">
                                 <children>
-                                    <VBox prefHeight="205.0" prefWidth="830.0" spacing="15.0" HBox.hgrow="ALWAYS" style="-fx-padding: 50 0 0 0">
+                                    <VBox prefHeight="205.0" prefWidth="830.0" spacing="15.0" style="-fx-padding: 50 0 0 0" HBox.hgrow="ALWAYS">
                                         <children>
                                             <Label prefHeight="10.0" prefWidth="607.0" style="-fx-font-weight: bold; -fx-font-size: 32;" text="Tác phẩm: 'Kaguya - Nữ thần mặt trăng'" textFill="WHITE" wrapText="true" />
-                                            <Label prefWidth="677.0" style="-fx-font-size: 16;" text="Một kiệt tác nghệ thuật kỹ thuật số độc bản, được chứng thực bởi Hội đồng nghệ thuật Cosmic." textFill="WHITE" wrapText="true" />
+                                            <Label prefWidth="677.0" style="-fx-font-size: 16;" text="Description" textFill="WHITE" wrapText="true" />
                                             <HBox alignment="CENTER_LEFT" spacing="15.0">
                                                 <children>
                                                     <Label text="⭐ 4.9 (2.5k lượt quan tâm)" textFill="#f4c150" />
-                                                    <Label style="-fx-underline: true;" text="Người bán: @dominic_art" textFill="#a1d2ff" />
+                                                    <Label style="-fx-underline: true;" text="Người bán:" textFill="#a1d2ff" />
                                                 </children>
                                             </HBox>
                                             <HBox spacing="20.0" style="-fx-padding: 10 0;">
                                                 <children>
                                                     <Label text="📅 Ngày đăng: 20/04/2026" textFill="WHITE" />
-                                                    <Label text="🌐 Ngôn ngữ: Toàn cầu" textFill="WHITE" />
+                                                    <Label text="Thể loại: " textFill="WHITE" />
                                                 </children>
                                             </HBox>
                                         </children>
@@ -140,7 +140,7 @@
                                                     <Label style="-fx-text-fill: gray; -fx-strikethrough: true;" text="Khởi điểm: 1,000,000đ" />
                                                 </children>
                                             </HBox>
-                                            <Label style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian còn lại: 02:45:10" />
+                                            <Label style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
 
                                             <Button maxWidth="Infinity" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
                                             <Button maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />

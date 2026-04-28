@@ -1,7 +1,9 @@
 package Database;
 
 import Items.Arts;
+import Items.ItemType;
 import java.sql.*;
+import java.util.HashMap;
 
 
 public class ArtsDAO extends ItemDAO {
@@ -28,6 +30,33 @@ public class ArtsDAO extends ItemDAO {
 
         } catch (SQLException e) {
             throw new SQLException("không thể thêm arts vào");
+        }
+    }
+    public Arts findById(int id) throws SQLException {
+        HashMap<String, Object> base = fetchBaseItemFields(id);
+        if (base == null) return null;
+
+        int bid = (Integer) base.get("id");
+        String title = (String) base.get("title");
+        int sellerId = (Integer) base.get("sellerId");
+        String description = (String) base.get("description");
+        ItemType type = ItemType.valueOf((String) base.get("type"));
+        String imagePath = (String) base.get("imagePath");
+
+        String sql = "SELECT artist, yearOfcreation, dimensions, medium FROM arts WHERE itemId = ?";
+        try (Connection connection = instance.getConnect(); PreparedStatement pr = connection.prepareStatement(sql)) {
+            pr.setInt(1, id);
+            try (ResultSet rs = pr.executeQuery()) {
+                if (rs.next()) {
+                    Arts art = new Arts(title, description, type, sellerId,bid, imagePath);
+                    art.setArts(rs.getString("artist"), rs.getInt("yearOfcreation"), rs.getString("dimensions"), rs.getString("medium"));
+                    return art;
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Không thể truy vấn arts: " + e.getMessage(), e);
         }
     }
 }

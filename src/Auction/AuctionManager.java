@@ -66,4 +66,5 @@ public class AuctionManager {
     public ArrayList<AuctionInfo> auctionList(){
         return AuctionDAO.getInstance().getAllAuctions();
     }
+    
 }

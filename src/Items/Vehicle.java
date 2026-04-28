@@ -35,8 +35,8 @@ public class Vehicle extends Item {
         return this.mileage;
     }
 
-    public Vehicle(String name, String description, ItemType type, int sellerId, String imagePath) {
-        super(name, description, type, sellerId, -1, imagePath);
+    public Vehicle(String name, String description, ItemType type, int sellerId,int id, String imagePath) {
+        super(name, description, type, sellerId, id, imagePath);
     }
 
     // MFG
