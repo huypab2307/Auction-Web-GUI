@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import Auction.AuctionStatus;
 import Items.Item;
 import Items.ItemType;
-//this class is made only to display info quickly rather than query all of Auction and Item and User
+//This class is made only to display info quickly, rather than do many frivolous queries of Auction, Item, and User
 public class AuctionInfo {
     private int id;
     private String sellerUsername;
