@@ -14,9 +14,9 @@ public class RandomHelper {
             "(to left, #ef9393, #e17dc2, #998ee0, #43add0);",
             "(to left, #00bf72, #008793, #004d7a, #051937);",
             "(to left, #4286f4, #373b44);",
-            "(to right, #00c996, #003d4d);",
+            "(to left, #00c996, #003d4d);",
             "(to right, #24243e, #302b63, #0f0c29);",
-            "(to right, #f8ffae, #43c6ac);",
+            "(to left, #f8ffae, #43c6ac);",
             "(to right, #004e92, #000428);",
             //deep space
             "(to right, #434343, #000000);"};
