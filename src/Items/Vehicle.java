@@ -16,6 +16,7 @@ public class Vehicle extends Item {
     private String model; //dòng xe
     private String trim; // phiên bản
     private String titleStatus; //Tình trạng giấy tờ
+
     
     @Override
     public boolean upload(Connection connection, double price, double stepPrice, int durations) throws SQLException {

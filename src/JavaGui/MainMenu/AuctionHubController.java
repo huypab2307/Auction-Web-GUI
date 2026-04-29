@@ -2,6 +2,7 @@ package JavaGui.MainMenu;
 
 import Database.AuctionDAO;
 import Items.ItemType;
+import JavaGui.RandomHelper;
 import JavaGui.SceneChanger;
 import JavaGui.TopBar.SearchListener;
 import JavaGui.TopBar.TopBarController;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import DTO.AuctionInfo;
+import javafx.scene.layout.StackPane;
 
 public class AuctionHubController implements SearchListener {
     @FXML
@@ -29,6 +31,8 @@ public class AuctionHubController implements SearchListener {
     private ToggleButton electronicButton;
     @FXML
     private ToggleButton vehicleButton;
+    @FXML
+    private StackPane pane;
 
     private User user;
     @FXML
@@ -39,6 +43,7 @@ public class AuctionHubController implements SearchListener {
         if (topBarController != null) {
             topBarController.setListener(this);
         }
+        pane.setStyle("-fx-background-radius: 20;" + RandomHelper.randomColorPicker());
     }
 
     public void setUser(User user){

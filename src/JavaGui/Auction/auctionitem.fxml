@@ -5,6 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
+
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="JavaGui.Auction.AuctionItemController">
     <stylesheets>
         <URL value="@../Style/buttonStyle.css" />
@@ -20,7 +21,7 @@
                 <VBox>
                     <StackPane prefHeight="350.0" style="-fx-background-color: #1c1d1f;">
                         <children>
-                            <Pane style="-fx-padding: 40 400 40 100; -fx-background-color: linear-gradient(to bottom right,#08088e,#6f26c1);">
+                            <Pane fx:id="pane" style="-fx-padding: 40 400 40 100; -fx-background-color: linear-gradient(to right, #5cdb95, #05386b);">
                                 <children>
                                     <VBox layoutX="124.0" layoutY="46.0" prefHeight="205.0" prefWidth="830.0" spacing="15.0" style="-fx-padding: 50 0 0 0" HBox.hgrow="ALWAYS">
                                         <children>

@@ -41,7 +41,7 @@
                 <VBox spacing="30.0" style="-fx-padding: 30;">
                     <children>
 
-                        <StackPane prefHeight="200.0" style="-fx-background-color: linear-gradient(to right, #6a11cb, #2575fc); -fx-background-radius: 20;">
+                        <StackPane fx:id="pane" prefHeight="200.0" style="-fx-background-color: linear-gradient(to right, #6a11cb, #2575fc); -fx-background-radius: 20;">
                             <children>
                                 <VBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>

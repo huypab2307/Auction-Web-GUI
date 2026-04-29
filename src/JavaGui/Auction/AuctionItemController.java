@@ -1,8 +1,8 @@
 package JavaGui.Auction;
-
 import Database.AuctionDAO;
 import Database.UserDAO;
 import Items.FactoryItem;
+import JavaGui.RandomHelper;
 import JavaGui.SceneChanger;
 import User.User;
 import javafx.animation.PauseTransition;
@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import User.Bidder;
 import User.Role;
@@ -55,6 +56,8 @@ public class AuctionItemController implements JavaGui.TopBar.SearchListener {
     private AuctionInfo auctionInfo;
     @FXML
     private Button bidButton;
+    @FXML
+    private Pane pane;
 
     @FXML
     public void initialize() {
@@ -96,7 +99,7 @@ public class AuctionItemController implements JavaGui.TopBar.SearchListener {
 
             URL src = getClass().getResource(itemSummary.getImagePath());
             image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
-
+            pane.setStyle("-fx-padding: 40 400 40 100;" + RandomHelper.randomColorPicker());
             attributeBox.getChildren().clear();
             Map<String, String> itemInfo = FactoryItem.findItemById(itemSummary.getItemType(), itemSummary.getItemId()).getSpecificInfo();
             itemInfo.forEach((label, value) -> {
@@ -111,7 +114,6 @@ public class AuctionItemController implements JavaGui.TopBar.SearchListener {
         curBidder.setText(auctionInfo.getLastBidderName() != null ? "người giữ giá: " + auctionInfo.getLastBidderName() : "Chưa có người ra giá");
 
     }
-
 
     public void onBidHandle(ActionEvent actionEvent) {
         Button bidButton = (Button) actionEvent.getSource();

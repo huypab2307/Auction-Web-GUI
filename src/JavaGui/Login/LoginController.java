@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import Database.UserDAO;
 // import JavaGui.Auction.AuctionController;
-import JavaGui.MainMenu.AuctionHubController;
 import JavaGui.SceneChanger;
 import User.User;
 import javafx.event.ActionEvent;

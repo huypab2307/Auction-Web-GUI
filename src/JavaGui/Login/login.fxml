@@ -42,7 +42,7 @@
             </Label>
         </children>
     </AnchorPane>
-    <Pane layoutX="-13.0" layoutY="-1.0" prefHeight="800.0" prefWidth="853.0" style="-fx-background-color: linear-gradient(to bottom, #000051, #083fec);">
+    <Pane fx:id="pane" layoutX="-13.0" layoutY="-1.0" prefHeight="800.0" prefWidth="853.0" style="-fx-background-color: linear-gradient(to bottom, #000051, #083fec);">
         <children>
             <Label layoutX="43.0" layoutY="194.0" text="Cosmic" textFill="#00acff">
                 <font>
