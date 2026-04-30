@@ -86,6 +86,16 @@ public class AuctionDAO extends BaseDAO {
         ArrayList<AuctionInfo> results = executeQueryAndGetList(sql, auctionId);
         return results.isEmpty() ? null : results.get(0);
     }
+    public ArrayList<AuctionInfo> searchAuctionByUserId(int userId) {
+        String sql = BASE_SELECT_QUERY + " WHERE u_seller.id = ?";
+        ArrayList<AuctionInfo> results = executeQueryAndGetList(sql, userId);
+        return results;
+    }
+//    public AuctionInfo searchAuctionByInterestedId(int userId) {
+//        String sql = BASE_SELECT_QUERY + " WHERE .id = ?";
+//        ArrayList<AuctionInfo> results = executeQueryAndGetList(sql, userId);
+//        return results.isEmpty() ? null : results.get(0);
+//    }
 
 
     public boolean createAuction(Connection connection, int itemId, int sellerId, double price, double stepPrice, int durations) throws SQLException {

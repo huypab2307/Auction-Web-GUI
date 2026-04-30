@@ -56,4 +56,9 @@ public class TopBarController {
             SceneChanger.getInstance().toLogin();
         }
     }
+
+    @FXML
+    public void userGuiHandle(ActionEvent actionEvent) {
+        SceneChanger.getInstance().toUserGui(user);
+    }
 }

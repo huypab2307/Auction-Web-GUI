@@ -35,6 +35,7 @@ public class AuctionHubController implements SearchListener {
     private StackPane pane;
 
     private User user;
+
     @FXML
     private TopBarController topBarController;
 
