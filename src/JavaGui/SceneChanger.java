@@ -2,6 +2,7 @@ package JavaGui;
 
 import JavaGui.MainMenu.AuctionHubController;
 import JavaGui.Auction.AuctionItemController;
+import JavaGui.DashBoard.GeneralController;
 import User.User;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -55,6 +56,13 @@ public class SceneChanger {
             controller.setAuctionInfo(auctionInfo);
             controller.renderStaticInfo();
             controller.updateDynamicInfo();
+        });
+    }
+    public void toUserGui(User user){
+        navigate("/JavaGui/DashBoard/general.fxml", "Dashboard - " + user.getUsername(), loader -> {
+            GeneralController controller = loader.getController();
+            controller.setUser(user);
+            controller.generalButton();
         });
     }
 //    public void toAuction(AuctionInfo auctionInfo, User user){
