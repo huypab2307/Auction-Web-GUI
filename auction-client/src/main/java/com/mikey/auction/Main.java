@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 public class Main extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = new FXMLLoader(getClass().getResource("javagui/login/login.fxml")).load();
+        Parent root = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/login/login.fxml")).load();
         primaryStage.setTitle("login");
         primaryStage.setScene(new Scene(root));
         primaryStage.setFullScreen(false);

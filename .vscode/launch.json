@@ -3,18 +3,15 @@
     "configurations": [
         {
             "type": "java",
-<<<<<<< HEAD
             "name": "Run Client (F5)",
-=======
             "name": "AuctionServer",
             "request": "launch",
-            "mainClass": "Socket.AuctionServer",
+            "mainClass": "com.mikey.auction.socket.AuctionServer",
             "projectName": "Auction-Web-GUI_5e1d0955"
         },
         {
             "type": "java",
             "name": "Login",
->>>>>>> b2f286edaccb4c6037ebc072b2cfe616c2e668a8
             "request": "launch",
             "mainClass": "com.mikey.auction.AppLauncher",
             "projectName": "auction-client",
@@ -24,7 +21,7 @@
             "type": "java",
             "name": "Run Server",
             "request": "launch",
-            "mainClass": "com.mikey.auction.server.MainServer", 
+            "mainClass": "com.mikey.auction.socket.AuctionServer", 
             "projectName": "auction-server"
         },
         {

@@ -2,12 +2,14 @@ com\mikey\auction\javagui\dashboard\GeneralController.class
 com\mikey\auction\javagui\topbar\SearchListener.class
 com\mikey\auction\Main.class
 com\mikey\auction\javagui\auction\AuctionItemController.class
+com\mikey\auction\AppLauncher.class
 com\mikey\auction\javagui\SceneChanger$ControllerConsumer.class
 com\mikey\auction\javagui\mainmenu\AuctionHubController.class
 com\mikey\auction\javagui\dashboard\MyAuctionController.class
 com\mikey\auction\javagui\topbar\TopBarController.class
 com\mikey\auction\javagui\SceneChanger.class
 com\mikey\auction\javagui\mainmenu\ItemController.class
+com\mikey\auction\Foo.class
 com\mikey\auction\socket\AuctionClient.class
 com\mikey\auction\javagui\RandomHelper.class
 com\mikey\auction\javagui\login\RegisterController.class

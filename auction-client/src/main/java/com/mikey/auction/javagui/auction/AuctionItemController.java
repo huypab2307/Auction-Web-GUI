@@ -2,6 +2,7 @@ package com.mikey.auction.javagui.auction;
 
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.factory.FactoryItem;
 import com.mikey.auction.javagui.RandomHelper;
 import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.user.User;
@@ -25,7 +26,7 @@ import java.util.Map;
 
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
-import com.mikey.auction.factory.FactoryItem;
+
 import com.mikey.auction.javagui.topbar.TopBarController;
 import com.mikey.auction.javagui.topbar.SearchListener;
 
