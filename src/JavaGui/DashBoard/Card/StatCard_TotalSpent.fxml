@@ -13,15 +13,23 @@
 <StackPane prefHeight="110" prefWidth="820" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            style="-fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);">
 
-    <Rectangle width="820" height="150" arcWidth="30" arcHeight="30">
-        <fill>
-            <ImagePattern>
-                <image>
-                    <Image url="@/images/space.jpg" />
-                </image>
-            </ImagePattern>
-        </fill>
-    </Rectangle>
+<!--    <Rectangle width="820" height="150" arcWidth="30" arcHeight="30">-->
+<!--        <fill>-->
+<!--            <ImagePattern>-->
+<!--                <image>-->
+<!--                    <Image url="@/images/movingSpaceTwo.gif" />-->
+<!--                </image>-->
+<!--            </ImagePattern>-->
+<!--        </fill>-->
+<!--    </Rectangle>-->
+    <ImageView fitWidth="820" fitHeight="150" style="-fx-background-radius: 20">
+        <image >
+            <Image url="@../../../images/space.jpg" />
+        </image>
+        <clip>
+            <Rectangle width="820" height="150" arcWidth="40" arcHeight="40" />
+        </clip>
+    </ImageView>
     <Pane style="-fx-background-color: rgba(0, 0, 0, 0.3); -fx-background-radius: 15;" />
 
     <VBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 20;">

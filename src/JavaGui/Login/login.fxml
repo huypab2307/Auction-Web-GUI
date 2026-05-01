@@ -8,7 +8,7 @@
 <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="JavaGui.Login.LoginController">
     <AnchorPane prefHeight="800.0" prefWidth="508.0" style="-fx-background-color: white" BorderPane.alignment="CENTER">
         <children>
-            <Label layoutX="57.0" layoutY="207.0" prefHeight="36.0" prefWidth="232.0" text="Đăng nhập" textFill="#223aff">
+            <Label layoutX="57.0" layoutY="207.0" prefHeight="36.0" prefWidth="232.0" text="Đăng nhập" textFill="#ff7719">
                 <font>
                     <Font name="Arial Bold" size="42.0" />
                 </font>
@@ -18,7 +18,7 @@
                     <Font name="Arial" size="17.0" />
                 </font>
             </Label>
-            <Hyperlink onAction="#onRegisterHandle" layoutX="230.0" layoutY="486.0" text="Đăng ký ngay">
+            <Hyperlink layoutX="230.0" layoutY="486.0" onAction="#onRegisterHandle" text="Đăng ký ngay">
                 <font>
                     <Font name="Arial" size="17.0" />
                 </font></Hyperlink>
@@ -30,7 +30,7 @@
             <font>
                <Font size="17.0" />
             </font></PasswordField>
-            <Button fx:id="loginButton" layoutX="120.0" layoutY="426.0" onAction="#onHandleLogin" prefHeight="48.0" prefWidth="187.0" style="-fx-background-radius: 20;                             -fx-background-color: blue" text="Đăng nhập" textFill="white">
+            <Button fx:id="loginButton" layoutX="120.0" layoutY="426.0" onAction="#onHandleLogin" prefHeight="48.0" prefWidth="187.0" style="-fx-background-radius: 20;   -fx-background-color: #ff7719" text="Đăng nhập" textFill="white">
                 <font>
                     <Font name="Arial Bold" size="20.0" />
                 </font>
@@ -42,33 +42,25 @@
             </Label>
         </children>
     </AnchorPane>
-    <Pane fx:id="pane" layoutX="-13.0" layoutY="-1.0" prefHeight="800.0" prefWidth="853.0" style="-fx-background-color: linear-gradient(to bottom, #000051, #083fec);">
+    <Pane fx:id="pane" layoutX="-13.0" layoutY="-1.0" prefHeight="800.0" prefWidth="853.0" style="-fx-background-color: black; -fx-background-radius: 20;"> 
         <children>
-            <Label layoutX="43.0" layoutY="194.0" text="Cosmic" textFill="#00acff">
+            <ImageView fitHeight="707.0" fitWidth="858.0" preserveRatio="false">
+                <image>
+                    <Image url="@../../images/movingSpaceFour.gif" />
+                </image>
+            </ImageView>
+            <Pane prefHeight="800.0" prefWidth="802.0" style="-fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 20;" />
+            <Label layoutX="43.0" layoutY="194.0" text="Cosmic" textFill="#ff735d">
                 <font>
                     <Font name="Arial Bold" size="60.0" />
                 </font>
             </Label>
+
             <Label layoutX="33.0" layoutY="253.0" text="Auction Web gui" textFill="WHITE">
                 <font>
                     <Font name="Arial Bold" size="70.0" />
                 </font>
             </Label>
-            <ImageView fitHeight="552.0" fitWidth="521.0" layoutX="446.0" layoutY="387.0" pickOnBounds="true" preserveRatio="true" rotate="90">
-                <image>
-                    <Image url="@../../images/earth.png" />
-                </image>
-            </ImageView>
-            <ImageView fitHeight="56.0" fitWidth="56.0" layoutX="688.0" layoutY="359.0" pickOnBounds="true" preserveRatio="true">
-                <image>
-                    <Image url="@../../images/star1.png" />
-                </image>
-            </ImageView>
-            <ImageView fitHeight="33.0" fitWidth="33.0" layoutX="64.0" layoutY="615.0" pickOnBounds="true" preserveRatio="true">
-                <image>
-                    <Image url="@../../images/star1.png" />
-                </image>
-            </ImageView>
         </children>
     </Pane>
 </HBox>
