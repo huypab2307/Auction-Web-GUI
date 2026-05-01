@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AuctionServer",
+            "request": "launch",
+            "mainClass": "Socket.AuctionServer",
+            "projectName": "Auction-Web-GUI_5e1d0955"
+        },
+        {
+            "type": "java",
             "name": "Login",
             "request": "launch",
             "mainClass": "Login",

@@ -30,7 +30,7 @@
             <font>
                <Font size="17.0" />
             </font></PasswordField>
-            <Button fx:id="loginButton" layoutX="120.0" layoutY="426.0" onAction="#onHandleLogin" prefHeight="48.0" prefWidth="187.0" style="-fx-background-radius: 20;   -fx-background-color: #ff7719" text="Đăng nhập" textFill="white">
+            <Button fx:id="loginButton" disable="true" layoutX="120.0" layoutY="426.0" onAction="#onHandleLogin" prefHeight="48.0" prefWidth="187.0" style="-fx-background-radius: 20;   -fx-background-color: #ff7719" text="Đăng nhập" textFill="white">
                 <font>
                     <Font name="Arial Bold" size="20.0" />
                 </font>
