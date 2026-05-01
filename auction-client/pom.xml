@@ -47,10 +47,21 @@
     <build>
         <!-- PHẦN 1: Cấu hình cho phép FXML nằm chung với file Java -->
         <resources>
-            <resource>
+                <resource>
+                        <directory>src/main/java</directory>
+                        <includes>
+                            <include>**/*.fxml</include>
+                        </includes>
+                    </resource>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                    </resource>
+                    <resource>
                 <directory>src/main/java</directory>
                 <includes>
                     <include>**/*.fxml</include>
+                    <include>**/*.css</include>  <!-- THÊM DÒNG NÀY -->
+                    <include>**/*.png</include>  <!-- Thêm luôn cái này cho ảnh nếu cần -->
                 </includes>
             </resource>
             <resource>

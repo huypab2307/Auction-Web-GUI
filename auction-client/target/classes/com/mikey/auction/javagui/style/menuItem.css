@@ -1,0 +1,47 @@
+
+.menuItem {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.menuItem {
+    -fx-padding: 8 15 8 15;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+}
+
+.menuItem:focused {
+    -fx-background-color: #e3f2fd; /* Màu xanh nhạt Cosmic */
+}
+
+.menuItem .label {
+    -fx-text-fill: #444444;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+.menuItem:focused .label {
+    -fx-text-fill: #1976d2;
+    -fx-font-weight: bold;
+}
+
+.menuItem.separator {
+    -fx-padding: 5 0 5 0;
+}
+.menuItem .separator .line {
+    -fx-border-color: #f0f0f0;
+    -fx-border-width: 1 0 0 0;
+}
+.context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 15; /* Bo tròn mạnh ở đây nè Dương */
+    -fx-border-radius: 15;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    /* Thêm đổ bóng để nhìn nó "nổi" lên trên mặt giao diện */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 4);
+    -fx-padding: 5; /* Tạo khoảng cách giữa viền và nội dung */
+}

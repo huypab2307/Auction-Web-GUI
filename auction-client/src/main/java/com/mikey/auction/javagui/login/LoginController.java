@@ -96,7 +96,7 @@ public class LoginController {
                     // Dùng GSON để bóc tách Role
                     JsonObject jsonObject = JsonParser.parseString(userJson).getAsJsonObject();
                     String roleStr = jsonObject.get("role").getAsString();
-
+                    System.out.println("JSON nhận được: " + userJson);
                     User user = null;
                     if ("ADMIN".equals(roleStr)) {
                         user = gson.fromJson(userJson, Admin.class); 
