@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<VBox prefWidth="250.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-padding: 0 0 15 0;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.mainmenu.ItemController">
+    <children>
+        <StackPane alignment="TOP_LEFT">
+            <children>
+                <ImageView fx:id="itemImage" fitHeight="140.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/earth.png" />
+                    </image>
+                    <clip>
+                        <Rectangle arcHeight="30" arcWidth="30" height="140" width="250" />
+                    </clip>
+                </ImageView>
+                <Label fx:id="type" style="-fx-background-color: #00acff; -fx-text-fill: white; -fx-padding: 2 10; -fx-background-radius: 5;" text="type">
+                    <StackPane.margin><Insets left="10" top="10" /></StackPane.margin>
+                </Label>
+            </children>
+        </StackPane>
+
+        <VBox spacing="5.0" style="-fx-padding: 0 15 0 15;">
+            <children>
+                <Label fx:id="itemName" style="-fx-font-weight: bold; -fx-font-size: 14;" text="tên sản phẩm" wrapText="true" />
+                <Label fx:id="sellerName" style="-fx-text-fill: gray; -fx-font-size: 11;" text="người bán" />
+
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label fx:id="curPrice" style="-fx-font-weight: bold; -fx-font-size: 16; -fx-text-fill: #2575fc;" text="50.000đ" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                      <Label fx:id="date" text="date" textFill="#797676">
+                         <font>
+                            <Font size="13.0" />
+                         </font>
+                      </Label>
+                    </children>
+                </HBox>
+
+                <Button fx:id="showDetailButton" maxWidth="Infinity" onAction="#showDetailHandle" style="-fx-background-color: linear-gradient(to right, #6a11cb, #2575fc); -fx-text-fill: white; -fx-background-radius: 10;" text="Chi tiết">
+                    <VBox.margin>
+                        <Insets top="10" />
+                    </VBox.margin>
+                    <font>
+                        <Font size="15.0" />
+                    </font>
+                </Button>
+            </children>
+        </VBox>
+    </children>
+</VBox>

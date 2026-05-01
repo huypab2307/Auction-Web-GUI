@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.login.LoginController">
+    <AnchorPane prefHeight="800.0" prefWidth="508.0" style="-fx-background-color: white" BorderPane.alignment="CENTER">
+        <children>
+            <Label layoutX="57.0" layoutY="207.0" prefHeight="36.0" prefWidth="232.0" text="Đăng nhập" textFill="#ff7719">
+                <font>
+                    <Font name="Arial Bold" size="42.0" />
+                </font>
+            </Label>
+            <Label layoutX="83.0" layoutY="489.0" prefHeight="21.0" prefWidth="216.0" text="chưa có tài khoản? " textFill="black">
+                <font>
+                    <Font name="Arial" size="17.0" />
+                </font>
+            </Label>
+            <Hyperlink layoutX="230.0" layoutY="486.0" onAction="#onRegisterHandle" text="Đăng ký ngay">
+                <font>
+                    <Font name="Arial" size="17.0" />
+                </font></Hyperlink>
+            <TextField fx:id="username" layoutX="57.0" layoutY="285.0" onKeyReleased="#onKeyReleased" prefHeight="48.0" prefWidth="313.0" promptText="username" style="-fx-background-color: white;                                 -fx-border-radius: 20;                                 -fx-border-color: gray">
+            <font>
+               <Font size="17.0" />
+            </font></TextField>
+            <PasswordField fx:id="password" layoutX="57.0" layoutY="344.0" onKeyReleased="#onKeyReleased" prefHeight="48.0" prefWidth="313.0" promptText="password" style="-fx-background-color: white;                                 -fx-border-radius: 20;                                 -fx-border-color: gray">
+            <font>
+               <Font size="17.0" />
+            </font></PasswordField>
+            <Button fx:id="loginButton" layoutX="120.0" layoutY="426.0" onAction="#onHandleLogin" prefHeight="48.0" prefWidth="187.0" style="-fx-background-radius: 20;   -fx-background-color: #ff7719" text="Đăng nhập" textFill="white">
+                <font>
+                    <Font name="Arial Bold" size="20.0" />
+                </font>
+            </Button>
+            <Label fx:id="status" layoutX="67.0" layoutY="401.0" text="tên đăng nhập hoặc mật khẩu không đúng" textFill="white">
+                <font>
+                    <Font name="Arial" size="14.0" />
+                </font>
+            </Label>
+        </children>
+    </AnchorPane>
+    <Pane fx:id="pane" layoutX="-13.0" layoutY="-1.0" prefHeight="800.0" prefWidth="853.0" style="-fx-background-color: black; -fx-background-radius: 20;"> 
+        <children>
+            <ImageView fitHeight="707.0" fitWidth="858.0" preserveRatio="false">
+                <image>
+                    <Image url="@/images/movingSpaceFour.gif" />
+                </image>
+            </ImageView>
+            <Pane prefHeight="800.0" prefWidth="802.0" style="-fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 20;" />
+            <Label layoutX="43.0" layoutY="194.0" text="Cosmic" textFill="#ff735d">
+                <font>
+                    <Font name="Arial Bold" size="60.0" />
+                </font>
+            </Label>
+
+            <Label layoutX="33.0" layoutY="253.0" text="Auction Web gui" textFill="WHITE">
+                <font>
+                    <Font name="Arial Bold" size="70.0" />
+                </font>
+            </Label>
+        </children>
+    </Pane>
+</HBox>

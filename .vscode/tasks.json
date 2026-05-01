@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "MvnRunClient",
+            "type": "process",
+            "command": "mvn",
+            "args": [
+                "javafx:run",
+                "-pl",
+                "auction-client"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

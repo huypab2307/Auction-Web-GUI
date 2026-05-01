@@ -3,24 +3,25 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Login",
+            "name": "Run Client (F5)",
             "request": "launch",
-            "mainClass": "Login",
-            "projectName": "Auction-Web-GUI_2519a4d1"
+            "mainClass": "com.mikey.auction.AppLauncher",
+            "projectName": "auction-client",
+            "cwd": "${workspaceFolder}/auction-client"
         },
         {
             "type": "java",
-            "name": "Login",
+            "name": "Run Server",
             "request": "launch",
-            "mainClass": "Login",
-            "projectName": "Auction-Web-GUI_bb8c2822"
+            "mainClass": "com.mikey.auction.server.MainServer", 
+            "projectName": "auction-server"
         },
         {
             "type": "java",
-            "name": "Chạy App Đấu Giá",
+            "name": "🚀 MAVEN: Run Client",
             "request": "launch",
-            "mainClass": "JavaGui.Main",
-            "vmArgs": "--module-path \"${workspaceFolder}/libs/javafx-sdk-21.0.10/lib\" --add-modules javafx.controls,javafx.fxml"
+            "mainClass": "com.mikey.auction.Foo", 
+            "preLaunchTask": "MvnRunClient"
         }
     ]
 }

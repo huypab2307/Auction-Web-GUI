@@ -1,0 +1,15 @@
+package com.mikey.auction.user;
+
+
+public class Bidder extends User {
+
+    public Bidder(String username, String password, int id) {
+        super(username, password, id,Role.BIDDER);
+    }
+
+    @Override
+    public void showRole() {
+        System.out.println(username + " is a Bidder");
+    }
+
+}

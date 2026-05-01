@@ -1,0 +1,72 @@
+package com.mikey.auction.javagui.login;
+
+import java.io.IOException;
+
+import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.javagui.SceneChanger;
+import com.mikey.auction.user.User;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.paint.Paint;
+import javafx.stage.Stage;
+
+public class LoginController {
+    @FXML
+    private TextField username;
+    @FXML
+    private PasswordField password;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private Label status;
+
+    public void initialize(){
+        loginButton.setDisable(true);
+    }
+    @FXML
+    public void onHandleLogin(ActionEvent e){
+        String text1 = username.getText();
+        String text2 = password.getText();
+        UserDAO userDAO = UserDAO.getInstance();
+        User user = userDAO.login(text1,text2);
+        if (user != null){
+             try{
+                 SceneChanger.getInstance().toMainMenu(user);
+             }
+             catch (Exception ex){
+                System.out.println(ex.getMessage());
+             }
+        }else{
+            loginButton.setDisable(true);
+            username.clear();
+            password.clear();
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
+            status.setTextFill(Paint.valueOf("red"));
+        }
+    }
+    public void onKeyReleased(){
+        String text1 = username.getText();
+        String text2 = password.getText();
+        boolean disable1 = text1.isEmpty() || text1.trim().isEmpty();
+        boolean disable2 = text2.trim().isEmpty() || text2.isEmpty();
+        if (!disable1 || !disable2){ 
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+        }
+        loginButton.setDisable(disable1 || disable2);
+    }
+    public void onRegisterHandle() throws IOException {
+        Parent root = FXMLLoader.load((getClass().getResource("register.fxml")));
+        Stage stage = (Stage) loginButton.getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.show();
+    }
+}

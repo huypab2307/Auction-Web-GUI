@@ -1,0 +1,40 @@
+.buttonStyle {
+    -fx-background-color: transparent;
+    -fx-padding: 10 15;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-text-fill: #555555;
+}
+
+.buttonStyle:hover {
+    -fx-background-color: #f0f0f0;
+    -fx-translate-x: 5;
+}
+
+.buttonStyle:selected {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #1976d2;
+    -fx-font-weight: bold;
+}
+.search-icon-button {
+    -fx-background-color: #2575fc; /* Màu xanh thương hiệu của Dương */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-background-radius: 50; /* Làm nút tròn xoe cho đẹp */
+    -fx-min-width: 34px;
+    -fx-min-height: 34px;
+    -fx-pref-width: 34px;
+    -fx-pref-height: 34px;
+    -fx-cursor: hand;
+    -fx-transition: 0.2s;
+}
+
+.search-icon-button:hover {
+    -fx-background-color: #1a5edb; /* Đậm hơn tí khi di chuột */
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.search-icon-button:pressed {
+    -fx-scale-x: 0.95; /* Hiệu ứng nhấn nút */
+}
