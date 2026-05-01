@@ -16,7 +16,8 @@
         "libs/javafx-sdk-21.0.10/lib/javafx-swt.jar",
         "libs/HikariCP-7.0.2.jar",
         "libs/slf4j-api-2.0.17.jar",
-        "libs/slf4j-simple-2.0.17.jar"
+        "libs/slf4j-simple-2.0.17.jar",
+        "libs/gson-2.10.1.jar"
     ],
     "files.encoding": "utf8",
     "java.debug.settings.vmArgs": "-Dfile.encoding=UTF-8",
