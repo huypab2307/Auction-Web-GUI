@@ -9,8 +9,8 @@ public class AuctionServer {
     private static Set<PrintWriter> clientWriters = new HashSet<>();
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Server is started...");
         ServerSocket ss = new ServerSocket(12345);
+        System.out.println("Server is started...");
 
         try {
             while (true) {
