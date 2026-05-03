@@ -1,8 +1,13 @@
 package com.mikey.auction.javagui.login;
 
-import com.mikey.auction.database.UserDAO;
-import com.mikey.auction.user.User;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,7 +21,6 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.IOException;
 
 
 public class RegisterController {
@@ -29,15 +33,43 @@ public class RegisterController {
     @FXML
     private Label status;
 
+    private Socket socket;
+    private PrintWriter out;
+    private BufferedReader in;
+
     public void initialize(){
         registerButton.setDisable(true);
+        new Thread(() -> {
+            while (true) { 
+                try {
+                    // Kết nối đến Server (đảm bảo Server chạy port 12345)
+                    socket = new Socket("localhost", 12345);
+                    out = new PrintWriter(socket.getOutputStream(), true);
+                    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    
+                    Platform.runLater(() -> {
+                        status.setText("Đã kết nối server");
+                        registerButton.setDisable(false);
+                    });
+                    break; 
+                } catch (IOException e) {
+                    Platform.runLater(() -> status.setText("Không thể kết nối server, thử lại..."));
+                    try {
+                        Thread.sleep(3000); 
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        }).start();
     }
     @FXML
     public void onHandleRegister(ActionEvent e) throws IOException {
         String text1 = username.getText();
         String text2 = password.getText();
-        UserDAO userDAO = UserDAO.getInstance();
-        boolean success = userDAO.register(text1,text2);
+        out.println("REGISTER|" + text1 + "|" + text2);
+        String response = in.readLine();
+        boolean success = "SUCCESS".equals(response);
         if (success){
             status.setText("đăng ký thành công!!");
             status.setTextFill(Paint.valueOf("green"));

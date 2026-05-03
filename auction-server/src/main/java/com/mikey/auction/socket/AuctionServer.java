@@ -1,11 +1,18 @@
 package com.mikey.auction.socket;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader; 
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.gson.Gson;
-import com.mikey.auction.database.UserDAO; 
-import com.mikey.auction.user.User; 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.mikey.auction.socket.Handlers.LoginHandlers;
+import com.mikey.auction.socket.Handlers.RegisterHandlers;
 
 public class AuctionServer {
     // Danh sách lưu trữ tất cả các Client đang kết nối (Thread-safe)
@@ -58,7 +65,9 @@ public class AuctionServer {
 
                     // Xử lý các lệnh từ Client
                     if (message.startsWith("LOGIN|")) {
-                        handleLogin(message);
+                        LoginHandlers.handleLogin(message, out);
+                    }else if (message.startsWith("REGISTER|")) {
+                        RegisterHandlers.handleRegister(message, out);
                     } else if (message.startsWith("BID|") || message.startsWith("CHAT|")) {
                         // Nếu là đặt giá hoặc chat thì gửi cho tất cả
                         broadcast(message);
@@ -71,31 +80,7 @@ public class AuctionServer {
             }
         }
 
-        private void handleLogin(String message) {
-            try {
-                String[] parts = message.split("\\|");
-                if (parts.length >= 3) {
-                    String username = parts[1].trim();
-                    String password = parts[2].trim();
-
-                    // Kiểm tra Database thông qua DAO
-                    User user = UserDAO.getInstance().login(username, password);
-
-                    if (user != null) {
-                        // Gửi phản hồi SUCCESS và chuỗi JSON của User
-                        out.println("SUCCESS");
-                        out.println(gson.toJson(user)); 
-                        System.out.println("[LOGIN SUCCESS] User: " + username);
-                    } else {
-                        out.println("FAIL");
-                        System.out.println("[LOGIN FAIL] User: " + username);
-                    }
-                }
-            } catch (Exception e) {
-                out.println("ERROR");
-                e.printStackTrace();
-            }
-        }
+       
 
         private void broadcast(String msg) {
             synchronized (clientWriters) {
