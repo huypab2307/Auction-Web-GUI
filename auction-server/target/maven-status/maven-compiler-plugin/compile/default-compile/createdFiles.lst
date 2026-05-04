@@ -1,3 +1,4 @@
+com\mikey\auction\socket\Handlers\LoginHandlers.class
 com\mikey\auction\database\UserDAO.class
 com\mikey\auction\factory\FactoryItem.class
 com\mikey\auction\database\MessageDAO.class
@@ -8,6 +9,7 @@ com\mikey\auction\database\VehicleDAO.class
 com\mikey\auction\factory\UserFactory$1.class
 com\mikey\auction\Main.class
 com\mikey\auction\socket\AuctionServer$ClientHandler.class
+com\mikey\auction\socket\Handlers\RegisterHandlers.class
 com\mikey\auction\database\ItemDAO.class
 com\mikey\auction\factory\UserFactory.class
 com\mikey\auction\database\NotificationDAO.class
