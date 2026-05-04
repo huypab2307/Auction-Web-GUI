@@ -1,5 +1,6 @@
 package com.mikey.auction.javagui.seller;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.URL;
 import java.sql.Connection;
@@ -44,6 +45,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
 
 public class SellerController {
+    private List<File> selectedFiles = new ArrayList<>();
     @FXML private ComboBox<String> type;
     @FXML private VBox itemInfo;
     @FXML private TextField itemName;
@@ -111,19 +113,22 @@ public class SellerController {
             preview1.getScene().getWindow()
         );
 
-        if (files == null) return;
+        if (files == null || files.isEmpty()) return;
+        selectedFiles = files;
 
+        for (ImageView view : previewList) {
+            view.setImage(null);
+        }
+
+        int index = 0;
         for (File file : files) {
+            if (index >= previewList.size()) break;
 
             Image image = new Image(file.toURI().toString());
+            previewList.get(index).setImage(image);
+            previewList.get(index).setPreserveRatio(true);
 
-            for (ImageView view : previewList) {
-                if (view.getImage() == null) {
-                    view.setImage(image);
-                    view.setPreserveRatio(true);
-                    break;
-                }
-            }
+            index++;
         }
 
         for (ImageView view : previewList) {
@@ -143,7 +148,12 @@ public class SellerController {
         }
 
         if (selected.equals("Arts")) {
-            String imagePath = "/auction-common/src/main/resources/images/earth.png";
+            String imagePath = null;
+
+            if (selectedFiles != null && !selectedFiles.isEmpty()) {
+                imagePath = saveImage(selectedFiles.get(0)); 
+            }
+
             TextField artistField = (TextField) itemInfo.lookup("#artist");
             TextField yearField = (TextField) itemInfo.lookup("#yearOfcreation");
             TextField dimensionsField = (TextField) itemInfo.lookup("#dimensions");
@@ -171,6 +181,12 @@ public class SellerController {
             }
 
         } else if (selected.equals("Electronics")) {
+            String imagePath = null;
+
+            if (selectedFiles != null && !selectedFiles.isEmpty()) {
+                imagePath = saveImage(selectedFiles.get(0)); 
+            }
+
             TextField brandField = (TextField) itemInfo.lookup("#brand");
             TextField powerField = (TextField) itemInfo.lookup("#power");
             TextField voltageField = (TextField) itemInfo.lookup("#voltage");
@@ -186,7 +202,7 @@ public class SellerController {
             String status = statusField.getText();
             String color = colorField.getText();    
             double weight = Double.parseDouble(weightField.getText());
-            String imagePath = "/auction-common/src/main/resources/images/earth.png";
+
             Electronics electronic = new Electronics(name, description, ItemType.ELECTRONICS, user.getId(), -1, imagePath);
             electronic.setElectronics(brand, power, voltage, current, status, color, weight);
 
@@ -203,7 +219,12 @@ public class SellerController {
             }
 
         } else if (selected.equals("Vehicles")) {
-            String imagePath = "/auction-common/src/main/resources/images/earth.png";
+            String imagePath = null;
+
+            if (selectedFiles != null && !selectedFiles.isEmpty()) {
+                imagePath = saveImage(selectedFiles.get(0)); 
+            }
+
             TextField mileageField = (TextField) itemInfo.lookup("#mileage");
             TextField mFGField = (TextField) itemInfo.lookup("#mFG");
             TextField brandField = (TextField) itemInfo.lookup("#brand");
@@ -235,5 +256,31 @@ public class SellerController {
         }
         
         return -1;
+    }
+
+    private String saveImage(File file) {
+        try {
+            String folder = "..\\auction-common\\src\\main\\resources\\images\\";
+            File dir = new File(folder);
+
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String fileName = System.currentTimeMillis() + "_" + file.getName();
+            File dest = new File(folder + fileName);
+
+            java.nio.file.Files.copy(
+                file.toPath(),
+                dest.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            );
+
+            return "/images/" + fileName;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
