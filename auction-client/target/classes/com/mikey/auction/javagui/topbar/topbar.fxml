@@ -44,7 +44,7 @@
                         </graphic>
                         <items>
                             <MenuItem onAction="#userGuiHandle" styleClass="menuItem" mnemonicParsing="false" text="👤 Thông tin cá nhân" />
-                            <MenuItem styleClass="menuItem" mnemonicParsing="false" text="👤 Đến trang người bán" />
+                            <MenuItem onAction="#sellerGuiHandle" styleClass="menuItem" mnemonicParsing="false" text="👤 Đến trang người bán" />
                             <MenuItem styleClass="menuItem" mnemonicParsing="false" text="👤 lịch sử giao dịch" />
                             <MenuItem styleClass="menuItem" mnemonicParsing="false" text="⚙️ Cài đặt" />
                             <SeparatorMenuItem mnemonicParsing="false" />

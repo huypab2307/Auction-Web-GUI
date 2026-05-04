@@ -1,6 +1,7 @@
 package com.mikey.auction.javagui;
 
 import com.mikey.auction.javagui.mainmenu.AuctionHubController;
+import com.mikey.auction.javagui.seller.SellerController;
 import com.mikey.auction.javagui.auction.AuctionItemController;
 import com.mikey.auction.javagui.dashboard.GeneralController;
 
@@ -74,6 +75,13 @@ public class SceneChanger {
 //            controller.renderAuction();
 //        });
 //    }
+    public void toSellerGui(User user){
+        navigate("seller/seller.fxml", "Seller Dashboard - " + user.getUsername(), loader -> {
+            SellerController controller = loader.getController();
+            controller.setUser(user);
+            controller.loadSellerAuctions();
+        });
+    }
 
     private void navigate(String fxmlPath, String title, ControllerConsumer consumer) {
         try {

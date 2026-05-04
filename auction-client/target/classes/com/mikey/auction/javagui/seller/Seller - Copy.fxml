@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="720" prefWidth="1280"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="JavaGui.Seller.SellerController"
+            style="
+                -fx-background-color: linear-gradient(to bottom right, #eef2ff, #f8fbff);
+            ">
+
+    <top>
+        <fx:include fx:id="topBar" source="../TopBar/topbar.fxml"/>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true"
+                    style="-fx-background-color: transparent;">
+
+            <content>
+
+                <HBox spacing="30" style="-fx-padding: 25;">
+
+                    <!-- LEFT -->
+                    <VBox spacing="25" prefWidth="600">
+
+                        <!-- CARD -->
+                        <VBox spacing="12"
+                              style="
+                                -fx-background-color: white;
+                                -fx-background-radius: 20;
+                                -fx-padding: 18;
+                                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20,0,0,6);
+                              ">
+
+                            <Label text="Thông tin sản phẩm"
+                                   style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
+
+                            <Label text="Tên sản phẩm:"/>
+
+                            <TextField promptText="Nhập tên..."
+                                       style="
+                                         -fx-background-radius: 12;
+                                         -fx-border-radius: 12;
+                                         -fx-border-color: #ddd;
+                                         -fx-padding: 8;
+                                       "/>
+
+                            <Label text="Danh mục"/>
+
+                            <ComboBox fx:id="type"
+                                      onAction="#changeItemInfo"
+                                      style="
+                                        -fx-background-radius: 12;
+                                        -fx-border-radius: 12;
+                                      "/>
+
+                            <Label text="Mô tả:"/>
+
+                            <TextArea prefHeight="120"
+                                      style="
+                                        -fx-background-radius: 12;
+                                        -fx-border-radius: 12;
+                                        -fx-border-color: #ddd;
+                                      "/>
+
+                        </VBox>
+
+
+                        <!-- UPLOAD CARD -->
+                        <VBox spacing="15"
+                              style="
+                                -fx-background-color: white;
+                                -fx-background-radius: 20;
+                                -fx-padding: 18;
+                                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20,0,0,6);
+                              ">
+
+                            <Label text="Hình ảnh sản phẩm"
+                                   style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
+
+                            <Label text="Tải ảnh đẹp để thu hút người mua"
+                                   style="-fx-text-fill: #777;"/>
+
+                            <!-- DROP ZONE PRO -->
+                            <VBox fx:id="dropZone"
+                                  alignment="CENTER"
+                                  spacing="10"
+                                  style="
+                                    -fx-background-color: linear-gradient(to bottom, #ffffff, #eef2ff);
+                                    -fx-border-color: #8e8eff;
+                                    -fx-border-width: 2;
+                                    -fx-border-radius: 20;
+                                    -fx-border-style: segments(14, 6);
+                                    -fx-background-radius: 20;
+                                    -fx-padding: 35;
+                                    -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.25), 25,0,0,8);
+                                  ">
+
+                                <Label text="⬆"
+                                       style="
+                                         -fx-font-size: 48px;
+                                         -fx-text-fill: #6c5ce7;
+                                       "/>
+
+                                <Label text="Kéo thả hình ảnh vào đây"
+                                       style="-fx-font-size: 14px;"/>
+
+                                <Label text="hoặc"
+                                       style="-fx-text-fill: #aaa;"/>
+
+                                <Button text="Chọn hình ảnh"
+                                        onAction="#handleChooseImage"
+                                        style="
+                                          -fx-background-color: linear-gradient(to right, #6c5ce7, #8e7cff);
+                                          -fx-text-fill: white;
+                                          -fx-background-radius: 25;
+                                          -fx-padding: 10 25;
+                                          -fx-font-weight: bold;
+                                          -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.4), 12,0,0,4);
+                                        "/>
+
+                            </VBox>
+
+                            <!-- PREVIEW -->
+                            <HBox spacing="12" alignment="CENTER">
+
+                                <ImageView fx:id="preview1" fitHeight="75" fitWidth="75"
+                                           style="-fx-border-color: #ddd; -fx-border-radius: 12;"/>
+
+                                <ImageView fx:id="preview2" fitHeight="75" fitWidth="75"
+                                           style="-fx-border-color: #ddd; -fx-border-radius: 12;"/>
+
+                                <ImageView fx:id="preview3" fitHeight="75" fitWidth="75"
+                                           style="-fx-border-color: #ddd; -fx-border-radius: 12;"/>
+
+                                <ImageView fx:id="preview4" fitHeight="75" fitWidth="75"
+                                           style="-fx-border-color: #ddd; -fx-border-radius: 12;"/>
+
+                                <ImageView fx:id="preview5" fitHeight="75" fitWidth="75"
+                                           style="-fx-border-color: #ddd; -fx-border-radius: 12;"/>
+
+                            </HBox>
+
+                        </VBox>
+
+                    </VBox>
+
+
+                    <!-- RIGHT -->
+                    <VBox spacing="25" prefWidth="600">
+
+                        <!-- DETAIL CARD -->
+                        <VBox spacing="12"
+                              style="
+                                -fx-background-color: white;
+                                -fx-background-radius: 20;
+                                -fx-padding: 18;
+                                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20,0,0,6);
+                              ">
+
+                            <Label text="Thông tin chi tiết"
+                                   style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
+
+                            <GridPane hgap="12" vgap="12">
+
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50"/>
+                                    <ColumnConstraints percentWidth="50"/>
+                                </columnConstraints>
+
+                                <Label text="Nghệ sĩ:"/>
+                                <Label text="Năm:" GridPane.columnIndex="1"/>
+
+                                <TextField style="-fx-border-radius: 10;" GridPane.rowIndex="1"/>
+                                <TextField style="-fx-border-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                <Label text="Kích thước:" GridPane.rowIndex="2"/>
+                                <Label text="Chất liệu:" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                <TextField style="-fx-border-radius: 10;" GridPane.rowIndex="3"/>
+                                <TextField style="-fx-border-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                            </GridPane>
+
+                        </VBox>
+
+
+                        <!-- AUCTION CARD -->
+                        <VBox spacing="15"
+                              style="
+                                -fx-background-color: white;
+                                -fx-background-radius: 20;
+                                -fx-padding: 18;
+                                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20,0,0,6);
+                              ">
+
+                            <Label text="Cài đặt đấu giá"
+                                   style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
+
+                            <GridPane hgap="12" vgap="12">
+
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50"/>
+                                    <ColumnConstraints percentWidth="50"/>
+                                </columnConstraints>
+
+                                <VBox>
+                                    <Label text="Giá"/>
+                                    <TextField/>
+                                </VBox>
+
+                                <VBox GridPane.columnIndex="1">
+                                    <Label text="Bước giá"/>
+                                    <TextField/>
+                                </VBox>
+
+                                <VBox GridPane.rowIndex="1">
+                                    <Label text="Bắt đầu"/>
+                                    <DatePicker/>
+                                </VBox>
+
+                                <VBox GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <Label text="Kết thúc"/>
+                                    <DatePicker/>
+                                </VBox>
+
+                            </GridPane>
+
+                            <Button text="Đăng sản phẩm"
+                                    style="
+                                      -fx-background-color: linear-gradient(to right, #6c5ce7, #8e7cff);
+                                      -fx-text-fill: white;
+                                      -fx-background-radius: 25;
+                                      -fx-padding: 12 30;
+                                      -fx-font-weight: bold;
+                                      -fx-effect: dropshadow(gaussian, rgba(108,92,231,0.4), 15,0,0,5);
+                                    "/>
+
+                        </VBox>
+
+                    </VBox>
+
+                </HBox>
+
+            </content>
+
+        </ScrollPane>
+    </center>
+
+</BorderPane>
