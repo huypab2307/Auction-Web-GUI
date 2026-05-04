@@ -38,7 +38,7 @@
                               
                               <VBox spacing="5.0" styleClass="input-group">
                                  <Label styleClass="field-label" text="Tên sản phẩm:" />
-                                 <TextField prefHeight="35.0" prefWidth="372.0" promptText="Nhập tên vật phẩm đấu giá" styleClass="input-field" />
+                                 <TextField fx:id="itemName" prefHeight="35.0" prefWidth="372.0" promptText="Nhập tên vật phẩm đấu giá" styleClass="input-field" />
                               </VBox>
                               
                               <VBox spacing="5.0" styleClass="input-group">
@@ -56,7 +56,7 @@
                               
                               <VBox spacing="5.0" styleClass="input-group">
                                  <Label styleClass="field-label" text="Mô tả:" />
-                                 <TextArea prefHeight="120.0" prefWidth="450.0" promptText="Mô tả chi tiết về sản phẩm..." styleClass="input-area" wrapText="true" />
+                                 <TextArea fx:id="itemDescription" prefHeight="120.0" prefWidth="450.0" promptText="Mô tả chi tiết về sản phẩm..." styleClass="input-area" wrapText="true" />
                               </VBox>
                            </children>
                         </VBox>
@@ -195,7 +195,7 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </VBox.margin>
                               </GridPane>
-                              <Button fx:id="submit" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" styleClass="btn-submit" text="Submit" />
+                              <Button fx:id="submit" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="40.0" prefWidth="150.0" styleClass="btn-submit" text="Submit" />
                            </children>
                            <VBox.margin>
                               <Insets top="10.0" />

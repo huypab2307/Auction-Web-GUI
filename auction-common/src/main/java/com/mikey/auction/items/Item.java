@@ -44,6 +44,7 @@ public abstract class Item {
     public String getImagePath(){
         return imagePath;
     }
+
     public abstract Map<String,String> getSpecificInfo();
 
 }

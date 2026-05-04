@@ -24,25 +24,25 @@
             <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
                <children>
                   <Label styleClass="field-label" text="Nghệ sĩ:" />
-                  <TextField prefHeight="35.0" promptText="Nhập tên nghệ sĩ" styleClass="input-field" />
+                  <TextField fx:id="artist" prefHeight="35.0" promptText="Nhập tên nghệ sĩ" styleClass="input-field" />
                </children>
             </VBox>
             <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
                <children>
                   <Label styleClass="field-label" text="Năm sáng tác:" />
-                  <TextField prefHeight="35.0" promptText="Nhập năm sáng tác" styleClass="input-field" />
+                  <TextField fx:id="yearOfcreation" prefHeight="35.0" promptText="Nhập năm sáng tác" styleClass="input-field" />
                </children>
             </VBox>
             <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
                <children>
                   <Label styleClass="field-label" text="Kích thước:" />
-                  <TextField prefHeight="35.0" promptText="VD: 23x29" styleClass="input-field" />
+                  <TextField fx:id="dimensions" prefHeight="35.0" promptText="VD: 23x29" styleClass="input-field" />
                </children>
             </VBox>
             <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <children>
                   <Label styleClass="field-label" text="Chất liệu:" />
-                  <TextField prefHeight="35.0" promptText="VD: Gỗ" styleClass="input-field" />
+                  <TextField fx:id="medium" prefHeight="35.0" promptText="VD: Gỗ" styleClass="input-field" />
                </children>
             </VBox>
          </children>

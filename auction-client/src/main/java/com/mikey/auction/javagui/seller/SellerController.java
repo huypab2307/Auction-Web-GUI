@@ -14,6 +14,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -23,7 +24,14 @@ import java.io.IOException;
 import java.util.ResourceBundle;
 
 import com.mikey.auction.database.ArtsDAO;
+import com.mikey.auction.items.Arts;
+import com.mikey.auction.items.Electronics;
+import com.mikey.auction.items.ItemType;
 import com.mikey.auction.user.User;
+import com.mikey.auction.javagui.SceneChanger;
+import com.mikey.auction.database.ElectronicsDAO;
+import com.mikey.auction.database.VehicleDAO;
+import com.mikey.auction.items.Vehicle;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -33,23 +41,19 @@ import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
 
 public class SellerController {
-    @FXML
-    private ComboBox<String> type;
-    @FXML
-    private VBox itemInfo;
+    @FXML private ComboBox<String> type;
+    @FXML private VBox itemInfo;
+    @FXML private TextField itemName;
+    @FXML private TextArea itemDescription;
 
     @FXML private ImageView preview1;
     @FXML private ImageView preview2;
     @FXML private ImageView preview3;
     @FXML private ImageView preview4;
     @FXML private ImageView preview5;
-
-    @FXML private TextField artist;
-    @FXML private TextField yearOfcreation;
-    @FXML private TextField dimensions;
-    @FXML private TextField medium;
 
     @FXML
     private Button submit;
@@ -75,11 +79,11 @@ public class SellerController {
         String fxmlPath = null;
 
         if (selected.equals("Arts")) {
-            fxmlPath = "/javagui/seller/Arts.fxml";
+            fxmlPath = "Arts.fxml";
         } else if (selected.equals("Electronics")) {
-            fxmlPath = "/javagui/seller/Electronics.fxml";
+            fxmlPath = "Electronics.fxml";
         } else if (selected.equals("Vehicles")) {
-            fxmlPath = "/javagui/seller/Vehicles.fxml";
+            fxmlPath = "Vehicles.fxml";
         }
 
         if (fxmlPath == null) return;
@@ -129,33 +133,107 @@ public class SellerController {
 
     @FXML
     private int handleSubmit(ActionEvent e) {
-        if (type.getValue() == null) return -1;
-        String itemType = type.getValue();
-        if (itemType.equals("Arts")) {
-            try {
-                Connection conn = ArtsDAO.getInstance().getConnect();
-                String sql = "INSERT INTO arts (itemId, artist, yearOfcreation, dimensions, medium) VALUES (?, ?, ?, ?, ?)";
-                PreparedStatement pr;
-                try {
-                    pr = conn.prepareStatement(sql);
-                    pr.setInt(1, 11);
-                    pr.setString(2, artist.getText());
-                    pr.setString(3, yearOfcreation.getText());
-                    pr.setString(4, dimensions.getText());
-                    pr.setString(5, medium.getText());
-                    pr.executeUpdate();
-                    int res = pr.executeUpdate();
-                    return res;
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
+        String name = itemName.getText();
+        String description = itemDescription.getText();
+        String selected = type.getValue();
+        
+        if (selected == null) {
+            System.out.println("Vui lòng chọn loại sản phẩm.");
+            return -1;
+        }
+
+        if (selected.equals("Arts")) {
+            String imagePath = "/auction-common/src/main/resources/images/earth.png";
+            TextField artistField = (TextField) itemInfo.lookup("#artist");
+            TextField yearField = (TextField) itemInfo.lookup("#yearOfcreation");
+            TextField dimensionsField = (TextField) itemInfo.lookup("#dimensions");
+            TextField mediumField = (TextField) itemInfo.lookup("#medium");
+
+            String artistStr = artistField.getText();
+            int year = Integer.parseInt(yearField.getText());
+            String dim = dimensionsField.getText();
+            String med = mediumField.getText();
+
+            Arts art = new Arts(name, description, ItemType.ARTS, user.getId(), -1, imagePath);
+            art.setArts(artistStr, year, dim, med);
+
+            ArtsDAO artsDAO = ArtsDAO.getInstance();
+            try (Connection conn = artsDAO.getConnect()) {
+                int itemId = artsDAO.createItem(conn, art);
+                if (itemId != -1) {
+                    conn.commit();
+                    System.out.println("Tạo tác phẩm 1 thành công!");
+                    return itemId;
                 }
-            } catch (SQLException e1) {
-                e1.printStackTrace();
+            } catch (SQLException ex) {
+                System.out.println("Lỗi khi tạo tác phẩm: " + ex.getMessage());
+                ex.printStackTrace();
             }
-            finally {
-                return 1;
+
+        } else if (selected.equals("Electronics")) {
+            TextField brandField = (TextField) itemInfo.lookup("#brand");
+            TextField powerField = (TextField) itemInfo.lookup("#power");
+            TextField voltageField = (TextField) itemInfo.lookup("#voltage");
+            TextField currentField = (TextField) itemInfo.lookup("#current");
+            TextField statusField = (TextField) itemInfo.lookup("#status");
+            TextField colorField = (TextField) itemInfo.lookup("#color");
+            TextField weightField = (TextField) itemInfo.lookup("#weight");
+
+            String brand = brandField.getText();
+            int power = Integer.parseInt(powerField.getText());
+            double voltage = Double.parseDouble(voltageField.getText());
+            double current = Double.parseDouble(currentField.getText());
+            String status = statusField.getText();
+            String color = colorField.getText();    
+            double weight = Double.parseDouble(weightField.getText());
+            String imagePath = "/auction-common/src/main/resources/images/earth.png";
+            Electronics electronic = new Electronics(name, description, ItemType.ELECTRONICS, user.getId(), -1, imagePath);
+            electronic.setElectronics(brand, power, voltage, current, status, color, weight);
+
+            ElectronicsDAO electronicsDAO = ElectronicsDAO.getInstance();
+            try (Connection conn = electronicsDAO.getConnect()) {
+                int itemId = electronicsDAO.createItem(conn, electronic);
+                if (itemId != -1) {
+                    System.out.println("Tạo sản phẩm điện tử thành công!");
+                    return itemId;
+                }
+            } catch (SQLException ex) {
+                System.out.println("Lỗi khi tạo sản phẩm điện tử: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+
+        } else if (selected.equals("Vehicles")) {
+            String imagePath = "/auction-common/src/main/resources/images/earth.png";
+            TextField mileageField = (TextField) itemInfo.lookup("#mileage");
+            TextField mFGField = (TextField) itemInfo.lookup("#mFG");
+            TextField brandField = (TextField) itemInfo.lookup("#brand");
+            TextField modelField = (TextField) itemInfo.lookup("#model");
+            TextField trimField = (TextField) itemInfo.lookup("#trim");
+            TextField titleStatusField = (TextField) itemInfo.lookup("#titleStatus");
+
+            double mileage = Double.parseDouble(mileageField.getText());
+            int mFG = Integer.parseInt(mFGField.getText());
+            String brand = brandField.getText();
+            String model = modelField.getText();
+            String trim = trimField.getText();
+            String titleStatus = titleStatusField.getText();
+
+            Vehicle vehicle = new Vehicle(name, description, ItemType.VEHICLE, user.getId(), -1, imagePath);
+            vehicle.setVehicle(mileage, mFG, brand, model, trim, titleStatus);
+
+            VehicleDAO vehicleDAO = VehicleDAO.getInstance();
+            try (Connection conn = vehicleDAO.getConnect()) {
+                int itemId = vehicleDAO.createItem(conn, vehicle);
+                if (itemId != -1) {
+                    System.out.println("Tạo phương tiện thành công!");
+                    return itemId;
+                }
+            } catch (SQLException ex) {
+                System.out.println("Lỗi khi tạo phương tiện: " + ex.getMessage());
+                ex.printStackTrace();
             }
         }
-        return 1;
+        
+        return -1;
     }
 }
