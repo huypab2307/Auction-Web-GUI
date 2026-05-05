@@ -48,7 +48,7 @@
                                        <FXCollections fx:factory="observableArrayList">
                                           <String fx:value="Arts" />
                                           <String fx:value="Electronics" />
-                                          <String fx:value="Vehicles" />
+                                          <String fx:value="Vehicle" />
                                        </FXCollections>
                                     </items>
                                  </ComboBox>

@@ -48,10 +48,10 @@ public class Arts extends Item {
     @Override
     public Map<String, String> getSpecificInfo() {
         Map<String, String> info = new LinkedHashMap<>();
-        info.put("Tác giả", artist);
-        info.put("Năm sáng tác", String.valueOf(yearOfcreation));
-        info.put("Kích thước", dimensions);
-        info.put("Chất liệu", medium);
+        info.put("artist", artist);
+        info.put("yearOfcreation", String.valueOf(yearOfcreation));
+        info.put("dimensions", dimensions);
+        info.put("medium", medium);
         return info;
     }
 }

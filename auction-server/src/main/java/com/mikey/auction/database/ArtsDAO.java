@@ -14,7 +14,6 @@ public class ArtsDAO extends ItemDAO {
 
     public int createItem(Connection connection, Arts art) throws SQLException {
         String sqlArts = "INSERT INTO arts(itemId, artist, yearOfcreation, dimensions, medium) VALUES(?, ?, ?, ?, ?)";
-        connection.setAutoCommit(false);
         try {
             int generatedId = insertBaseItem(connection, art, "ARTS", art.getImagePath());
 

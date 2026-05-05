@@ -1,4 +1,4 @@
-package com.mikey.auction.factory;
+package com.mikey.auction.manager;
 
 
 import com.mikey.auction.database.ArtsDAO;
@@ -9,9 +9,15 @@ import com.mikey.auction.items.*;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class FactoryItem {
+public class ItemManager {
+    private static final ItemManager instance = new ItemManager();
+    private ItemManager() {
+    }
+    public static ItemManager getInstance() {
+        return instance;
+    }
 
-    public static Item createBuilder(ItemType type, String name, String desc, int sellerId, String imagePath) {
+    public Item createItem(ItemType type, String name, String desc, int sellerId, String imagePath) {
         switch (type.name()) {
             case ("ARTS"):
                 return new Arts(name, desc, type, -1,sellerId, imagePath);
@@ -24,7 +30,7 @@ public class FactoryItem {
         }
         throw new IllegalArgumentException("type không được hỗ trợ ");
     }
-    public static Item findItemById(ItemType type, int id) throws SQLException{
+    public Item findItemById(ItemType type, int id) throws SQLException{
         switch (type.name()) {
             case ("ARTS"):
                 return ArtsDAO.getInstance().findById(id);
