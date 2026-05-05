@@ -1,0 +1,63 @@
+/* --- TRẠNG THÁI ĐÃ ĐỌC (Màu trắng pastel nhẹ, bóng đổ êm ái) --- */
+.notification-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    /* Bóng đổ xám pastel rất nhẹ tạo cảm giác nổi 3D */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.05), 10, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.notification-card:hover {
+    -fx-background-color: linear-gradient(to right bottom, #ffffff, #f8fafc);
+    -fx-effect: dropshadow(three-pass-box, rgba(37, 117, 252, 0.15), 12, 0, 0, 4);
+}
+
+/* --- TRẠNG THÁI CHƯA ĐỌC (Nền pastel xanh tím, chữ đậm, viền phát sáng) --- */
+.notification-card-unread {
+    /* Nền Gradient Pastel (từ xanh nhạt sang tím nhạt) */
+    -fx-background-color: linear-gradient(to right bottom, #f0f4ff, #e6eeff);
+    -fx-background-radius: 12;
+    /* Hiệu ứng bóng phát sáng Neon Glow màu xanh dương nhạt */
+    -fx-effect: dropshadow(three-pass-box, rgba(37, 117, 252, 0.35), 15, 0.1, 0, 0);
+    -fx-cursor: hand;
+}
+
+.notification-card-unread:hover {
+    -fx-background-color: linear-gradient(to right bottom, #e6eeff, #dbe6ff);
+    -fx-effect: dropshadow(three-pass-box, rgba(37, 117, 252, 0.5), 20, 0.2, 0, 0);
+}
+
+/* --- CHỮ NỘI DUNG --- */
+.notification-text {
+    -fx-fill: #475569; /* Màu xám đen, chống mỏi mắt */
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Chữ in đậm dành riêng cho tin chưa đọc */
+.text-unread {
+    -fx-font-weight: bold;
+    -fx-fill: #0f172a; /* Màu đen sắc nét hơn */
+}
+
+/* --- CHỮ THỜI GIAN --- */
+.notification-time {
+    -fx-text-fill: #94a3b8; /* Xám bạc */
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+}
+
+/* --- CHẤM XANH NEON BÁO CHƯA ĐỌC --- */
+.unread-dot {
+    -fx-fill: #00e5ff; /* Cyan rực rỡ */
+    /* Phát sáng mạnh xung quanh chấm xanh */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 229, 255, 0.8), 8, 0.5, 0, 0);
+}
+
+/* Xóa bỏ màu nền xanh lè mặc định của JavaFX khi di chuột vào Menu */
+.menu-item:focused, 
+.menu-item:hover, 
+.custom-menu-item:focused, 
+.custom-menu-item:hover {
+    -fx-background-color: transparent;
+}

@@ -1,0 +1,91 @@
+/* Tổng thể khung chứa bảng thông báo (ContextMenu/VBox) */
+.context-menu {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: #f0f2f5;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 10);
+    -fx-padding: 5;
+}
+
+/* Từng dòng thông báo */
+.notification-item {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-margin: 2 5;
+    -fx-padding: 12 15;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+/* Hiệu ứng khi di chuột qua - Màu Pastel Blue cực nhẹ */
+.notification-item:hover {
+    -fx-background-color: #f0f7ff;
+    -fx-translate-x: 3; /* Nhích nhẹ sang phải khi hover */
+}
+
+/* Trạng thái chưa đọc (isChecked = 0) - Màu Pastel lãng mạn */
+.notification-unread {
+    -fx-background-color: #f4f8ff; /* Xanh pastel rất nhạt */
+    -fx-border-color: #e1eeff;
+    -fx-border-width: 0 0 0 4; /* Vạch xanh bên trái để nhấn mạnh */
+    -fx-border-radius: 0;
+}
+
+/* Định dạng nội dung tin nhắn */
+.notification-text {
+    -fx-font-family: "Segoe UI", Tahoma;
+    -fx-font-size: 13px;
+    -fx-text-fill: #4a4a4a;
+}
+
+/* Làm nổi bật tên người và sản phẩm trong TextFlow */
+.text-bold-blue {
+    -fx-font-weight: bold;
+    -fx-fill: #5da2ff; /* Màu xanh Pastel Blue */
+}
+
+.text-bold {
+    -fx-font-weight: bold;
+    -fx-fill: #555555;
+}
+
+/* Định dạng thời gian (createdAt) */
+.notification-time {
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #b0b0b0;
+    -fx-padding: 2 0 0 0;
+}
+
+/* Dấu chấm xanh báo hiệu chưa đọc */
+.unread-dot {
+    -fx-fill: #89cff0; /* Baby Blue */
+    -fx-effect: dropshadow(three-pass-box, rgba(137, 207, 240, 0.4), 5, 0, 0, 0);
+}
+
+/* Tùy chỉnh ScrollPane cho mượt */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-viewport-background-color: transparent;
+}
+
+.scroll-pane .thumb {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 10;
+}
+
+/* Hiệu ứng khi di chuột qua thông báo bình thường (Đã đọc) */
+.notification-item:hover {
+    -fx-background-color: #e2efff; /* Xanh Pastel đậm hơn một chút */
+    -fx-translate-x: 3; 
+    -fx-effect: dropshadow(three-pass-box, rgba(93, 162, 255, 0.15), 5, 0, 0, 2); /* Thêm viền bóng xanh nhẹ cho nổi bật */
+}
+
+/* Hiệu ứng khi di chuột qua thông báo CHƯA ĐỌC */
+.notification-unread:hover {
+    -fx-background-color: #d4e7ff; /* Đậm màu hơn hẳn để Huy dễ chú ý */
+    -fx-translate-x: 3;
+    -fx-border-color: #89cff0; /* Vạch trái cũng đổi màu đậm hơn */
+    -fx-border-width: 0 0 0 4;
+}

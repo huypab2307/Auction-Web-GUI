@@ -6,8 +6,10 @@ import com.mikey.auction.auction.Message;
 import com.mikey.auction.auction.Notifications;
 import com.mikey.auction.database.MessageDAO;
 import com.mikey.auction.database.NotificationDAO;
+import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.User;
+import com.mysql.cj.jdbc.exceptions.SQLError;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,7 +25,7 @@ public class NotificationManager {
         NotificationDAO notification = NotificationDAO.getInstance();
         try(Connection connection = notification.getConnect()){
             connection.setAutoCommit(false);
-            ArrayList<Notifications> notifications = notification.checkNotifications(connection, user.getId(), false);
+            ArrayList<Notifications> notifications = notification.checkNotifications(connection, user.getId());
             notifications.forEach(s -> s.readNotification());
             notification.markAllAsRead(connection, user.getId());
             connection.commit();
@@ -31,7 +33,7 @@ public class NotificationManager {
             System.out.println(ex.getMessage());
         }
     }
-    public Notifications subscribeAuction(Connection connection, Auction auction, Bidder bidder) throws SQLException {
+    public Notifications subscribeAuction(Connection connection, AuctionInfo auction, Bidder bidder) throws SQLException {
         NotificationDAO notificationDAO = NotificationDAO.getInstance();
         Notifications notification = notificationDAO.subscribeAuction(connection, auction, bidder);
         ArrayList<Integer> log = notificationDAO.findNotificationList(connection, auction.getId());
@@ -78,4 +80,22 @@ public class NotificationManager {
         }
         return false;
     }
+    public List<Notifications> findNotififications(int userId){
+        NotificationDAO notificationDAO = NotificationDAO.getInstance();
+        try(Connection connection = notificationDAO.getConnect()) {
+            connection.setAutoCommit(false);
+            ArrayList<Notifications> list = notificationDAO.checkNotifications(connection, userId);
+            if (list != null && !list.isEmpty()) {
+                notificationDAO.markAllAsRead(connection, userId);
+            }
+            connection.commit();
+            return list;
+            
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
 }
