@@ -10,7 +10,11 @@ import com.mikey.auction.user.Seller;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 
 public class AuctionManager {
     private static final AuctionManager instance = new AuctionManager();
@@ -18,11 +22,8 @@ public class AuctionManager {
     public static AuctionManager getInstance(){
         return instance;
     }
-   public void uploadItem(Item item, double price, double stepPrice, int durations, Seller seller) {
-       if (seller.getRole() != Role.SELLER) {
-           System.out.println("Lỗi: Người dùng không có quyền bán!");
-           return;
-       }
+   public void uploadItem(Item item, double price, double stepPrice, LocalDateTime startTime, LocalDateTime endTime) {
+
        if (price <= 0 || stepPrice <= 0 || stepPrice > price) {
            System.out.println("Lỗi: Giá khởi điểm và bước giá không hợp lệ!");
            return;
@@ -30,8 +31,9 @@ public class AuctionManager {
 
        try (Connection connection = AuctionDAO.getInstance().getConnect()) {
            connection.setAutoCommit(false);
+           Item createdItem = ItemManager.getInstance().uploadItem(connection, item);
 
-           if (AuctionDAO.getInstance().createAuction(connection, item.getId(), item.getSellerId(), price, stepPrice, durations)) {
+           if (AuctionDAO.getInstance().createAuction(connection, createdItem.getId(), createdItem.getSellerId(), price, stepPrice, startTime, endTime)) {
                connection.commit();
            } else {
                connection.rollback();

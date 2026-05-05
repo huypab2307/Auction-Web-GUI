@@ -163,31 +163,31 @@
                                     <VBox alignment="CENTER_LEFT" spacing="5">
                                        <children>
                                           <Label alignment="CENTER" contentDisplay="CENTER" styleClass="field-label" text="Giá khởi điểm:" />
-                                          <TextField prefHeight="35.0" promptText="Nhập giá khởi điểm" styleClass="input-field" />
+                                          <TextField fx:id="price" prefHeight="35.0" promptText="Nhập giá khởi điểm" styleClass="input-field" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.rowIndex="1">
                                        <children>
                                           <Label contentDisplay="TOP" prefHeight="26.0" prefWidth="209.0" styleClass="field-label" text="Thời gian bắt đầu:" />
-                                          <DatePicker prefHeight="35.0" prefWidth="385.0" promptText="Chọn ngày bắt đầu" styleClass="input-date" />
+                                          <DatePicker fx:id="startTime" prefHeight="35.0" prefWidth="385.0" promptText="Chọn ngày bắt đầu" styleClass="input-date" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="Thời gian kết thúc:" />
-                                          <DatePicker prefHeight="35.0" prefWidth="297.0" promptText="Chọn ngày kết thúc" styleClass="input-date" />
+                                          <DatePicker fx:id="endTime" prefHeight="35.0" prefWidth="297.0" promptText="Chọn ngày kết thúc" styleClass="input-date" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.columnIndex="1">
                                        <children>
                                           <Label alignment="TOP_LEFT" styleClass="field-label" text="Bước giá:" />
-                                          <TextField prefHeight="35.0" promptText="Nhập bước giá" styleClass="input-field" />
+                                          <TextField fx:id="stepPrice" prefHeight="35.0" promptText="Nhập bước giá" styleClass="input-field" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.rowIndex="2">
                                        <children>
                                           <Label alignment="TOP_LEFT" styleClass="field-label" text="Mức giá cuối:" />
-                                          <TextField prefHeight="35.0" promptText="Nhập mức giá cuối" styleClass="input-field" />
+                                          <TextField fx:id="finalPrice" prefHeight="35.0" promptText="Nhập mức giá cuối" styleClass="input-field" />
                                        </children>
                                     </VBox>
                                  </children>

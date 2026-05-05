@@ -61,21 +61,22 @@ public class SceneChanger {
         });
     }
     public void toUserGui(User user){
+        if (user == null) {
+            toLogin();
+            return;
+        }
         navigate("dashboard/general.fxml", "Dashboard - " + user.getUsername(), loader -> {
             GeneralController controller = loader.getController();
             controller.setUser(user);
             controller.generalButton();
         });
     }
-//    public void toAuction(AuctionInfo auctionInfo, User user){
-//        navigate("auction/auctionitem.fxml", "Auction: " + auctionInfo.getItemInfo().getTitle(), loader -> {
-//            AuctionItemController controller = loader.getController();
-//            controller.setUser(user);
-//            controller.setAuctionInfo(auctionInfo);
-//            controller.renderAuction();
-//        });
-//    }
+
     public void toSellerGui(User user){
+        if (user == null) {
+            toLogin();
+            return;
+        }
         navigate("seller/seller.fxml", "Seller Dashboard - " + user.getUsername(), loader -> {
             SellerController controller = loader.getController();
             controller.setUser(user);

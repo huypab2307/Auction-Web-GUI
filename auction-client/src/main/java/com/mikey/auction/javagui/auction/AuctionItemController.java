@@ -2,7 +2,7 @@ package com.mikey.auction.javagui.auction;
 
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
-import com.mikey.auction.factory.FactoryItem;
+import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.RandomHelper;
 import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.user.User;
@@ -28,6 +28,7 @@ import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
 
 import com.mikey.auction.javagui.topbar.TopBarController;
+import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.topbar.SearchListener;
 
 
@@ -105,7 +106,7 @@ public class AuctionItemController implements SearchListener {
             image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
             pane.setStyle("-fx-padding: 40 400 40 100;" + RandomHelper.randomColorPicker());
             attributeBox.getChildren().clear();
-            Map<String, String> itemInfo = FactoryItem.findItemById(itemSummary.getItemType(), itemSummary.getItemId()).getSpecificInfo();
+            Map<String, String> itemInfo = ItemManager.getInstance().findItemById(itemSummary.getItemType(), itemSummary.getItemId()).getSpecificInfo();
             itemInfo.forEach((label, value) -> {
                 attributeBox.getChildren().add(new Label(label + ": " + value));
             });

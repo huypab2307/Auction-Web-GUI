@@ -29,9 +29,28 @@ public class ArtsDAO extends ItemDAO {
             return generatedId;
 
         } catch (SQLException e) {
-            throw new SQLException("không thể thêm arts vào");
+            throw new SQLException("không thể thêm arts vào", e);
         }
     }
+    //     String sqlArts = "INSERT INTO arts(itemId, artist, yearOfcreation, dimensions, medium) VALUES(?, ?, ?, ?, ?)";
+    //     try {
+    //         int generatedId = insertBaseItem(connection, art, "ARTS", art.getImagePath());
+
+    //         try (PreparedStatement pr = connection.prepareStatement(sqlArts)) {
+    //             pr.setInt(1, generatedId);
+    //             pr.setString(2, art.getArtist());
+    //             pr.setInt(3, art.getYearOfcreation());
+    //             pr.setString(4, art.getDimensions());
+    //             pr.setString(5, art.getMedium());
+
+    //             pr.executeUpdate();
+    //         }
+    //         return generatedId;
+
+    //     } catch (SQLException e) {
+    //         throw new SQLException("không thể thêm arts vào");
+    //     }
+    // }
     public Arts findById(int id) throws SQLException {
         HashMap<String, Object> base = fetchBaseItemFields(id);
         if (base == null) return null;

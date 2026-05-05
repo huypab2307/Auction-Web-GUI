@@ -102,9 +102,8 @@ public class AuctionDAO extends BaseDAO {
 //    }
 
 
-    public boolean createAuction(Connection connection, int itemId, int sellerId, double price, double stepPrice, int durations) throws SQLException {
-        LocalDateTime endDateTime = LocalDateTime.now().plusDays(durations);
-        String query = "INSERT INTO auctions(itemId, sellerId, startingPrice, priceStep, curPrice, endTime) VALUES(?,?,?,?,?,?);";
+    public boolean createAuction(Connection connection, int itemId, int sellerId, double price, double stepPrice, LocalDateTime startTime, LocalDateTime endTime) throws SQLException {
+        String query = "INSERT INTO auctions(itemId, sellerId, startingPrice, priceStep, curPrice, startTime, endTime) VALUES(?,?,?,?,?,?,?);";
 
         try (PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1, itemId);
@@ -112,7 +111,8 @@ public class AuctionDAO extends BaseDAO {
             pr.setDouble(3, price);
             pr.setDouble(4, stepPrice);
             pr.setDouble(5, price);
-            pr.setTimestamp(6, Timestamp.valueOf(endDateTime));
+            pr.setTimestamp(6, Timestamp.valueOf(startTime));
+            pr.setTimestamp(7, Timestamp.valueOf(endTime));
             return pr.executeUpdate() > 0;
         }
     }

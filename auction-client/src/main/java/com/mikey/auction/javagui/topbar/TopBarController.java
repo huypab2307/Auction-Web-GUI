@@ -61,10 +61,18 @@ public class TopBarController {
 
     @FXML
     public void userGuiHandle(ActionEvent actionEvent) {
-        SceneChanger.getInstance().toUserGui(user);
+        if (user != null) {
+            SceneChanger.getInstance().toUserGui(user);
+        } else {
+            SceneChanger.getInstance().toLogin();
+        }
     }
     @FXML
     public void sellerGuiHandle(ActionEvent actionEvent) {
-        SceneChanger.getInstance().toSellerGui(user);
+        if (user != null) {
+            SceneChanger.getInstance().toSellerGui(user);
+        } else {
+            SceneChanger.getInstance().toLogin();
+        }
     }
 }
