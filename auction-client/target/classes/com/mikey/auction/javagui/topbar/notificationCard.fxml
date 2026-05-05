@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+
+<HBox fx:id="notificationRoot" alignment="CENTER_LEFT" prefWidth="380.0" spacing="12.0" stylesheets="@../style/Notification.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.topbar.NotificationController">
+   <children>
+      <!-- Ảnh minh họa (Có thể thay đổi dựa trên loại auction) -->
+      <ImageView fx:id="itemImage" fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@/images/earth.png" />
+         </image>
+      </ImageView>
+
+      <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+         <children>
+            <TextFlow fx:id="messageFlow" lineSpacing="2.0">
+               <children>
+                  <!-- Nội dung từ cột message sẽ được phân tách vào đây -->
+                  <Text fx:id="mainContent" styleClass="notification-text" text="Nội dung thông báo..." />
+               </children>
+            </TextFlow>
+            <!-- Dữ liệu từ cột createdAt -->
+            <Label fx:id="timeLabel" styleClass="notification-time" text="2026-04-22 14:42:09" />
+         </children>
+      </VBox>
+
+      <!-- Dựa trên cột isChecked (0: hiện, 1: ẩn) -->
+      <Circle fx:id="unreadDot" fill="#2575fc" radius="5.0" stroke="TRANSPARENT" />
+   </children>
+   <padding>
+      <Insets bottom="12.0" left="15.0" right="15.0" top="12.0" />
+   </padding>
+</HBox>

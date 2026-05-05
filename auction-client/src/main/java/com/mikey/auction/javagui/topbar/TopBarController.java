@@ -1,23 +1,39 @@
 package com.mikey.auction.javagui.topbar;
 
 
+import com.mikey.auction.auction.Notifications;
 import com.mikey.auction.database.AuctionDAO;
+import com.mikey.auction.database.NotificationDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.javagui.SceneChanger;
+import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.user.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.VBox;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.management.Notification;
 
 
 
 public class TopBarController {
     @FXML private TextField searchField;
     @FXML private ToggleButton searchButton;
+    @FXML private MenuButton notification;
+    @FXML private VBox mainContainer;
 
     private SearchListener listener;
     private User user;
@@ -73,6 +89,19 @@ public class TopBarController {
             SceneChanger.getInstance().toSellerGui(user);
         } else {
             SceneChanger.getInstance().toLogin();
+        }
+    }
+
+    @FXML
+    public void showNotification() throws IOException {    
+        System.out.println("huy"); 
+        List<Notifications> list = NotificationManager.getInstance().findNotififications(user.getId());
+        for (Notifications notifications : list){
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
+            Parent root = loader.load();
+            NotificationController notificationController = loader.getController();
+            notificationController.setContent(notifications);
+            mainContainer.getChildren().add(root);
         }
     }
 }

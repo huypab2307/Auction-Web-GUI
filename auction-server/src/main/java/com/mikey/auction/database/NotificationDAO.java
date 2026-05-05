@@ -2,6 +2,7 @@ package com.mikey.auction.database;
 
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.auction.Notifications;
+import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.user.Bidder;
 
 import java.sql.*;
@@ -23,9 +24,9 @@ public class NotificationDAO extends BaseDAO {
             rs.getTimestamp("createdAt").toLocalDateTime()
         );
     }
-    public Notifications subscribeAuction(Connection connection, Auction auction, Bidder bidder) throws SQLException {
+    public Notifications subscribeAuction(Connection connection, AuctionInfo auction, Bidder bidder) throws SQLException {
         String query = "INSERT INTO notification(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
-        String message = "Người dùng " + bidder.getUsername() + " vừa đấu giá món hàng id " + auction.getItemId();
+        String message = "Người dùng " + bidder.getUsername() + " vừa đấu giá món hàng " + auction.getItemInfo().getTitle();
         
         try (PreparedStatement pr = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             pr.setInt(1, bidder.getId());
@@ -82,12 +83,11 @@ public class NotificationDAO extends BaseDAO {
         return log;
         }
     }
-    public ArrayList<Notifications> checkNotifications(Connection connection,int userId, boolean isReaded) throws SQLException{
-        String query = "SELECT * FROM notification WHERE userId = ? AND isChecked = ?";
+    public ArrayList<Notifications> checkNotifications(Connection connection,int userId) throws SQLException{
+        String query = "SELECT * FROM notification WHERE userId = ?";
         ArrayList<Notifications> notifications = new ArrayList<>();
         try(PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1,userId);
-            pr.setBoolean(2, isReaded);
             ResultSet rs = pr.executeQuery();
             while(rs.next()){
                 notifications.add(mapNotification(rs));
@@ -95,7 +95,7 @@ public class NotificationDAO extends BaseDAO {
         return notifications;
         } 
     }
-    public void markAllAsRead(Connection connection, int userId) throws SQLException {
+    public boolean markAllAsRead(Connection connection, int userId) throws SQLException {
         String query = "UPDATE notification SET isChecked = true WHERE userId = ? AND isChecked = false";
         
         try (PreparedStatement pr = connection.prepareStatement(query)) {
@@ -104,8 +104,9 @@ public class NotificationDAO extends BaseDAO {
             
             if (rowsAffected > 0) {
                 System.out.println("Sytem: Đã đánh dấu " + rowsAffected + " thông báo là đã đọc.");
+                return true;
             }
-        }
+        }return false;
     }
     public void markByIdAsRead(Connection connection, int notificationId) throws SQLException {
         String query = "UPDATE notification SET isChecked = true WHERE id = ?";

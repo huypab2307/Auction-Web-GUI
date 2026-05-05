@@ -202,7 +202,7 @@
          </image>
       </ImageView>
          <ImageView  fx:id="congrats" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-            <ImageView style="-fx-padding: 0 0 100 20" fx:id="congian1" disable="false" fitHeight="95.0" fitWidth="103.0" pickOnBounds="true" preserveRatio="false" scaleX="2.0" scaleY="2.0" scaleZ="2.0" visible="true" StackPane.alignment="BOTTOM_LEFT">
+            <ImageView style="-fx-padding: 0 0 100 20" fx:id="congian1" disable="true" fitHeight="95.0" fitWidth="103.0" pickOnBounds="true" preserveRatio="false" scaleX="2.0" scaleY="2.0" scaleZ="2.0" visible="true" StackPane.alignment="BOTTOM_LEFT">
          <image>
             <Image url="@/images/congian.gif" />
          </image>

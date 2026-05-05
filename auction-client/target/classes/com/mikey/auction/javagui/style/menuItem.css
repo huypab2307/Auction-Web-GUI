@@ -45,3 +45,25 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 4);
     -fx-padding: 5; /* Tạo khoảng cách giữa viền và nội dung */
 }
+
+/* Ẩn hoàn toàn phần mũi tên */
+.menu-button .arrow-button {
+    -fx-padding: 0;
+}
+
+.menu-button .arrow {
+    -fx-shape: "";
+    -fx-padding: 0;
+}
+
+/* Tùy chỉnh để icon chuông nằm chính giữa nút */
+.menu-button .label {
+    -fx-padding: 0;
+}
+
+.context-menu {
+    -fx-translate-x: -350px; /* Chỉnh con số này để bảng dịch sang trái bao nhiêu tùy ý */
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}

@@ -1,0 +1,29 @@
+/* Nhắm mục tiêu vào cửa sổ menu thả xuống */
+.context-menu {
+    /* Dịch toàn bộ bảng sang trái. 
+       Số âm càng lớn thì dịch sang trái càng nhiều */
+    -fx-translate-x: -180px; 
+    
+    /* Chỉnh cho bảng cách nút bấm một chút (tùy chọn) */
+    -fx-translate-y: 5px;
+
+    /* Tùy chỉnh kích thước bảng thông báo */
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 5);
+}
+
+/* Ẩn mũi tên mặc định của MenuButton để trông hiện đại hơn */
+.menu-button .arrow-button {
+    -fx-padding: 0;
+}
+.menu-button .arrow {
+    -fx-shape: "";
+    -fx-padding: 0;
+}
+
+/* Xóa vạch xanh khi di chuột qua CustomMenuItem */
+.custom-menu-item:focused {
+    -fx-background-color: transparent;
+}
+
