@@ -15,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.Parent;
@@ -48,8 +49,10 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
+import javafx.util.Duration;
 
 public class SellerController {
+    @FXML private StackPane mainStackPane;
     private List<File> selectedFiles = new ArrayList<>();
     @FXML private ComboBox<String> type;
     @FXML private VBox itemInfo;
@@ -61,7 +64,7 @@ public class SellerController {
     @FXML private DatePicker endTime;
     @FXML private TextField finalPrice;
     @FXML private TopBarController topBarController;
-    @FXML private ImageView congratulation;
+
 
 
     @FXML private ImageView preview1;
@@ -156,7 +159,7 @@ public class SellerController {
     private void handleSubmit(ActionEvent e) {
         String name = itemName.getText();
         String description = itemDescription.getText();
-        ItemType selected = ItemType.valueOf(type.getValue().toUpperCase());
+        String selected = type.getValue().toUpperCase();
 
         String imagePath = null;
 
@@ -165,7 +168,7 @@ public class SellerController {
         }
 
         HashMap<String, String> itemData = new HashMap<>();
-        itemData.put("type", "ARTS");
+        itemData.put("type", selected);
         itemData.put("name", name);
         itemData.put("description", description);
         itemData.put("sellerId", String.valueOf(user.getId()));
@@ -177,13 +180,13 @@ public class SellerController {
             return;
         }
         switch (selected) {
-            case ARTS:
+            case "ARTS":
                 findArtworkData(itemData);
                 break;
-            case ELECTRONICS:
+            case "ELECTRONICS":
                 findElectronicsData(itemData);
                 break;
-            case VEHICLE:
+            case "VEHICLE":
                 findVehicleData(itemData);
                 break;
             default:
@@ -192,15 +195,7 @@ public class SellerController {
         }
         AuctionManager.getInstance().uploadItem(ItemManager.getInstance().preProcessing(itemData), Double.parseDouble(price.getText()), Double.parseDouble(stepPrice.getText()), startTime.getValue().atStartOfDay(), endTime.getValue().atStartOfDay());
 
-        congratulation.setDisable(false);
-        congratulation.setVisible(true);
-
-        PauseTransition pause = new PauseTransition(javafx.util.Duration.seconds(3));
-        pause.setOnFinished(event -> { 
-
-            SceneChanger.getInstance().toMainMenu(user);
-        });
-        pause.play();
+        showCongratulationEffect(2.5);
         
     }
 
@@ -294,5 +289,30 @@ public class SellerController {
         itemData.put("model", model);
         itemData.put("trim", trim);
         itemData.put("titleStatus", titleStatus);
+    }
+    private void showCongratulationEffect(double seconds) {
+        ImageView animImg = new ImageView();
+        try {
+            URL imgUrl = getClass().getResource("/images/congratulation.gif");
+            if (imgUrl != null) {
+                animImg.setImage(new Image(imgUrl.toExternalForm()));
+            }
+        } catch (Exception e) {
+            System.err.println("Không tìm thấy ảnh GIF chúc mừng!");
+            return;
+        }
+
+        animImg.setFitWidth(900);
+        animImg.setPreserveRatio(true);
+        animImg.setMouseTransparent(true);
+
+        mainStackPane.getChildren().add(animImg);
+
+        PauseTransition cleanup = new PauseTransition(Duration.seconds(seconds));
+        cleanup.setOnFinished(event -> {
+            mainStackPane.getChildren().remove(animImg);
+            SceneChanger.getInstance().toUserGui(user);
+        });
+        cleanup.play();
     }
 }

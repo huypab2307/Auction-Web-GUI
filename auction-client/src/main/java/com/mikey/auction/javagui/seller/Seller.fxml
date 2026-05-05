@@ -9,10 +9,10 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1180.0" styleClass="root-pane" stylesheets="@../Style/Seller.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.seller.SellerController">
    <top>
-      <fx:include fx:id="topBar" source="../TopBar/topbar.fxml" />
+      <fx:include fx:id="topBar" source="../topBar/topbar.fxml" />
    </top>
    <center>
-      <StackPane prefHeight="720.0" prefWidth="1180.0">
+      <StackPane fx:id="mainStackPane" prefHeight="720.0" prefWidth="1180.0">
       <ScrollPane fitToWidth="true" styleClass="main-scroll" BorderPane.alignment="CENTER">
          <content>
             <HBox alignment="TOP_CENTER" styleClass="main-hbox">
@@ -196,17 +196,6 @@
             </HBox>
          </content>
       </ScrollPane>
-      <ImageView fx:id="congratulation" disable="false" pickOnBounds="true" preserveRatio="false" scaleX="2.0" scaleY="2.0" scaleZ="2.0" visible="true">
-         <image>
-            <Image url="@/images/congratulation.gif" />
-         </image>
-      </ImageView>
-         <ImageView  fx:id="congrats" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-            <ImageView style="-fx-padding: 0 0 100 20" fx:id="congian1" disable="true" fitHeight="95.0" fitWidth="103.0" pickOnBounds="true" preserveRatio="false" scaleX="2.0" scaleY="2.0" scaleZ="2.0" visible="true" StackPane.alignment="BOTTOM_LEFT">
-         <image>
-            <Image url="@/images/congian.gif" />
-         </image>
-      </ImageView>
             </StackPane>
    </center>
 </BorderPane>

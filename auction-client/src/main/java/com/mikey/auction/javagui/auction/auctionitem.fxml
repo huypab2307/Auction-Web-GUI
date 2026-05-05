@@ -55,11 +55,11 @@
                             </children>
                         </StackPane>
 
-                        <AnchorPane style="-fx-padding: 0 60;">
+                        <AnchorPane style="-fx-padding: 0 100;">
                             <children>
-                                <VBox layoutY="40.0" prefWidth="650.0" spacing="30.0" AnchorPane.leftAnchor="0.0">
+                                <VBox layoutY="40.0" prefWidth="550.0" spacing="30.0" AnchorPane.leftAnchor="0.0">
                                     <children>
-                                        <VBox prefHeight="102.0" prefWidth="583.0" spacing="20.0" style="-fx-border-color: #e0e0e0; -fx-padding: 25; -fx-border-width: 1;">
+                                        <VBox prefHeight="102.0" prefWidth="653.0" spacing="20.0" style="-fx-border-color: #e0e0e0; -fx-padding: 25; -fx-border-width: 1;">
                                             <children>
                                                 <Label style="-fx-font-weight: bold; -fx-font-size: 20;" text="Mô tả vật phẩm" />
                                                 <TilePane fx:id="attributeBox" hgap="20.0" vgap="10.0" />

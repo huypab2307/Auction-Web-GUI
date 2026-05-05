@@ -1,63 +1,91 @@
-/* --- TRẠNG THÁI ĐÃ ĐỌC (Màu trắng pastel nhẹ, bóng đổ êm ái) --- */
-.notification-card {
-    -fx-background-color: white;
+/* Tổng thể khung chứa bảng thông báo (ContextMenu/VBox) */
+.context-menu {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: #f0f2f5;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 10);
+    -fx-padding: 5;
+}
+
+/* Từng dòng thông báo */
+.notification-item {
+    -fx-background-color: #ffffff;
     -fx-background-radius: 12;
-    /* Bóng đổ xám pastel rất nhẹ tạo cảm giác nổi 3D */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.05), 10, 0, 0, 2);
+    -fx-margin: 2 5;
+    -fx-padding: 12 15;
     -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
 }
 
-.notification-card:hover {
-    -fx-background-color: linear-gradient(to right bottom, #ffffff, #f8fafc);
-    -fx-effect: dropshadow(three-pass-box, rgba(37, 117, 252, 0.15), 12, 0, 0, 4);
+/* Hiệu ứng khi di chuột qua - Màu Pastel Blue cực nhẹ */
+.notification-item:hover {
+    -fx-background-color: #f0f7ff;
+    -fx-translate-x: 3; /* Nhích nhẹ sang phải khi hover */
 }
 
-/* --- TRẠNG THÁI CHƯA ĐỌC (Nền pastel xanh tím, chữ đậm, viền phát sáng) --- */
-.notification-card-unread {
-    /* Nền Gradient Pastel (từ xanh nhạt sang tím nhạt) */
-    -fx-background-color: linear-gradient(to right bottom, #f0f4ff, #e6eeff);
-    -fx-background-radius: 12;
-    /* Hiệu ứng bóng phát sáng Neon Glow màu xanh dương nhạt */
-    -fx-effect: dropshadow(three-pass-box, rgba(37, 117, 252, 0.35), 15, 0.1, 0, 0);
-    -fx-cursor: hand;
+/* Trạng thái chưa đọc (isChecked = 0) - Màu Pastel lãng mạn */
+.notification-unread {
+    -fx-background-color: #f4f8ff; /* Xanh pastel rất nhạt */
+    -fx-border-color: #e1eeff;
+    -fx-border-width: 0 0 0 4; /* Vạch xanh bên trái để nhấn mạnh */
+    -fx-border-radius: 0;
 }
 
-.notification-card-unread:hover {
-    -fx-background-color: linear-gradient(to right bottom, #e6eeff, #dbe6ff);
-    -fx-effect: dropshadow(three-pass-box, rgba(37, 117, 252, 0.5), 20, 0.2, 0, 0);
-}
-
-/* --- CHỮ NỘI DUNG --- */
+/* Định dạng nội dung tin nhắn */
 .notification-text {
-    -fx-fill: #475569; /* Màu xám đen, chống mỏi mắt */
-    -fx-font-size: 14px;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-family: "Segoe UI", Tahoma;
+    -fx-font-size: 13px;
+    -fx-text-fill: #4a4a4a;
 }
 
-/* Chữ in đậm dành riêng cho tin chưa đọc */
-.text-unread {
+/* Làm nổi bật tên người và sản phẩm trong TextFlow */
+.text-bold-blue {
     -fx-font-weight: bold;
-    -fx-fill: #0f172a; /* Màu đen sắc nét hơn */
+    -fx-fill: #5da2ff; /* Màu xanh Pastel Blue */
 }
 
-/* --- CHỮ THỜI GIAN --- */
+.text-bold {
+    -fx-font-weight: bold;
+    -fx-fill: #555555;
+}
+
+/* Định dạng thời gian (createdAt) */
 .notification-time {
-    -fx-text-fill: #94a3b8; /* Xám bạc */
-    -fx-font-size: 11px;
-    -fx-font-style: italic;
+    -fx-font-size: 10.5px;
+    -fx-text-fill: #b0b0b0;
+    -fx-padding: 2 0 0 0;
 }
 
-/* --- CHẤM XANH NEON BÁO CHƯA ĐỌC --- */
+/* Dấu chấm xanh báo hiệu chưa đọc */
 .unread-dot {
-    -fx-fill: #00e5ff; /* Cyan rực rỡ */
-    /* Phát sáng mạnh xung quanh chấm xanh */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 229, 255, 0.8), 8, 0.5, 0, 0);
+    -fx-fill: #89cff0; /* Baby Blue */
+    -fx-effect: dropshadow(three-pass-box, rgba(137, 207, 240, 0.4), 5, 0, 0, 0);
 }
 
-/* Xóa bỏ màu nền xanh lè mặc định của JavaFX khi di chuột vào Menu */
-.menu-item:focused, 
-.menu-item:hover, 
-.custom-menu-item:focused, 
-.custom-menu-item:hover {
+/* Tùy chỉnh ScrollPane cho mượt */
+.scroll-pane {
     -fx-background-color: transparent;
+    -fx-viewport-background-color: transparent;
+}
+
+.scroll-pane .thumb {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 10;
+}
+
+/* Hiệu ứng khi di chuột qua thông báo bình thường (Đã đọc) */
+.notification-item:hover {
+    -fx-background-color: #e2efff; /* Xanh Pastel đậm hơn một chút */
+    -fx-translate-x: 3; 
+    -fx-effect: dropshadow(three-pass-box, rgba(93, 162, 255, 0.15), 5, 0, 0, 2); /* Thêm viền bóng xanh nhẹ cho nổi bật */
+}
+
+/* Hiệu ứng khi di chuột qua thông báo CHƯA ĐỌC */
+.notification-unread:hover {
+    -fx-background-color: #d4e7ff; /* Đậm màu hơn hẳn để Huy dễ chú ý */
+    -fx-translate-x: 3;
+    -fx-border-color: #89cff0; /* Vạch trái cũng đổi màu đậm hơn */
+    -fx-border-width: 0 0 0 4;
 }
