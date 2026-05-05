@@ -9,15 +9,16 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import com.google.gson.Gson;
 import com.mikey.auction.socket.Handlers.LoginHandlers;
 import com.mikey.auction.socket.Handlers.RegisterHandlers;
 
 public class AuctionServer {
     // Danh sách lưu trữ tất cả các Client đang kết nối (Thread-safe)
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
-    private static Gson gson = new Gson(); 
+    private static final ExecutorService threadPool = Executors.newFixedThreadPool(20); // Tối đa 20 client cùng lúc
 
     public static void main(String[] args) {
         int port = 12345;
@@ -33,15 +34,17 @@ public class AuctionServer {
                 System.out.println("[NEW CONNECTION] " + clientSocket.getInetAddress());
 
                 // Mỗi Client là một luồng riêng
-                new ClientHandler(clientSocket).start();
+                threadPool.execute(new ClientHandler(clientSocket));
             }
         } catch (IOException e) {
             System.err.println("Server Error: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
         }
     }
 
-    private static class ClientHandler extends Thread {
+    private static class ClientHandler implements Runnable {
         private Socket socket;
         private PrintWriter out;
         private BufferedReader in;
