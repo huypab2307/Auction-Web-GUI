@@ -45,7 +45,7 @@ public class AuctionManager {
        }
    }
 
-    public boolean placebid(Bidder bidder, int id, double oldPrice){
+    public boolean placeBid(Bidder bidder, int id, double oldPrice){
         AuctionDAO auctionDAO = AuctionDAO.getInstance();
 
         try(Connection connection = auctionDAO.getConnect()){

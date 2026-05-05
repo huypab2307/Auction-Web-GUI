@@ -2,6 +2,7 @@ package com.mikey.auction.javagui.auction;
 
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.RandomHelper;
 import com.mikey.auction.javagui.SceneChanger;
@@ -26,7 +27,7 @@ import java.util.Map;
 
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
-
+import com.mikey.auction.factory.UserFactory;
 import com.mikey.auction.javagui.topbar.TopBarController;
 import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.topbar.SearchListener;
@@ -127,17 +128,17 @@ public class AuctionItemController implements SearchListener {
         bidButton.setText("Đang xử lý...");
 
         try {
-//            Bidder tempUser = (Bidder) user.changeRole(Role.BIDDER);
-//            if (tempUser.placeBid(auctionInfo.getId(), auctionInfo.getCurPrice())) {
-//                auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
-//
-//
-//                System.out.println("Đặt giá thành công!");
-//            } else {
-//                System.err.println("Đặt giá thất bại! Có thể đã có người trả giá cao hơn.");
-//                auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
-//
-//            }
+            Bidder bidder = (Bidder) UserFactory.createUser(Role.BIDDER, user);
+           if (AuctionManager.getInstance().placeBid(bidder, auctionInfo.getId(), auctionInfo.getCurPrice())) {
+               auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+
+
+               System.out.println("Đặt giá thành công!");
+           } else {
+               System.err.println("Đặt giá thất bại! Có thể đã có người trả giá cao hơn.");
+               auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+
+           }
         } catch (Exception e) {
             System.err.println("Lỗi hệ thống: " + e.getMessage());
         }

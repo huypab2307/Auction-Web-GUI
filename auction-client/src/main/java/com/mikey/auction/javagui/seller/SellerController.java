@@ -20,6 +20,7 @@ import javafx.scene.text.Text;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class SellerController {
     @FXML private DatePicker endTime;
     @FXML private TextField finalPrice;
     @FXML private TopBarController topBarController;
+    @FXML private ImageView congratulation;
 
 
     @FXML private ImageView preview1;
@@ -189,7 +191,17 @@ public class SellerController {
                 return ;
         }
         AuctionManager.getInstance().uploadItem(ItemManager.getInstance().preProcessing(itemData), Double.parseDouble(price.getText()), Double.parseDouble(stepPrice.getText()), startTime.getValue().atStartOfDay(), endTime.getValue().atStartOfDay());
-        SceneChanger.getInstance().toMainMenu(user);
+
+        congratulation.setDisable(false);
+        congratulation.setVisible(true);
+
+        PauseTransition pause = new PauseTransition(javafx.util.Duration.seconds(3));
+        pause.setOnFinished(event -> { 
+
+            SceneChanger.getInstance().toMainMenu(user);
+        });
+        pause.play();
+        
     }
 
 
