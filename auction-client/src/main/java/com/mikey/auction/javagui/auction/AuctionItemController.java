@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Role;
@@ -34,6 +35,10 @@ import com.mikey.auction.javagui.topbar.SearchListener;
 
 
 public class AuctionItemController implements SearchListener {
+    @FXML
+    private StackPane mainStackPane;
+    @FXML
+    private ImageView congratulation;
     @FXML
     private Label startTime;
     @FXML
@@ -121,24 +126,23 @@ public class AuctionItemController implements SearchListener {
 
     }
 
+    @FXML
     public void onBidHandle(ActionEvent actionEvent) {
         Button bidButton = (Button) actionEvent.getSource();
-
         bidButton.setDisable(true);
         bidButton.setText("Đang xử lý...");
 
         try {
             Bidder bidder = (Bidder) UserFactory.createUser(Role.BIDDER, user);
-           if (AuctionManager.getInstance().placeBid(bidder, auctionInfo.getId(), auctionInfo.getCurPrice())) {
-               auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+            if (AuctionManager.getInstance().placeBid(bidder, auctionInfo.getId(), auctionInfo.getCurPrice())) {
+                auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+                showCongratulationEffect(2.5);
 
-
-               System.out.println("Đặt giá thành công!");
-           } else {
-               System.err.println("Đặt giá thất bại! Có thể đã có người trả giá cao hơn.");
-               auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
-
-           }
+                System.out.println("Đặt giá thành công!");
+            } else {
+                System.err.println("Đặt giá thất bại!");
+                auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+            }
         } catch (Exception e) {
             System.err.println("Lỗi hệ thống: " + e.getMessage());
         }
@@ -150,5 +154,30 @@ public class AuctionItemController implements SearchListener {
             bidButton.setText("Đặt giá ngay");
         });
         pause.play();
+    }
+
+    private void showCongratulationEffect(double seconds) {
+        ImageView animImg = new ImageView();
+        try {
+            URL imgUrl = getClass().getResource("/images/congratulation.gif");
+            if (imgUrl != null) {
+                animImg.setImage(new Image(imgUrl.toExternalForm()));
+            }
+        } catch (Exception e) {
+            System.err.println("Không tìm thấy ảnh GIF chúc mừng!");
+            return;
+        }
+
+        animImg.setFitWidth(900);
+        animImg.setPreserveRatio(true);
+        animImg.setMouseTransparent(true);
+
+        mainStackPane.getChildren().add(animImg);
+
+        PauseTransition cleanup = new PauseTransition(Duration.seconds(seconds));
+        cleanup.setOnFinished(event -> {
+            mainStackPane.getChildren().remove(animImg);
+        });
+        cleanup.play();
     }
 }
