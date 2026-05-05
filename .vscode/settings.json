@@ -1,35 +1,35 @@
-{
-    "java.project.sourcePaths": [
-        "src"
-    ],
+// {
+//     "java.project.sourcePaths": [
+//         "src"
+//     ],
 
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "libs/mysql-connector-j-9.6.0.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx.base.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx.controls.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx.fxml.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx.graphics.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx.media.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx.swing.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx.web.jar",
-        "libs/javafx-sdk-21.0.10/lib/javafx-swt.jar",
-        "libs/HikariCP-7.0.2.jar",
-        "libs/slf4j-api-2.0.17.jar",
-        "libs/slf4j-simple-2.0.17.jar",
-        "libs/gson-2.10.1.jar"
-    ],
-    "files.encoding": "utf8",
-    "java.debug.settings.vmArgs": "-Dfile.encoding=UTF-8",
-    "java.jdt.ls.vmargs": "-Dfile.encoding=UTF-8",
+//     "java.project.referencedLibraries": [
+//         "lib/**/*.jar",
+//         "libs/mysql-connector-j-9.6.0.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx.base.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx.controls.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx.fxml.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx.graphics.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx.media.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx.swing.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx.web.jar",
+//         "libs/javafx-sdk-21.0.10/lib/javafx-swt.jar",
+//         "libs/HikariCP-7.0.2.jar",
+//         "libs/slf4j-api-2.0.17.jar",
+//         "libs/slf4j-simple-2.0.17.jar",
+//         "libs/gson-2.10.1.jar"
+//     ],
+//     "files.encoding": "utf8",
+//     "java.debug.settings.vmArgs": "-Dfile.encoding=UTF-8",
+//     "java.jdt.ls.vmargs": "-Dfile.encoding=UTF-8",
 
-    "terminal.integrated.profiles.windows": {
-        "PowerShell UTF-8": {
-            "source": "PowerShell",
-            "args": ["-NoExit", "-Command", "chcp 65001"]
-        }
-    },
-    "terminal.integrated.defaultProfile.windows": "PowerShell UTF-8",
-    "java.debug.settings.onBuildFailureProceed": true,
-    "java.configuration.updateBuildConfiguration": "automatic"
-}
+//     "terminal.integrated.profiles.windows": {
+//         "PowerShell UTF-8": {
+//             "source": "PowerShell",
+//             "args": ["-NoExit", "-Command", "chcp 65001"]
+//         }
+//     },
+//     "terminal.integrated.defaultProfile.windows": "PowerShell UTF-8",
+//     "java.debug.settings.onBuildFailureProceed": true,
+//     "java.configuration.updateBuildConfiguration": "automatic"
+// }
