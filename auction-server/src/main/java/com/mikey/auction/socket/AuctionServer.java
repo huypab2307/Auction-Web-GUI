@@ -71,6 +71,8 @@ public class AuctionServer {
                         LoginHandlers.handleLogin(message, out);
                     }else if (message.startsWith("REGISTER|")) {
                         RegisterHandlers.handleRegister(message, out);
+                    } else if (message.startsWith("AUCTION")){
+                       AuctionHandler.handleAuction(message, out);
                     } else if (message.startsWith("BID|") || message.startsWith("CHAT|")) {
                         // Nếu là đặt giá hoặc chat thì gửi cho tất cả
                         broadcast(message);
