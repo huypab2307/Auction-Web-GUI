@@ -40,7 +40,6 @@ public class SceneChanger {
             AuctionHubController controller = loader.getController();
             controller.setUser(user);
             controller.loadAuction();
-            mainStage.setFullScreen(true);
             mainStage.setResizable(true);
         });
     }

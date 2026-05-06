@@ -1,28 +1,57 @@
-/* Nhắm mục tiêu vào cửa sổ menu thả xuống */
-.context-menu {
-    /* Dịch toàn bộ bảng sang trái. 
-       Số âm càng lớn thì dịch sang trái càng nhiều */
-    -fx-translate-x: -180px; 
-    
-    /* Chỉnh cho bảng cách nút bấm một chút (tùy chọn) */
-    -fx-translate-y: 5px;
-
-    /* Tùy chỉnh kích thước bảng thông báo */
-    -fx-background-color: white;
-    -fx-background-radius: 10;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 5);
+/* Loại bỏ màu nền khi hover hoặc click vào menu item chứa thông báo */
+.menu-item:focused,
+.menu-item:hover,
+.custom-menu-item:focused,
+.custom-menu-item:hover {
+    -fx-background-color: transparent !important;
 }
 
-/* Ẩn mũi tên mặc định của MenuButton để trông hiện đại hơn */
-.menu-button .arrow-button {
-    -fx-padding: 0;
-}
-.menu-button .arrow {
-    -fx-shape: "";
-    -fx-padding: 0;
-}
-
-/* Xóa vạch xanh khi di chuột qua CustomMenuItem */
-.custom-menu-item:focused {
+/* Đảm bảo ScrollPane và VBox bên trong không bị dính màu nền lạ */
+.scroll-pane, .scroll-pane > .viewport {
     -fx-background-color: transparent;
+}
+.scroll-pane > .scroll-bar:vertical,
+.scroll-pane > .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-padding: -5; /* Đẩy thanh cuộn ra khỏi vùng nhìn thấy */
+}
+
+/* Đảm bảo vùng chứa nội dung (viewport) không có nền trắng */
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+#mainContainer {
+    -fx-background-color: transparent;
+}
+/* Trạng thái bình thường của card */
+.notification-card {
+    -fx-background-color: white; /* Hoặc transparent tùy ý Dương */
+    -fx-cursor: hand;            /* Hiện bàn tay khi hover cho giống app xịn */
+    -fx-transition: 0.3s;        /* Nếu JavaFX bản mới có hỗ trợ transition */
+}
+
+/* Khi di chuột qua (Hover) */
+.notification-card:hover {
+    -fx-background-color: #f0f7ff; /* Màu xanh nhạt nhẹ nhàng */
+}
+
+/* Khi nhấn vào (Pressed) - tạo hiệu ứng phản hồi */
+.notification-card:pressed {
+    -fx-background-color: #e1efff;
+}
+
+/* Style cho chữ trong thông báo */
+.notification-text {
+    -fx-fill: #1c1d1f;
+    -fx-font-size: 13px;
+}
+
+.notification-time {
+    -fx-text-fill: #797676;
+    -fx-font-size: 11px;
 }

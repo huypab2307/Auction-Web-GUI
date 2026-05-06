@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 
-<HBox fx:id="notificationRoot" alignment="CENTER_LEFT" prefWidth="380.0" spacing="12.0" stylesheets="@../style/Notification.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.topbar.NotificationController">
+<HBox styleClass="notification-card" fx:id="notificationRoot" alignment="CENTER_LEFT" prefWidth="380.0" spacing="12.0" stylesheets="@../style/Notification.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.topbar.NotificationController">
    <children>
       <!-- Ảnh minh họa (Có thể thay đổi dựa trên loại auction) -->
       <ImageView fx:id="itemImage" fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
