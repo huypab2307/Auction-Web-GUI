@@ -67,11 +67,25 @@ public class RegisterController {
     public void onHandleRegister(ActionEvent e) throws IOException {
         String text1 = username.getText();
         String text2 = password.getText();
+
+                if (text1.length() < 5) {
+            status.setText("Tên đăng nhập phải có ít nhất 5 ký tự!");
+            status.setTextFill(javafx.scene.paint.Color.RED);
+            status.setVisible(true);
+            
+            String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red;";
+            username.setStyle(errorStyle);
+            password.setStyle(errorStyle);
+            return;
+        }
+
+        registerButton.setDisable(true);
         out.println("REGISTER|" + text1 + "|" + text2);
         String response = in.readLine();
         boolean success = "SUCCESS".equals(response);
         if (success){
             status.setText("đăng ký thành công!!");
+            status.setVisible(true);
             status.setTextFill(Paint.valueOf("green"));
             username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
             password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
@@ -83,12 +97,15 @@ public class RegisterController {
         }else{
             registerButton.setDisable(true);
             status.setText("tên đăng nhập tồn tại");
+            status.setVisible(true);
             status.setTextFill(Paint.valueOf("red"));
             username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
             password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
             username.clear();
             password.clear();
         }
+
+        
 
 
 
@@ -104,7 +121,42 @@ public class RegisterController {
             password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
         }
         registerButton.setDisable(disable1 || disable2);
+
+        boolean isUserValid = validateASCII(text1);
+        boolean isPassValid = validateASCII(text2);
+
+        if (!isUserValid) {
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 1px;");
+        } else {
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray;");
+        }
+
+        if (!isPassValid) {
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 1px;");
+        } else {
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray;");
+        }
+
+        if (!isUserValid || !isPassValid) {
+            applyErrorStyle("Kí tự không hợp lệ");
+        } else {
+            status.setVisible(false);
+        }
     }
+
+    private boolean validateASCII(String content) {
+        for (char c : content.toCharArray()) {
+            if (c < 33 || c > 126) return false;
+        }
+        return true;
+    }
+
+    private void applyErrorStyle(String msg) {
+        status.setText(msg);
+        status.setTextFill(javafx.scene.paint.Color.RED);
+        status.setVisible(true);
+    }
+
     @FXML
     public void backToLogin() {
         try{
@@ -116,4 +168,6 @@ public class RegisterController {
             System.out.println(e.getMessage());
         }
     }
+
+
 }

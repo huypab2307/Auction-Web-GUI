@@ -25,17 +25,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 public class LoginController {
-    @FXML
-    private TextField username;
-    @FXML
-    private PasswordField password;
-    @FXML
-    private Button loginButton;
-    @FXML
-    private Label status;
+    @FXML private TextField username;
+    @FXML private PasswordField password;
+    @FXML private Button loginButton;
+    @FXML private Label status;
 
     private Socket socket;
     private PrintWriter out;
@@ -82,6 +79,19 @@ public class LoginController {
             loginButton.setDisable(true);
             return;
         }
+
+        if (text1.length() < 5) {
+            status.setText("Tên đăng nhập phải có ít nhất 5 ký tự!");
+            status.setTextFill(javafx.scene.paint.Color.RED);
+            status.setVisible(true);
+            
+            String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red;";
+            username.setStyle(errorStyle);
+            password.setStyle(errorStyle);
+            return;
+        }
+
+        loginButton.setDisable(true);
         
         // Gửi lệnh LOGIN sang Server
         out.println("LOGIN|" + text1 + "|" + text2); 
@@ -124,6 +134,7 @@ public class LoginController {
                         username.clear();
                         password.clear();
                         status.setText("Sai tài khoản hoặc mật khẩu!");
+                        status.setVisible(true);
                         
                         String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red";
                         username.setStyle(errorStyle);
@@ -136,19 +147,56 @@ public class LoginController {
                 ex.printStackTrace();
             }
         }).start();
+
+        if (username.getText().length() < 5) {
+            applyErrorStyle("Độ dài phải lớn hơn 5");
+        }
     }
 
+    @FXML
     public void onKeyReleased() {
-        String text1 = username.getText();
-        String text2 = password.getText();
-        boolean disable1 = text1.isEmpty() || text1.trim().isEmpty();
-        boolean disable2 = text2.trim().isEmpty() || text2.isEmpty();
-        if (!disable1 || !disable2) { 
-            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
-            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+        String userText = username.getText();
+        String passText = password.getText();
+
+        boolean isUserEmpty = userText.trim().isEmpty();
+        boolean isPassEmpty = passText.trim().isEmpty();
+        loginButton.setDisable(isUserEmpty || isPassEmpty);
+
+        boolean isUserValid = validateASCII(userText);
+        boolean isPassValid = validateASCII(passText);
+
+        if (!isUserValid) {
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 1px;");
+        } else {
+            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray;");
         }
-        loginButton.setDisable(disable1 || disable2);
+
+        if (!isPassValid) {
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 1px;");
+        } else {
+            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray;");
+        }
+
+        if (!isUserValid || !isPassValid) {
+            applyErrorStyle("Kí tự không hợp lệ");
+        } else {
+            status.setVisible(false);
+        }
     }
+
+    private boolean validateASCII(String content) {
+        for (char c : content.toCharArray()) {
+            if (c < 33 || c > 126) return false;
+        }
+        return true;
+    }
+
+    private void applyErrorStyle(String msg) {
+        status.setText(msg);
+        status.setTextFill(javafx.scene.paint.Color.RED);
+        status.setVisible(true);
+    }
+
 
     public void onRegisterHandle() throws IOException {
         // Lưu ý: register.fxml phải nằm cùng package hoặc đúng đường dẫn resources
