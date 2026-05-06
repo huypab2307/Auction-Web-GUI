@@ -33,10 +33,31 @@ public class NotificationManager {
             System.out.println(ex.getMessage());
         }
     }
-
-    public Boolean subscribeAuction(Connection connection, int auctionId,int userId) throws SQLException {
+    public boolean markAsRead(int userId, int notificationId){
         NotificationDAO notificationDAO = NotificationDAO.getInstance();
-        return notificationDAO.subscribeAuction(connection, auctionId, userId);
+        try(Connection connection = notificationDAO.getConnect()) {
+            connection.setAutoCommit(false);
+            notificationDAO.markByIdAsRead(connection, notificationId);
+            connection.commit();
+            return true;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Boolean subscribeAuction(int auctionId,int userId){
+
+        NotificationDAO notificationDAO = NotificationDAO.getInstance();
+        try(Connection connection = notificationDAO.getConnect()) {
+            connection.setAutoCommit(false);
+            if (notificationDAO.subscribeAuction(connection, auctionId, userId));
+                connection.commit();
+                return true;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

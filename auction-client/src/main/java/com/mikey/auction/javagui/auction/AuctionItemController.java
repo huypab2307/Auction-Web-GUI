@@ -6,6 +6,7 @@ import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.RandomHelper;
 import com.mikey.auction.javagui.SceneChanger;
+import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.user.User;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
@@ -182,6 +183,9 @@ public class AuctionItemController implements SearchListener {
     }
 
     public void followButton(ActionEvent actionEvent) {
-
+        NotificationManager notificationManager = NotificationManager.getInstance();
+        if (notificationManager.subscribeAuction(auctionInfo.getId(), user.getId())){
+            showCongratulationEffect(2.5);
+        }
     }
 }

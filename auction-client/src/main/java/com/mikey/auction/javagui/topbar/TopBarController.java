@@ -93,14 +93,15 @@ public class TopBarController {
     }
 
     @FXML
-    public void showNotification() throws IOException {    
-        System.out.println("huy"); 
+    public void showNotification() throws IOException {
         List<Notifications> list = NotificationManager.getInstance().findNotififications(user.getId());
-        for (Notifications notifications : list){
+        for (Notifications notification : list){
             FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
             Parent root = loader.load();
+            String color = (notification.isRead()) ? "white" : "green";
+            root.setStyle("-fx-background-color: " + color);
             NotificationController notificationController = loader.getController();
-            notificationController.setContent(notifications);
+            notificationController.setContent(notification);
             mainContainer.getChildren().add(root);
         }
     }

@@ -21,11 +21,13 @@ public class NotificationDAO extends BaseDAO {
             rs.getInt("id"),
             rs.getInt("userId"),
             rs.getString("message"),
-            rs.getTimestamp("createdAt").toLocalDateTime()
+            rs.getTimestamp("createdAt").toLocalDateTime(),
+                rs.getBoolean("isChecked")
+
         );
     }
     public Notifications getNotification(Connection connection, AuctionInfo auction, Bidder bidder) throws SQLException {
-        String query = "INSERT INTO notificationL(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
+        String query = "INSERT INTO notification(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
         String message = "Người dùng " + bidder.getUsername() + " vừa đấu giá món hàng " + auction.getItemInfo().getTitle();
         
         try (PreparedStatement pr = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -45,7 +47,8 @@ public class NotificationDAO extends BaseDAO {
                             generatedId,
                             bidder.getId(),
                             message,
-                            LocalDateTime.now() 
+                            LocalDateTime.now() ,
+                                true
                         );
                     }
                 }

@@ -6,15 +6,17 @@ public class Notifications {
     private int id;
     private int userId;
     private int auctionId;
+    private boolean isRead;
     private String message;
     private LocalDateTime createdAt;
 
-    public Notifications(int auctionId,int id, int userId, String message, LocalDateTime createdAt ) {
+    public Notifications(int auctionId,int id, int userId, String message, LocalDateTime createdAt, boolean read ) {
         this.auctionId = auctionId;
         this.createdAt = createdAt;
         this.id = id;
         this.message = message;
         this.userId = userId;
+        this.isRead = read;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -23,6 +25,9 @@ public class Notifications {
 
     public int getId() {
         return id;
+    }
+    public boolean isRead() {
+        return isRead;
     }
 
     public int getAuctionId() {
