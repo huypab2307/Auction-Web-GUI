@@ -24,15 +24,15 @@ public class NotificationDAO extends BaseDAO {
             rs.getTimestamp("createdAt").toLocalDateTime()
         );
     }
-    public Notifications subscribeAuction(Connection connection, AuctionInfo auction, Bidder bidder) throws SQLException {
-        String query = "INSERT INTO notification(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
+    public Notifications getNotification(Connection connection, AuctionInfo auction, Bidder bidder) throws SQLException {
+        String query = "INSERT INTO notificationL(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
         String message = "Người dùng " + bidder.getUsername() + " vừa đấu giá món hàng " + auction.getItemInfo().getTitle();
         
         try (PreparedStatement pr = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             pr.setInt(1, bidder.getId());
             pr.setInt(2, auction.getId());
             pr.setString(3, message);
-            pr.setBoolean(4, true); 
+            pr.setBoolean(4, true);
 
             int affectedRows = pr.executeUpdate();
             
@@ -53,7 +53,7 @@ public class NotificationDAO extends BaseDAO {
             throw new SQLException("Tạo thông báo thất bại, không có dòng nào được thay đổi.");
         }
     }
-    public void notiAll(Connection connection, Notifications notification, ArrayList<Integer> log) throws SQLException {
+    public boolean notiAll(Connection connection, Notifications notification, ArrayList<Integer> log) throws SQLException {
         String query = "INSERT INTO notification(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
         
         try (PreparedStatement pr = connection.prepareStatement(query)) {
@@ -68,11 +68,12 @@ public class NotificationDAO extends BaseDAO {
                     pr.addBatch(); 
                 }
             }
-            pr.executeBatch(); 
+            pr.executeBatch();
+            return true;
         }
     }
     public ArrayList<Integer> findNotificationList(Connection connection,int auctionId) throws SQLException{
-        String query = "SELECT DISTINCT userId FROM notification WHERE auctionId = ?";
+        String query = "SELECT userId FROM notificationList WHERE auctionId = ?";
         ArrayList<Integer> log = new ArrayList<>();
         try(PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1,auctionId);
@@ -115,5 +116,22 @@ public class NotificationDAO extends BaseDAO {
             pr.setInt(1, notificationId);
             pr.executeUpdate();
         }
+    }
+    public boolean subscribeAuction(Connection connection, int auctionId, int userId) throws SQLException {
+        String query = "INSERT INTO notificationList(userId, auctionId) VALUES(?,?)";
+
+        try (PreparedStatement pr = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            pr.setInt(1, userId);
+            pr.setInt(2, auctionId);
+
+
+            int affectedRows = pr.executeUpdate();
+
+            if (affectedRows > 0) {
+                return true;
+                }
+            }
+        throw new SQLException("Không thể thêm user");
+
     }
 }

@@ -134,7 +134,7 @@ public class AuctionItemController implements SearchListener {
 
         try {
             Bidder bidder = (Bidder) UserFactory.createUser(Role.BIDDER, user);
-            if (AuctionManager.getInstance().placeBid(bidder, auctionInfo.getId(), auctionInfo.getCurPrice())) {
+            if (AuctionManager.getInstance().placeBid(bidder, auctionInfo, auctionInfo.getCurPrice())) {
                 auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
                 showCongratulationEffect(2.5);
 
@@ -179,5 +179,9 @@ public class AuctionItemController implements SearchListener {
             mainStackPane.getChildren().remove(animImg);
         });
         cleanup.play();
+    }
+
+    public void followButton(ActionEvent actionEvent) {
+
     }
 }

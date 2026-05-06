@@ -45,16 +45,15 @@ public class AuctionManager {
        }
    }
 
-    public boolean placeBid(Bidder bidder, int id, double oldPrice){
+    public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice){
         AuctionDAO auctionDAO = AuctionDAO.getInstance();
 
         try(Connection connection = auctionDAO.getConnect()){
             connection.setAutoCommit(false);
-            Auction auction = auctionDAO.findById(connection, id);
-            auctionDAO.updateAuction(connection, auction, bidder.getId(),oldPrice);
-            auctionDAO.updateTransaction(connection, auction, bidder.getId());
+            auctionDAO.updateAuction(connection, auctionInfo, bidder.getId(),oldPrice);
+            auctionDAO.updateTransaction(connection, auctionInfo, bidder.getId());
             connection.commit();
-            return true;
+            return NotificationManager.getInstance().notiAll(auctionInfo, bidder);
 
         }catch (SQLException e){
             System.out.println(e.getMessage());

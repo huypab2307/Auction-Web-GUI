@@ -117,10 +117,10 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
-    public void updateAuction(Connection connection, Auction auction, int bidderId, double curPrice) throws SQLException {
+    public void updateAuction(Connection connection, AuctionInfo auction, int bidderId, double curPrice) throws SQLException {
         String query = "UPDATE auctions SET curPrice = ?, lastBidderId = ? WHERE id = ? AND curPrice = ?;";
         try (PreparedStatement pr = connection.prepareStatement(query)) {
-            pr.setDouble(1, auction.getCurPrice() + auction.getStepPrice());
+            pr.setDouble(1, auction.getCurPrice() + auction.getBidStep());
             pr.setInt(2, bidderId);
             pr.setInt(3, auction.getId());
             pr.setDouble(4, curPrice);
@@ -128,12 +128,12 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
-    public void updateTransaction(Connection connection, Auction auction, int bidderId) throws SQLException {
+    public void updateTransaction(Connection connection, AuctionInfo auction, int bidderId) throws SQLException {
         String query = "INSERT INTO bidTransactions(userId, auctionId, bidAmount) VALUES (?,?,?);";
         try (PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1, bidderId);
             pr.setInt(2, auction.getId());
-            pr.setDouble(3, auction.getCurPrice() + auction.getStepPrice());
+            pr.setDouble(3, auction.getCurPrice() + auction.getBidStep());
             pr.executeUpdate();
         }
     }

@@ -89,7 +89,7 @@
                                                 </HBox>
                                                 <Label fx:id="datetime" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
                                                 <Button fx:id="bidButton" maxWidth="Infinity" onAction="#onBidHandle" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
-                                                <Button maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />
+                                                <Button onAction="#followButton" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />
                                                 <VBox spacing="10.0" style="-fx-padding: 15 0 0 0;">
                                                     <children>
                                                         <Label style="-fx-font-weight: bold;" text="Thông tin phiên:" />

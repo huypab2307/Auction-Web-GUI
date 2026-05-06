@@ -33,61 +33,18 @@ public class NotificationManager {
             System.out.println(ex.getMessage());
         }
     }
-    public Notifications subscribeAuction(Connection connection, AuctionInfo auction, Bidder bidder) throws SQLException {
+
+    public Boolean subscribeAuction(Connection connection, int auctionId,int userId) throws SQLException {
         NotificationDAO notificationDAO = NotificationDAO.getInstance();
-        Notifications notification = notificationDAO.subscribeAuction(connection, auction, bidder);
-        ArrayList<Integer> log = notificationDAO.findNotificationList(connection, auction.getId());
-        notificationDAO.notiAll(connection, notification, log);
-        return notification;
+        return notificationDAO.subscribeAuction(connection, auctionId, userId);
     }
-    public List<Message> messageList(int senderId, int receiverId) {
-        MessageDAO messageDAO = MessageDAO.getInstance();
-        try (Connection connection = messageDAO.getConnect()){
-            connection.setAutoCommit(false);
-            List<Message> messageList = messageDAO.loadMessage(connection, senderId, receiverId);
-            return messageList;
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-        return null;
-    }
-    public List<Integer> loadUserMessageList(int userId){
-        MessageDAO messageDAO = MessageDAO.getInstance();
-        try (Connection connection = messageDAO.getConnect()){
-            connection.setAutoCommit(false);
-            List<Integer> userFriendList = messageDAO.loadUser(connection, userId);
-            return userFriendList;
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-        return null;
-    }
-    public boolean sendChatMessage(int senderId, int receiverId, String content) {
-        MessageDAO messageDAO = MessageDAO.getInstance();
-        try (Connection connection = messageDAO.getConnect()){
-            connection.setAutoCommit(false);
-            boolean isSuccess = messageDAO.sendMessage(connection, senderId, receiverId, content);
-            if (isSuccess) {
-                connection.commit();
-                return true;
-            } else {
-                connection.rollback();
-            }
-        } catch(SQLException e) {
-            System.out.println("Lỗi gửi tin nhắn: " + e.getMessage());
-        }
-        return false;
-    }
+
+
     public List<Notifications> findNotififications(int userId){
         NotificationDAO notificationDAO = NotificationDAO.getInstance();
         try(Connection connection = notificationDAO.getConnect()) {
             connection.setAutoCommit(false);
             ArrayList<Notifications> list = notificationDAO.checkNotifications(connection, userId);
-            if (list != null && !list.isEmpty()) {
-                notificationDAO.markAllAsRead(connection, userId);
-            }
             connection.commit();
             return list;
             
@@ -97,5 +54,15 @@ public class NotificationManager {
         }
         return new ArrayList<>();
     }
-
+    public boolean notiAll(AuctionInfo auction, Bidder bidder){
+        NotificationDAO notificationDAO = NotificationDAO.getInstance();
+        try(Connection connection = notificationDAO.getConnect()){
+            Notifications notifications = notificationDAO.getNotification(connection, auction, bidder);
+            ArrayList<Integer> list = notificationDAO.findNotificationList(connection, auction.getId());
+            return notificationDAO.notiAll(connection, notifications, list);
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
