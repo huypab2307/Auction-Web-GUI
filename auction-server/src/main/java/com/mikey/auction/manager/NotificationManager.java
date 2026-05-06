@@ -78,10 +78,11 @@ public class NotificationManager {
     public boolean notiAll(AuctionInfo auction, Bidder bidder){
         NotificationDAO notificationDAO = NotificationDAO.getInstance();
         try(Connection connection = notificationDAO.getConnect()){
-            Notifications notifications = notificationDAO.getNotification(connection, auction, bidder);
-            ArrayList<Integer> list = notificationDAO.findNotificationList(connection, auction.getId());
-            return notificationDAO.notiAll(connection, notifications, list);
-        }catch (SQLException e){
+            String message = "Người dùng " + bidder.getUsername() + " vừa đấu giá món hàng " + auction.getItemInfo().getTitle();
+            ArrayList<Integer> list = notificationDAO.findNotificationList(connection, auction.getId(), bidder.getId());
+
+            return notificationDAO.notiAll(connection, auction.getId(), message, list);
+        } catch (SQLException e){
             e.printStackTrace();
             return false;
         }

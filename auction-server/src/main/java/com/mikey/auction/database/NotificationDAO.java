@@ -56,30 +56,28 @@ public class NotificationDAO extends BaseDAO {
             throw new SQLException("Tạo thông báo thất bại, không có dòng nào được thay đổi.");
         }
     }
-    public boolean notiAll(Connection connection, Notifications notification, ArrayList<Integer> log) throws SQLException {
+    public boolean notiAll(Connection connection, int auctionId, String message, ArrayList<Integer> log) throws SQLException {
         String query = "INSERT INTO notification(userId, auctionId, message, isChecked) VALUES(?,?,?,?)";
-        
+
         try (PreparedStatement pr = connection.prepareStatement(query)) {
             for (int userId : log) {
-          
-                if (userId != notification.getUserId()) {
-                    pr.setInt(1, userId);
-                    pr.setInt(2, notification.getAuctionId()); 
-                    pr.setString(3, notification.getMessage()); 
-                    pr.setBoolean(4, false); 
-                    
-                    pr.addBatch(); 
-                }
+                pr.setInt(1, userId);
+                pr.setInt(2, auctionId);
+                pr.setString(3, message);
+                pr.setBoolean(4, false);
+
+                pr.addBatch();
             }
             pr.executeBatch();
             return true;
         }
     }
-    public ArrayList<Integer> findNotificationList(Connection connection,int auctionId) throws SQLException{
-        String query = "SELECT userId FROM notificationList WHERE auctionId = ?";
+    public ArrayList<Integer> findNotificationList(Connection connection,int auctionId, int userId) throws SQLException{
+        String query = "SELECT userId FROM notificationList WHERE auctionId = ? AND userId != ?";
         ArrayList<Integer> log = new ArrayList<>();
         try(PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1,auctionId);
+            pr.setInt(2,userId);
             ResultSet rs = pr.executeQuery();
             while (rs.next()){
                 log.add(rs.getInt("userId"));
@@ -88,7 +86,7 @@ public class NotificationDAO extends BaseDAO {
         }
     }
     public ArrayList<Notifications> checkNotifications(Connection connection,int userId) throws SQLException{
-        String query = "SELECT * FROM notification WHERE userId = ?";
+        String query = "SELECT * FROM notification WHERE userId = ? ORDER BY createdAt DESC LIMIT 30 ";
         ArrayList<Notifications> notifications = new ArrayList<>();
         try(PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1,userId);
