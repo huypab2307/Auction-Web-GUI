@@ -107,4 +107,8 @@ public class AuctionHubController implements SearchListener {
             e.printStackTrace();
         }
     }
+
+    public void toDashBoard(ActionEvent actionEvent) {
+        SceneChanger.getInstance().toUserGui(user);
+    }
 }

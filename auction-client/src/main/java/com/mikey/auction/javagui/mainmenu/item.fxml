@@ -19,8 +19,11 @@
                         <Rectangle arcHeight="30" arcWidth="30" height="140" width="250" />
                     </clip>
                 </ImageView>
-                <Label fx:id="type" style="-fx-background-color: #00acff; -fx-text-fill: white; -fx-padding: 2 10; -fx-background-radius: 5;" text="type">
+                <Label fx:id="type" style="-fx-background-color: #0066ff; -fx-text-fill: white; -fx-padding: 2 10; -fx-background-radius: 5;" text="type">
                     <StackPane.margin><Insets left="10" top="10" /></StackPane.margin>
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
                 </Label>
             </children>
         </StackPane>
