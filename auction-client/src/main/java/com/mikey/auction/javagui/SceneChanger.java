@@ -29,7 +29,10 @@ public class SceneChanger {
     }
 
     public void toLogin() {
-        navigate("login/login.fxml", "Login", null);
+        navigate("login/login.fxml", "Login", loader -> {
+            mainStage.setFullScreen(false);
+            mainStage.setResizable(false);
+        });
     }
 
     public void toMainMenu(User user) {
@@ -37,6 +40,8 @@ public class SceneChanger {
             AuctionHubController controller = loader.getController();
             controller.setUser(user);
             controller.loadAuction();
+            mainStage.setFullScreen(true);
+            mainStage.setResizable(true);
         });
     }
 
@@ -89,9 +94,6 @@ public class SceneChanger {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            if (consumer != null) {
-                consumer.prepare(loader);
-            }
 
             mainStage.setTitle(title);
             if (mainStage.getScene() == null) {
@@ -100,6 +102,9 @@ public class SceneChanger {
                 mainStage.getScene().setRoot(root);
             }
             mainStage.show();
+            if (consumer != null) {
+                consumer.prepare(loader);
+            }
         } catch (IOException e) {
             System.err.println("Lỗi chuyển cảnh: " + fxmlPath);
             e.printStackTrace();

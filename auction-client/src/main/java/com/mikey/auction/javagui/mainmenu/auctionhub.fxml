@@ -76,45 +76,45 @@
                 </VBox>
             </content>
         </ScrollPane>
-<!--        <StackPane prefWidth="1091.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">-->
-<!--            <children>-->
-<!--                <ImageView StackPane.alignment="BOTTOM_RIGHT" fitHeight="326" fitWidth="781.0" preserveRatio="false">-->
-<!--                    <image>-->
-<!--                        <Image url="@../../../../../../../../images/movingSpaceSix.gif" />-->
-<!--                    </image>-->
-<!--                </ImageView>-->
-<!--                <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent;">-->
-<!--                    <content>-->
-<!--                        <VBox spacing="30.0" style="-fx-padding: 30; -fx-background-color: transparent;">-->
-<!--                            <children>-->
-<!--                                <StackPane fx:id="pane" prefHeight="200.0" style="-fx-background-color: linear-gradient(to right, #6a11cb, #2575fc); -fx-background-radius: 20;">-->
-<!--                                    <children>-->
-<!--                                        <VBox alignment="CENTER_LEFT" spacing="10.0">-->
-<!--                                            <children>-->
-<!--                                                <Label text="Đấu giá không giới hạn" textFill="WHITE">-->
-<!--                                                    <font><Font name="System Bold" size="30.0" /></font>-->
-<!--                                                </Label>-->
-<!--                                                <Label text="các phiên đấu giá hàng đầu" textFill="WHITE" />-->
-<!--                                                <Button style="-fx-background-color: white; -fx-text-fill: #2575fc; -fx-background-radius: 10; -fx-font-weight: bold;" text="Khám phá ngay" />-->
-<!--                                            </children>-->
-<!--                                            <padding><Insets left="40.0" /></padding>-->
-<!--                                        </VBox>-->
-<!--                                    </children>-->
-<!--                                </StackPane>-->
+        <!--        <StackPane prefWidth="1091.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">-->
+        <!--            <children>-->
+        <!--                <ImageView StackPane.alignment="BOTTOM_RIGHT" fitHeight="326" fitWidth="781.0" preserveRatio="false">-->
+        <!--                    <image>-->
+        <!--                        <Image url="@../../../../../../../../images/movingSpaceSix.gif" />-->
+        <!--                    </image>-->
+        <!--                </ImageView>-->
+        <!--                <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent;">-->
+        <!--                    <content>-->
+        <!--                        <VBox spacing="30.0" style="-fx-padding: 30; -fx-background-color: transparent;">-->
+        <!--                            <children>-->
+        <!--                                <StackPane fx:id="pane" prefHeight="200.0" style="-fx-background-color: linear-gradient(to right, #6a11cb, #2575fc); -fx-background-radius: 20;">-->
+        <!--                                    <children>-->
+        <!--                                        <VBox alignment="CENTER_LEFT" spacing="10.0">-->
+        <!--                                            <children>-->
+        <!--                                                <Label text="Đấu giá không giới hạn" textFill="WHITE">-->
+        <!--                                                    <font><Font name="System Bold" size="30.0" /></font>-->
+        <!--                                                </Label>-->
+        <!--                                                <Label text="các phiên đấu giá hàng đầu" textFill="WHITE" />-->
+        <!--                                                <Button style="-fx-background-color: white; -fx-text-fill: #2575fc; -fx-background-radius: 10; -fx-font-weight: bold;" text="Khám phá ngay" />-->
+        <!--                                            </children>-->
+        <!--                                            <padding><Insets left="40.0" /></padding>-->
+        <!--                                        </VBox>-->
+        <!--                                    </children>-->
+        <!--                                </StackPane>-->
 
-<!--                                <VBox spacing="15.0">-->
-<!--                                    <children>-->
-<!--                                        <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #000000;" text="Tất cả sản phẩm" />-->
-<!--                                        <FlowPane fx:id="mainContainer" hgap="20.0" vgap="20.0">-->
-<!--                                        </FlowPane>-->
-<!--                                    </children>-->
-<!--                                </VBox>-->
-<!--                            </children>-->
-<!--                        </VBox>-->
-<!--                    </content>-->
-<!--                </ScrollPane>-->
-<!--            </children>-->
-<!--        </StackPane>-->
+        <!--                                <VBox spacing="15.0">-->
+        <!--                                    <children>-->
+        <!--                                        <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #000000;" text="Tất cả sản phẩm" />-->
+        <!--                                        <FlowPane fx:id="mainContainer" hgap="20.0" vgap="20.0">-->
+        <!--                                        </FlowPane>-->
+        <!--                                    </children>-->
+        <!--                                </VBox>-->
+        <!--                            </children>-->
+        <!--                        </VBox>-->
+        <!--                    </content>-->
+        <!--                </ScrollPane>-->
+        <!--            </children>-->
+        <!--        </StackPane>-->
     </center>
 
 </BorderPane>
