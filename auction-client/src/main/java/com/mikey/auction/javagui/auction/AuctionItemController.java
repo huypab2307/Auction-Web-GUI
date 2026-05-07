@@ -4,7 +4,7 @@ import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
-import com.mikey.auction.javagui.RandomHelper;
+import com.mikey.auction.javagui.Helper;
 import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.user.User;
@@ -29,9 +29,8 @@ import java.util.Map;
 
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
-import com.mikey.auction.factory.UserFactory;
+import com.mikey.auction.manager.UserManager;
 import com.mikey.auction.javagui.topbar.TopBarController;
-import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.topbar.SearchListener;
 
 
@@ -94,7 +93,7 @@ public class AuctionItemController implements SearchListener {
 
     @Override
     public void onSearchPerformed(ArrayList<AuctionInfo> results) {
-        SceneChanger.getInstance().toMainMenu(user, results);
+        SceneChanger.getInstance().toBidder(user, results);
     }
 
     public void renderStaticInfo() {
@@ -111,7 +110,7 @@ public class AuctionItemController implements SearchListener {
 
             URL src = getClass().getResource(itemSummary.getImagePath());
             image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
-            pane.setStyle("-fx-padding: 40 400 40 100;" + RandomHelper.randomColorPicker());
+            pane.setStyle("-fx-padding: 40 400 40 100;" + Helper.randomColorPicker());
             attributeBox.getChildren().clear();
             Map<String, String> itemInfo = ItemManager.getInstance().findItemById(itemSummary.getItemType(), itemSummary.getItemId()).getSpecificInfo();
             itemInfo.forEach((label, value) -> {
@@ -134,7 +133,7 @@ public class AuctionItemController implements SearchListener {
         bidButton.setText("Đang xử lý...");
 
         try {
-            Bidder bidder = (Bidder) UserFactory.createUser(Role.BIDDER, user);
+            Bidder bidder = (Bidder) UserManager.getInstance().createUser(Role.BIDDER, user);
             if (AuctionManager.getInstance().placeBid(bidder, auctionInfo, auctionInfo.getCurPrice())) {
                 auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
                 showCongratulationEffect(2.5);

@@ -135,4 +135,16 @@ public class NotificationDAO extends BaseDAO {
         throw new SQLException("Không thể thêm user");
 
     }
+    public ArrayList<Integer> findSubscribedAuctions(Connection connection, int userId) throws SQLException {
+        String query = "SELECT auctionId FROM notificationList WHERE userId = ?";
+        ArrayList<Integer> auctions = new ArrayList<>();
+        try (PreparedStatement pr = connection.prepareStatement(query)) {
+            pr.setInt(1, userId);
+            ResultSet rs = pr.executeQuery();
+            while (rs.next()) {
+                auctions.add(rs.getInt("auctionId"));
+            }
+            return auctions;
+        }
+    }
 }

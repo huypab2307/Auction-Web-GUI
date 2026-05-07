@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: #F4F7F6;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.user.UserController">
+    <children>
+        <VBox layoutX="150.0" layoutY="100.0" prefWidth="600.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 0);">
+            <padding>
+                <Insets bottom="40.0" left="40.0" right="40.0" top="30.0" />
+            </padding>
+            <children>
+                <Label text="Account Settings" textFill="#1A202C">
+                    <font>
+                        <Font name="System Bold" size="22.0" />
+                    </font>
+                </Label>
+
+                <HBox spacing="40.0">
+                    <children>
+                        <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Your Username" textFill="#4A5568">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Label>
+                                        <TextField fx:id="usernameField" editable="false" prefHeight="40.0" style="-fx-background-color: #FAFAFA; -fx-border-color: #E2E8F0; -fx-border-radius: 5; -fx-background-radius: 5;" text="Anthony Webb" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT">
+                                            <children>
+                                                <Label text="Password" textFill="#4A5568" HBox.hgrow="ALWAYS">
+                                                    <font>
+                                                        <Font name="System Bold" size="12.0" />
+                                                    </font>
+                                                </Label>
+                                                <AnchorPane HBox.hgrow="ALWAYS" />
+                                                <Hyperlink onAction="#handleChangePassword" text="Change" textFill="#3182CE" />
+                                            </children>
+                                        </HBox>
+                                        <TextField editable="false" prefHeight="40.0" style="-fx-background-color: #FAFAFA; -fx-border-color: #E2E8F0; -fx-border-radius: 5; -fx-background-radius: 5;" text="**********" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Hyperlink onAction="#handleDeleteAccount" text="Delete Your Account" textFill="#E53E3E">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                            <padding>
+                                                <Insets left="-1.0" top="10.0" />
+                                            </padding>
+                                        </Hyperlink>
+                                        <Label text="Bạn sẽ nhận được email xác nhận. Lưu ý mọi dữ liệu sẽ bị xóa vĩnh viễn." textFill="#718096" wrapText="true">
+                                            <font>
+                                                <Font size="11.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <VBox alignment="CENTER" spacing="15.0">
+                            <children>
+                                <Circle fill="#E2E8F0" radius="50.0" stroke="WHITE" strokeType="INSIDE" />
+                                <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="130.0" style="-fx-background-color: #2D3748; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;" text="Upload a picture">
+                                    <font>
+                                        <Font name="System Bold" size="11.0" />
+                                    </font>
+                                </Button>
+                            </children>
+                            <padding>
+                                <Insets top="20.0" />
+                            </padding>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                    <VBox.margin>
+                        <Insets top="20.0" />
+                    </VBox.margin>
+                    <children>
+                        <Button onAction="#cancelHandle" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #EDF2F7; -fx-text-fill: #4A5568; -fx-background-radius: 5; -fx-cursor: hand;" text="Cancel">
+                            <font>
+                                <Font name="System Bold" size="13.0" />
+                            </font>
+                        </Button>
+                        <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #2D3748; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;" text="Save">
+                            <font>
+                                <Font name="System Bold" size="13.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
