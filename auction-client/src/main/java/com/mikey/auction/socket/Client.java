@@ -25,8 +25,14 @@ public class Client {
         return instance;
     }
 
-    public void sendMessage(String message) {
+    public synchronized String sendAndReceiveMessage(String message) {
         out.println(message);
+        try {
+            return in.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
-    public void re
 }

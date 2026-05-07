@@ -4,8 +4,11 @@ import java.io.PrintWriter;
 
 import com.google.gson.Gson;
 import com.mikey.auction.database.AuctionDAO;
+import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.ItemType;
 import com.mikey.auction.manager.AuctionManager;
+import com.mikey.auction.user.Bidder;
 
 public class AuctionHandler {
     private static String response;
@@ -36,7 +39,28 @@ public class AuctionHandler {
                         case "SEARCH":
                             String keyword = gson.fromJson(parts[2].trim(), String.class); 
                             response = "AUCTION|SEARCH|" + gson.toJson(AuctionDAO.getInstance().searchAuction(keyword));
-                            break;   
+                            break;
+                        case "CREATE":
+                            try {
+                                 AuctionInfo p = gson.fromJson(parts[2], AuctionInfo.class);
+                                AuctionManager.getInstance().uploadItem(p.getItemInfo().toItem(), p.getCurPrice(), p.getBidStep(), p.getStartTime(), p.getEndTime());
+                                response = "AUCTION|CREATE|SUCCESS";
+                            } catch (Exception e) {
+                                response = "AUCTION|CREATE|FAIL";
+                            }
+                            break;
+                        case "PLACEBID":
+                            try {
+                                int auctionId = gson.fromJson(parts[2].trim(), int.class);
+                                int userId = gson.fromJson(parts[3].trim(), int.class);
+                                AuctionInfo auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionId);
+                                Bidder bidder = (Bidder)UserDAO.getInstance().findById(userId);
+                                AuctionManager.getInstance().placeBid(bidder, auctionInfo, auctionInfo.getCurPrice());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+
                     }
                     if (!response.isEmpty()) {
                 synchronized (out) { 
