@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.collections.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1180.0" styleClass="root-pane" stylesheets="@../Style/Seller.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.seller.SellerController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1180.0" styleClass="root-pane" stylesheets="@../Style/Seller.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.seller.SellerController">
    <top>
       <fx:include fx:id="topBar" source="../topBar/topbar.fxml" />
    </top>
@@ -28,6 +40,7 @@
                               <VBox spacing="5.0" styleClass="input-group">
                                  <Label styleClass="field-label" text="Tên sản phẩm:" />
                                  <TextField fx:id="itemName" prefHeight="35.0" prefWidth="372.0" promptText="Nhập tên vật phẩm đấu giá" styleClass="input-field" />
+                                    <Label fx:id="errorItemName" prefHeight="24.0" prefWidth="479.0" text="Label" />
                               </VBox>
                               
                               <VBox spacing="5.0" styleClass="input-group">
@@ -41,11 +54,13 @@
                                        </FXCollections>
                                     </items>
                                  </ComboBox>
+                                    <Label prefHeight="24.0" prefWidth="479.0" text="Label" />
                               </VBox>
                               
                               <VBox spacing="5.0" styleClass="input-group">
                                  <Label styleClass="field-label" text="Mô tả:" />
                                  <TextArea fx:id="itemDescription" prefHeight="120.0" prefWidth="450.0" promptText="Mô tả chi tiết về sản phẩm..." styleClass="input-area" wrapText="true" />
+                                    <Label prefHeight="24.0" prefWidth="479.0" text="Label" />
                               </VBox>
                            </children>
                         </VBox>
@@ -105,24 +120,28 @@
                                        <children>
                                           <Label styleClass="field-label" text="Nghệ sĩ:" />
                                           <TextField fx:id="artist" prefHeight="35.0" promptText="Nhập tên nghệ sĩ" styleClass="input-field" />
+                                             <Label fx:id="errorArtist" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                     <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                        <children>
                                           <Label styleClass="field-label" text="Năm sáng tác:" />
                                           <TextField fx:id="yearOfcreation" prefHeight="35.0" promptText="Nhập năm sáng tác" styleClass="input-field" />
+                                             <Label fx:id="errorYear" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                     <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="Kích thước:" />
                                           <TextField fx:id="dimensions" prefHeight="35.0" promptText="VD: 23x29" styleClass="input-field" />
+                                             <Label fx:id="errorDimensions" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                     <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="Chất liệu:" />
                                           <TextField fx:id="medium" prefHeight="35.0" promptText="VD: Gỗ" styleClass="input-field" />
+                                             <Label fx:id="errorMedium" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                  </children>
@@ -153,30 +172,35 @@
                                        <children>
                                           <Label alignment="CENTER" contentDisplay="CENTER" styleClass="field-label" text="Giá khởi điểm:" />
                                           <TextField fx:id="price" prefHeight="35.0" promptText="Nhập giá khởi điểm" styleClass="input-field" />
+                                             <Label fx:id="errorPrice" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.rowIndex="1">
                                        <children>
                                           <Label contentDisplay="TOP" prefHeight="26.0" prefWidth="209.0" styleClass="field-label" text="Thời gian bắt đầu:" />
                                           <DatePicker fx:id="startTime" prefHeight="35.0" prefWidth="385.0" promptText="Chọn ngày bắt đầu" styleClass="input-date" />
+                                             <Label fx:id="errorStartTime" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <children>
                                           <Label styleClass="field-label" text="Thời gian kết thúc:" />
                                           <DatePicker fx:id="endTime" prefHeight="35.0" prefWidth="297.0" promptText="Chọn ngày kết thúc" styleClass="input-date" />
+                                             <Label fx:id="errorEndTime" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.columnIndex="1">
                                        <children>
                                           <Label alignment="TOP_LEFT" styleClass="field-label" text="Bước giá:" />
                                           <TextField fx:id="stepPrice" prefHeight="35.0" promptText="Nhập bước giá" styleClass="input-field" />
+                                             <Label fx:id="errorStepPrice" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                     <VBox alignment="CENTER_LEFT" spacing="5" GridPane.rowIndex="2">
                                        <children>
                                           <Label alignment="TOP_LEFT" styleClass="field-label" text="Mức giá cuối:" />
                                           <TextField fx:id="finalPrice" prefHeight="35.0" promptText="Nhập mức giá cuối" styleClass="input-field" />
+                                             <Label fx:id="errorFinalPrice" prefHeight="24.0" prefWidth="479.0" text="Label" />
                                        </children>
                                     </VBox>
                                  </children>

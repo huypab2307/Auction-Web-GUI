@@ -1,51 +1,30 @@
 package com.mikey.auction.javagui.seller;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Observable;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.animation.PauseTransition;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import java.io.IOException;
-import java.util.ResourceBundle;
-
-import com.mikey.auction.auction.Auction;
-import com.mikey.auction.database.ArtsDAO;
 import com.mikey.auction.user.User;
-import com.mysql.cj.xdevapi.InsertStatement;
-import com.zaxxer.hikari.util.ClockSource.Factory;
+import com.mikey.auction.auction.Auction;
 import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.javagui.topbar.TopBarController;
-import com.mikey.auction.database.ElectronicsDAO;
-import com.mikey.auction.database.VehicleDAO;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
-import com.mikey.auction.items.*;
 
 import javafx.stage.FileChooser;
 import java.io.File;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.event.ActionEvent;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
@@ -80,6 +59,9 @@ public class SellerController {
     private List<ImageView> previewList;
 
     @FXML
+    private Label errorArtist, errorYear, errorDimensions, errorMedium;
+
+    @FXML
     public void initialize() {
         previewList = List.of(preview1, preview2, preview3, preview4, preview5);
         type.setValue("Arts");
@@ -103,7 +85,7 @@ public class SellerController {
             fxmlPath = "Arts.fxml";
         } else if (selected.equals("Electronics")) {
             fxmlPath = "Electronics.fxml";
-        } else if (selected.equals("Vehicles")) {
+        } else if (selected.equals("Vehicle")) {
             fxmlPath = "Vehicles.fxml";
         }
 
@@ -157,14 +139,93 @@ public class SellerController {
 
     @FXML
     private void handleSubmit(ActionEvent e) {
+        boolean hasError = false;
+
+        checkItemName();
+        checkPrice();
+        checkStepPrice();
+        checkFinalPrice();
+        checkDates();
+
+        if (!errorItemName.getText().isEmpty()) {
+            hasError = true;
+        }
+        if (!errorPrice.getText().isEmpty()) {
+            hasError = true;
+        }
+        if (!errorStepPrice.getText().isEmpty()) {
+            hasError = true;
+        }
+        if (!errorFinalPrice.getText().isEmpty()) {
+            hasError = true;
+        }
+        if (!errorStartTime.getText().isEmpty()) {
+            hasError = true;
+        }
+        if (!errorEndTime.getText().isEmpty()) {
+            hasError = true;
+        }
+
+        String selected = type.getValue();
+        if (selected == null) {
+            System.out.println("Chưa chọn danh mục!");
+            return;
+        }
+
+        if (selected.equals("Arts")) {
+            checkArtist();
+            checkYearOfCreation();
+            checkDimensions();
+            checkMedium();
+
+            String[] ids = {"#errorArtist", "#errorYear", "#errorDimensions", "#errorMedium"};
+            if (hasDynamicError(ids)) {
+                hasError = true;
+            }
+        } else if (selected.equals("Electronics")) {
+            checkEBrand();
+            checkEPower();
+            checkEVoltage();
+            checkECurrent();
+            checkEStatus();
+            checkEColor();
+            checkEWeight();
+
+            String[] ids = {"#errorEBrand", "#errorEPower", "#errorEVoltage", "#errorECurrent", "#errorEStatus", "#errorEColor", "#errorEWeight"};
+            if (hasDynamicError(ids)) {
+                hasError = true;
+            }
+        } else if (selected.equals("Vehicle")) {
+            checkVMileage();
+            checkVMFG();
+            checkVBrand();
+            checkVModel();
+            checkVTrim();
+            checkVTitleStatus();
+
+            String[] ids = {"#errorVMileage", "#errorVMFG", "#errorVBrand", "#errorVModel", "#errorVTrim", "#errorVTitleStatus"};
+            if (hasDynamicError(ids)) {
+                hasError = true;
+            }
+        }
+
+        if (hasError) {
+            System.out.println("Form bị lỗi, không gửi dữ liệu!");
+            return;
+        }
+
+        System.out.println("Mọi thứ đã chuẩn 100%. Bắt đầu lấy dữ liệu...");
+
         String name = itemName.getText();
         String description = itemDescription.getText();
-        String selected = type.getValue().toUpperCase();
 
-        String imagePath = null;
+        String imagePath = "/images/earth.png";
 
         if (selectedFiles != null && !selectedFiles.isEmpty()) {
-            imagePath = saveImage(selectedFiles.get(0)); 
+            String savedPath = saveImage(selectedFiles.get(0)); 
+            if (savedPath != null) {
+                imagePath = savedPath; 
+            }
         }
 
         HashMap<String, String> itemData = new HashMap<>();
@@ -174,29 +235,25 @@ public class SellerController {
         itemData.put("sellerId", String.valueOf(user.getId()));
         itemData.put("imagePath", imagePath);
 
-
-        if (selected == null) {
-            System.out.println("Vui lòng chọn loại sản phẩm.");
-            return;
-        }
         switch (selected) {
-            case "ARTS":
+            case "Arts":
                 findArtworkData(itemData);
                 break;
-            case "ELECTRONICS":
+            case "Electronics":
                 findElectronicsData(itemData);
                 break;
-            case "VEHICLE":
+            case "Vehicle":
                 findVehicleData(itemData);
                 break;
             default:
                 System.out.println("Loại sản phẩm không hợp lệ.");
                 return ;
         }
+
+        System.out.println("Mọi thứ đã chuẩn 100%. Bắt đầu gửi dữ liệu lên Server...");
         AuctionManager.getInstance().uploadItem(ItemManager.getInstance().preProcessing(itemData), Double.parseDouble(price.getText()), Double.parseDouble(stepPrice.getText()), startTime.getValue().atStartOfDay(), endTime.getValue().atStartOfDay());
 
         showCongratulationEffect(2.5);
-        
     }
 
 
@@ -242,6 +299,7 @@ public class SellerController {
         itemData.put("dimensions", dim);
         itemData.put("medium", med);
     }
+
     public void findElectronicsData(HashMap<String, String> itemData) {
         TextField brandField = (TextField) itemInfo.lookup("#brand");
         TextField powerField = (TextField) itemInfo.lookup("#power");
@@ -313,5 +371,477 @@ public class SellerController {
             mainStackPane.getChildren().remove(animImg);
         });
         cleanup.play();
+    }
+
+    @FXML
+    private Label errorItemName, errorPrice, errorStepPrice, errorFinalPrice, errorStartTime, errorEndTime;
+
+private void setTextFieldError(TextField field, Label label, String message) {
+        if (!field.getStyleClass().contains("input-error")) {
+            field.getStyleClass().add("input-error");
+        }
+        if (!label.getStyleClass().contains("label-error")) {
+            label.getStyleClass().add("label-error");
+        }
+        label.setText(message);
+    }
+
+    private void clearTextFieldError(TextField field, Label label) {
+        field.getStyleClass().remove("input-error");
+        label.getStyleClass().remove("label-error");
+        label.setText("");
+    }
+
+    private void setDatePickerError(DatePicker field, Label label, String message) {
+        if (!field.getStyleClass().contains("input-error")) {
+            field.getStyleClass().add("input-error");
+        }
+        if (!label.getStyleClass().contains("label-error")) {
+            label.getStyleClass().add("label-error");
+        }
+        label.setText(message);
+    }
+
+    private void clearDatePickerError(DatePicker field, Label label) {
+        field.getStyleClass().remove("input-error");
+        label.getStyleClass().remove("label-error");
+        label.setText("");
+    }
+
+    private void hideLabels(String[] ids) {
+        for (String id : ids) {
+            Label lbl = (Label) itemInfo.lookup(id);
+            if (lbl != null) {
+                lbl.setText("");
+                lbl.getStyleClass().remove("label-error");
+            }
+        }
+    }
+
+    private boolean hasDynamicError(String[] ids) {
+        for (String id : ids) {
+            Label lbl = (Label) itemInfo.lookup(id);
+            if (lbl != null) {
+                if (!lbl.getText().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void clearDynamicLabels(String selected) {
+        if (selected.equals("Arts")) {
+            String[] ids = {"#errorArtist", "#errorYear", "#errorDimensions", "#errorMedium"};
+            hideLabels(ids);
+        } else if (selected.equals("Electronics")) {
+            String[] ids = {"#errorEBrand", "#errorEPower", "#errorEVoltage", "#errorECurrent", "#errorEStatus", "#errorEColor", "#errorEWeight"};
+            hideLabels(ids);
+        } else if (selected.equals("Vehicle")) {
+            String[] ids = {"#errorVMileage", "#errorVMFG", "#errorVBrand", "#errorVModel", "#errorVTrim", "#errorVTitleStatus"};
+            hideLabels(ids);
+        }
+    }
+
+    @FXML
+    public void checkItemName() {
+        String text = itemName.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(itemName, errorItemName, "Không được bỏ trống!");
+        } else if (text.length() < 5) {
+            setTextFieldError(itemName, errorItemName, "Tên phải từ 5 kí tự trở lên!");
+        } else {
+            clearTextFieldError(itemName, errorItemName);
+        }
+    }
+
+    @FXML
+    public void checkPrice() {
+        String text = price.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(price, errorPrice, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double p = Double.parseDouble(text);
+            if (p <= 0) {
+                setTextFieldError(price, errorPrice, "Giá phải lớn hơn 0!");
+            } else {
+                clearTextFieldError(price, errorPrice);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(price, errorPrice, "Chỉ được nhập số!");
+        }
+    }
+
+    @FXML
+    public void checkStepPrice() {
+        String text = stepPrice.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(stepPrice, errorStepPrice, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double s = Double.parseDouble(text);
+            if (s <= 0) {
+                setTextFieldError(stepPrice, errorStepPrice, "Bước giá phải lớn hơn 0!");
+            } else {
+                clearTextFieldError(stepPrice, errorStepPrice);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(stepPrice, errorStepPrice, "Chỉ được nhập số!");
+        }
+    }
+
+    @FXML
+    public void checkFinalPrice() {
+        String text = finalPrice.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(finalPrice, errorFinalPrice, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double f = Double.parseDouble(text);
+            double startP = 0;
+
+            if (!price.getText().isEmpty()) {
+                try {
+                    startP = Double.parseDouble(price.getText());
+                } catch (Exception e) {
+                    startP = 0;
+                }
+            }
+
+            if (f <= 0) {
+                setTextFieldError(finalPrice, errorFinalPrice, "Giá cuối phải lớn hơn 0!");
+            } else if (startP > 0) {
+                if (f <= startP) {
+                    setTextFieldError(finalPrice, errorFinalPrice, "Giá cuối phải lớn hơn giá khởi điểm!");
+                } else {
+                    clearTextFieldError(finalPrice, errorFinalPrice);
+                }
+            } else {
+                clearTextFieldError(finalPrice, errorFinalPrice);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(finalPrice, errorFinalPrice, "Chỉ được nhập số!");
+        }
+    }
+
+    @FXML
+    public void checkDates() {
+        boolean hasEmptyDate = false;
+
+        if (startTime.getValue() == null) {
+            setDatePickerError(startTime, errorStartTime, "Chưa chọn ngày bắt đầu!");
+            hasEmptyDate = true;
+        } else {
+            clearDatePickerError(startTime, errorStartTime);
+        }
+
+        if (endTime.getValue() == null) {
+            setDatePickerError(endTime, errorEndTime, "Chưa chọn ngày kết thúc!");
+            hasEmptyDate = true;
+        } else {
+            clearDatePickerError(endTime, errorEndTime);
+        }
+
+        if (!hasEmptyDate) {
+            if (startTime.getValue().isBefore(LocalDate.now())) {
+                setDatePickerError(startTime, errorStartTime, "Ngày bắt đầu phải từ ngày hôm nay!");
+            }
+
+            if (endTime.getValue().isBefore(startTime.getValue())) {
+                setDatePickerError(endTime, errorEndTime, "Ngày kết thúc phải sau ngày bắt đầu!");
+            }
+        }
+    }
+
+    public void checkArtist() {
+        TextField field = (TextField) itemInfo.lookup("#artist");
+        Label error = (Label) itemInfo.lookup("#errorArtist");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkYearOfCreation() {
+        TextField field = (TextField) itemInfo.lookup("#yearOfcreation");
+        Label error = (Label) itemInfo.lookup("#errorYear");
+        if (field == null || error == null) return;
+
+        String text = field.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            int val = Integer.parseInt(text);
+            int currentYear = java.time.Year.now().getValue();
+
+            if (val <= 0) {
+                setTextFieldError(field, error, "Năm không hợp lệ!");
+            } else if (val > currentYear) {
+                setTextFieldError(field, error, "Năm không hợp lệ!");
+            } else {
+                clearTextFieldError(field, error);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(field, error, "Chỉ được nhập số!");
+        }
+    }
+
+    public void checkDimensions() {
+        TextField field = (TextField) itemInfo.lookup("#dimensions");
+        Label error = (Label) itemInfo.lookup("#errorDimensions");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkMedium() {
+        TextField field = (TextField) itemInfo.lookup("#medium");
+        Label error = (Label) itemInfo.lookup("#errorMedium");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkEBrand() {
+        TextField field = (TextField) itemInfo.lookup("#brand");
+        Label error = (Label) itemInfo.lookup("#errorEBrand");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkEPower() {
+        TextField field = (TextField) itemInfo.lookup("#power");
+        Label error = (Label) itemInfo.lookup("#errorEPower");
+        if (field == null || error == null) return;
+
+        String text = field.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double val = Double.parseDouble(text);
+            if (val <= 0) {
+                setTextFieldError(field, error, "Công suất phải lớn hơn 0!");
+            } else {
+                clearTextFieldError(field, error);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(field, error, "Chỉ được nhập số!");
+        }
+    }
+
+    public void checkEVoltage() {
+        TextField field = (TextField) itemInfo.lookup("#voltage");
+        Label error = (Label) itemInfo.lookup("#errorEVoltage");
+        if (field == null || error == null) return;
+
+        String text = field.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double val = Double.parseDouble(text);
+            if (val <= 0) {
+                setTextFieldError(field, error, "Điện áp phải lớn hơn 0!");
+            } else {
+                clearTextFieldError(field, error);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(field, error, "Chỉ được nhập số!");
+        }
+    }
+
+    public void checkECurrent() {
+        TextField field = (TextField) itemInfo.lookup("#current");
+        Label error = (Label) itemInfo.lookup("#errorECurrent");
+        if (field == null || error == null) return;
+
+        String text = field.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double val = Double.parseDouble(text);
+            if (val <= 0) {
+                setTextFieldError(field, error, "Cường độ phải lớn hơn 0!");
+            } else {
+                clearTextFieldError(field, error);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(field, error, "Chỉ được nhập số!");
+        }
+    }
+
+    public void checkEStatus() {
+        TextField field = (TextField) itemInfo.lookup("#status");
+        Label error = (Label) itemInfo.lookup("#errorEStatus");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkEColor() {
+        TextField field = (TextField) itemInfo.lookup("#color");
+        Label error = (Label) itemInfo.lookup("#errorEColor");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkEWeight() {
+        TextField field = (TextField) itemInfo.lookup("#weight");
+        Label error = (Label) itemInfo.lookup("#errorEWeight");
+        if (field == null || error == null) return;
+
+        String text = field.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double val = Double.parseDouble(text);
+            if (val <= 0) {
+                setTextFieldError(field, error, "Trọng lượng phải lớn hơn 0!");
+            } else {
+                clearTextFieldError(field, error);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(field, error, "Chỉ được nhập số!");
+        }
+    }
+
+    public void checkVMileage() {
+        TextField field = (TextField) itemInfo.lookup("#mileage");
+        Label error = (Label) itemInfo.lookup("#errorVMileage");
+        if (field == null || error == null) return;
+
+        String text = field.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            double val = Double.parseDouble(text);
+            if (val < 0) {
+                setTextFieldError(field, error, "Số km không được âm!");
+            } else {
+                clearTextFieldError(field, error);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(field, error, "Chỉ được nhập số!");
+        }
+    }
+
+    public void checkVMFG() {
+        TextField field = (TextField) itemInfo.lookup("#mFG");
+        Label error = (Label) itemInfo.lookup("#errorVMFG");
+        if (field == null || error == null) return;
+
+        String text = field.getText();
+        if (text.isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+            return;
+        }
+
+        try {
+            int val = Integer.parseInt(text);
+            if (val <= 0) {
+                setTextFieldError(field, error, "Năm phải lớn hơn 0!");
+            } else {
+                clearTextFieldError(field, error);
+            }
+        } catch (NumberFormatException e) {
+            setTextFieldError(field, error, "Chỉ được nhập số!");
+        }
+    }
+
+    public void checkVBrand() {
+        TextField field = (TextField) itemInfo.lookup("#brand");
+        Label error = (Label) itemInfo.lookup("#errorVBrand");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkVModel() {
+        TextField field = (TextField) itemInfo.lookup("#model");
+        Label error = (Label) itemInfo.lookup("#errorVModel");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkVTrim() {
+        TextField field = (TextField) itemInfo.lookup("#trim");
+        Label error = (Label) itemInfo.lookup("#errorVTrim");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
+    }
+
+    public void checkVTitleStatus() {
+        TextField field = (TextField) itemInfo.lookup("#titleStatus");
+        Label error = (Label) itemInfo.lookup("#errorVTitleStatus");
+        if (field == null || error == null) return;
+
+        if (field.getText().isEmpty()) {
+            setTextFieldError(field, error, "Không được bỏ trống!");
+        } else {
+            clearTextFieldError(field, error);
+        }
     }
 }
