@@ -124,6 +124,7 @@ public class RegisterController {
 
         boolean isUserValid = validateASCII(text1);
         boolean isPassValid = validateASCII(text2);
+        System.out.println(validateASCII(text1));
 
         if (!isUserValid) {
             username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 1px;");

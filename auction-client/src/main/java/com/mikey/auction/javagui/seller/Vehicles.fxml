@@ -26,36 +26,42 @@
                <children>
                   <Label styleClass="field-label" text="Số km đã đi:" />
                   <TextField fx:id="mileage" prefHeight="35.0" promptText="Nhập số km đã đi" styleClass="input-field" />
+                  <Label fx:id="errorVMileage" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" styleClass="input-group" GridPane.columnIndex="1">
                <children>
                   <Label styleClass="field-label" text="Ngày sản xuất:" />
                   <TextField fx:id="mFG" prefHeight="35.0" promptText="Nhập ngày sản xuất" styleClass="input-field" />
+                  <Label fx:id="errorVMFG" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" styleClass="input-group" GridPane.rowIndex="1">
                <children>
                   <Label styleClass="field-label" text="Thương hiệu:" />
                   <TextField fx:id="brand" prefHeight="35.0" promptText="Nhập thương hiệu" styleClass="input-field" />
+                  <Label fx:id="errorVBrand" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" styleClass="input-group" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <children>
                   <Label styleClass="field-label" text="Dòng xe:" />
                   <TextField fx:id="model" prefHeight="35.0" promptText="Nhập dòng xe" styleClass="input-field" />
+                  <Label fx:id="errorVModel" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" styleClass="input-group" GridPane.rowIndex="2">
                <children>
                   <Label styleClass="field-label" text="Phiên bản:" />
                   <TextField fx:id="trim" prefHeight="35.0" promptText="Nhập phiên bản" styleClass="input-field" />
+                  <Label fx:id="errorVTrim" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" styleClass="input-group" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <children>
                   <Label styleClass="field-label" text="Tình trạng giấy tờ:" />
                   <TextField fx:id="titleStatus" prefHeight="35.0" promptText="Nhập tình trạng giấy tờ" styleClass="input-field" />
+                  <Label fx:id="errorVTitleStatus" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
          </children>

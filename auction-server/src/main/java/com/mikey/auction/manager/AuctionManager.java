@@ -5,15 +5,11 @@ import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.Item;
 import com.mikey.auction.user.Bidder;
-import com.mikey.auction.user.Role;
-import com.mikey.auction.user.Seller;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
 public class AuctionManager {

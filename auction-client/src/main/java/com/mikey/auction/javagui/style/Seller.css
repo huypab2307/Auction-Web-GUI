@@ -227,3 +227,14 @@
     -fx-effect: dropshadow(three-pass-box, rgba(139, 92, 246, 0.2), 5, 0, 0, 2); 
     -fx-opacity: 0.9;
 }
+
+.input-error {
+    -fx-border-color: #EF4444 !important; 
+    -fx-background-color: #FEF2F2 !important; 
+}
+
+.label-error {
+    -fx-text-fill: #EF4444 !important; /* Chữ đỏ */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}

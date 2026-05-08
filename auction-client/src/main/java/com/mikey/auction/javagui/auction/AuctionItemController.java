@@ -1,5 +1,6 @@
 package com.mikey.auction.javagui.auction;
 
+import com.mikey.auction.auction.Auction;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
 import com.mikey.auction.manager.AuctionManager;
@@ -23,6 +24,8 @@ import com.mikey.auction.user.Role;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
@@ -31,7 +34,6 @@ import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
 import com.mikey.auction.factory.UserFactory;
 import com.mikey.auction.javagui.topbar.TopBarController;
-import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.topbar.SearchListener;
 
 
@@ -117,6 +119,23 @@ public class AuctionItemController implements SearchListener {
             itemInfo.forEach((label, value) -> {
                 attributeBox.getChildren().add(new Label(label + ": " + value));
             });
+            
+            try (Connection connection = AuctionDAO.getInstance().getConnect()) {
+                Auction auction = AuctionDAO.getInstance().findById(connection,auctionInfo.getId());
+
+                if (user.getId() == auction.getSellerId()) {
+                    bidButton.setVisible(false);
+                    bidButton.setManaged(false); 
+                    return;
+                } else {
+                    bidButton.setVisible(true);
+                    bidButton.setManaged(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.err.println("Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
+                return;
+            }
         }catch (Exception e){
             System.err.println(e.getMessage());
         }
@@ -129,7 +148,6 @@ public class AuctionItemController implements SearchListener {
 
     @FXML
     public void onBidHandle(ActionEvent actionEvent) {
-        Button bidButton = (Button) actionEvent.getSource();
         bidButton.setDisable(true);
         bidButton.setText("Đang xử lý...");
 
