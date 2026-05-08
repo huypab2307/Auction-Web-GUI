@@ -369,7 +369,6 @@ public class SellerController {
         PauseTransition cleanup = new PauseTransition(Duration.seconds(seconds));
         cleanup.setOnFinished(event -> {
             mainStackPane.getChildren().remove(animImg);
-            SceneChanger.getInstance().toUserGui(user);
         });
         cleanup.play();
     }

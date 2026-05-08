@@ -121,7 +121,7 @@ public class LoginController {
                     Platform.runLater(() -> {
                         try {
                             if (finalUser != null) {
-                                SceneChanger.getInstance().toMainMenu(finalUser);
+                                SceneChanger.getInstance().toBidder(finalUser);
                             }
                         } catch (Exception ex) {
                             System.out.println("Lỗi chuyển cảnh: " + ex.getMessage());

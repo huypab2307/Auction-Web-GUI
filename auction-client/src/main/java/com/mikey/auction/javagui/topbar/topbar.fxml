@@ -60,8 +60,6 @@
                         <items>
                             <MenuItem mnemonicParsing="false" onAction="#userGuiHandle" styleClass="menuItem" text="👤 Thông tin cá nhân" />
                             <MenuItem mnemonicParsing="false" onAction="#sellerGuiHandle" styleClass="menuItem" text="👤 Đến trang người bán" />
-                            <MenuItem mnemonicParsing="false" styleClass="menuItem" text="👤 lịch sử giao dịch" />
-                            <MenuItem mnemonicParsing="false" styleClass="menuItem" text="⚙️ Cài đặt" />
                             <SeparatorMenuItem mnemonicParsing="false" />
                             <MenuItem mnemonicParsing="false" onAction="#logoutHandle" styleClass="menuItem" text="🚪 Đăng xuất" />
 

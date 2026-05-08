@@ -2,6 +2,7 @@ package com.mikey.auction.manager;
 
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.database.AuctionDAO;
+import com.mikey.auction.database.NotificationDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.Item;
 import com.mikey.auction.user.Bidder;
@@ -65,6 +66,22 @@ public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice)
 
     public ArrayList<AuctionInfo> auctionList(){
         return AuctionDAO.getInstance().getAllAuctions();
+    }
+
+    public ArrayList<AuctionInfo> getFollowedAuctions(int userId){
+        AuctionDAO auctionDAO = AuctionDAO.getInstance();
+        ArrayList<AuctionInfo> auctionList = new ArrayList<>();
+        try(Connection connection = auctionDAO.getConnect()) {
+            ArrayList<Integer> auctionIdList = NotificationDAO.getInstance().findSubscribedAuctions(connection, userId);
+            for (int id : auctionIdList) {
+                auctionList.add(auctionDAO.searchAuctionById(id));
+            }
+            return auctionList;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
     }
     
 }

@@ -3,9 +3,9 @@ package com.mikey.auction.javagui.topbar;
 
 import com.mikey.auction.auction.Notifications;
 import com.mikey.auction.database.AuctionDAO;
-import com.mikey.auction.database.NotificationDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.javagui.SceneChanger;
+import com.mikey.auction.javagui.user.UserController;
 import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.user.User;
 import javafx.event.ActionEvent;
@@ -15,18 +15,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
+import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.management.Notification;
-
 
 
 public class TopBarController {
@@ -68,7 +62,7 @@ public class TopBarController {
     }
     public void toHubHandle(ActionEvent actionEvent) {
         if (user != null) {
-            SceneChanger.getInstance().toMainMenu(user);
+            SceneChanger.getInstance().toBidder(user);
         } else {
             // no user info available: fallback to login
             SceneChanger.getInstance().toLogin();
@@ -77,11 +71,21 @@ public class TopBarController {
 
     @FXML
     public void userGuiHandle(ActionEvent actionEvent) {
-        if (user != null) {
-            SceneChanger.getInstance().toUserGui(user);
-        } else {
-            SceneChanger.getInstance().toLogin();
-        }
+        SceneChanger.getInstance().openSettings(new Stage(), user);
+//        Stage stage = new Stage();
+//        try {
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/user/User.fxml"));
+//            Parent root = loader.load();
+//            UserController controller = loader.getController();
+//            controller.setUser(user);
+//            stage.setTitle("User");
+//            stage.setResizable(false);
+//            stage.setAlwaysOnTop(true);
+//            stage.setScene(new javafx.scene.Scene(root));
+//            stage.show();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
     @FXML
     public void sellerGuiHandle(ActionEvent actionEvent) {
@@ -105,5 +109,8 @@ public class TopBarController {
             notificationController.setContent(notification);
             mainContainer.getChildren().add(root);
         }
+    }
+
+    public void userConfigHandle(ActionEvent actionEvent) {
     }
 }
