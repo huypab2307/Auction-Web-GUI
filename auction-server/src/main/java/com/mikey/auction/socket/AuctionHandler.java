@@ -6,8 +6,10 @@ import com.google.gson.Gson;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.items.Item;
 import com.mikey.auction.items.ItemType;
 import com.mikey.auction.manager.AuctionManager;
+import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.user.Bidder;
 
 public class AuctionHandler {
@@ -21,32 +23,62 @@ public class AuctionHandler {
                     // Xử lý dữ liệu đấu giá (ví dụ: lưu vào database, cập nhật trạng thái, v.v.)
                     switch (auctionData) {
                         case "All":
-                            response = "AUCTION|ALL|" + gson.toJson(AuctionManager.getInstance().auctionList());
+                            response = gson.toJson(AuctionManager.getInstance().auctionList());
+                            out.println(response);
+                            out.flush();
                             break;
                         case "TYPE ARTS":
-                            response = "AUCTION|TYPE ARTS|" + gson.toJson(AuctionDAO.getInstance().getAuctionsType(ItemType.ARTS));
+                            response = gson.toJson(AuctionDAO.getInstance().getAuctionsType(ItemType.ARTS));
+                                out.println(response);
+                                out.flush();
                             break;
                         case "TYPE VEHICLE":
-                            response = "AUCTION|TYPE VEHICLE|" + gson.toJson(AuctionDAO.getInstance().getAuctionsType(ItemType.VEHICLE));
+                            response = gson.toJson(AuctionDAO.getInstance().getAuctionsType(ItemType.VEHICLE));
+                            out.println(response);
+                            out.flush();
                             break;
                         case "TYPE ELECTRONICS":
-                            response = "AUCTION|TYPE ELECTRONICS|" + gson.toJson(AuctionDAO.getInstance().getAuctionsType(ItemType.ELECTRONICS));
+                            response = gson.toJson(AuctionDAO.getInstance().getAuctionsType(ItemType.ELECTRONICS));
+                            out.println(response);
+                            out.flush();
                             break;
                         case "USER":
                             int userid = gson.fromJson(parts[2].trim(), int.class); 
                             response = "AUCTION|USER|" + gson.toJson(AuctionDAO.getInstance().searchAuctionByUserId(userid)); 
+                            out.println(response);
+                            out.flush();
                             break;
                         case "SEARCH":
                             String keyword = gson.fromJson(parts[2].trim(), String.class); 
-                            response = "AUCTION|SEARCH|" + gson.toJson(AuctionDAO.getInstance().searchAuction(keyword));
+                            response = gson.toJson(AuctionDAO.getInstance().searchAuction(keyword));
+                            out.println(response);
+                            out.flush();
                             break;
-                        case "CREATE":
+                        case "CREATE":// Tạo đấu giá mới
                             try {
                                  AuctionInfo p = gson.fromJson(parts[2], AuctionInfo.class);
-                                AuctionManager.getInstance().uploadItem(p.getItemInfo().toItem(), p.getCurPrice(), p.getBidStep(), p.getStartTime(), p.getEndTime());
-                                response = "AUCTION|CREATE|SUCCESS";
+                                  // Lấy Item đầy đủ từ DB qua itemId trong ItemSummary
+                                   Item item = ItemManager.getInstance().findItemById(
+                                   p.getItemInfo().getItemType(), 
+                                   p.getItemInfo().getItemId()
+                                   );
+        
+                                    // Nếu Item không tồn tại, trả false
+                                    if (item == null) {
+                                     response = gson.toJson(false);
+                                     out.println(response);
+                                     out.flush();
+                                     break;
+                                    }
+                                AuctionManager.getInstance().uploadItem(item, p.getCurPrice(), p.getBidStep(), p.getStartTime(), p.getEndTime());
+                                response = gson.toJson(true);
+                                out.println(response);
+                                out.flush();
+                    
                             } catch (Exception e) {
-                                response = "AUCTION|CREATE|FAIL";
+                                response = gson.toJson(false);
+                                out.println(response);
+                                out.flush();
                             }
                             break;
                         case "PLACEBID":
@@ -56,18 +88,18 @@ public class AuctionHandler {
                                 AuctionInfo auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionId);
                                 Bidder bidder = (Bidder)UserDAO.getInstance().findById(userId);
                                 AuctionManager.getInstance().placeBid(bidder, auctionInfo, auctionInfo.getCurPrice());
+                                response = gson.toJson(true);
+                                out.println(response);
+                                out.flush();
                             } catch (Exception e) {
+                                response =  gson.toJson(false);
+                                out.println(response);
+                                out.flush();
                                 e.printStackTrace();
                             }
                             break;
 
                     }
-                    if (!response.isEmpty()) {
-                synchronized (out) { 
-                    out.println(response);
-                    out.flush();
-                }
-            }
         }
     } catch (Exception e) {
             out.println("ERROR");
