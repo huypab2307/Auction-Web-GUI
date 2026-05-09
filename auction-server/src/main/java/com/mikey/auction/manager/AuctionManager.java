@@ -14,15 +14,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import com.google.gson.Gson;
+import com.mikey.auction.socket.AuctionServer;
 
 
 public class AuctionManager {
+    private static final Gson gson = new Gson();
     private static final AuctionManager instance = new AuctionManager();
 
     public static AuctionManager getInstance(){
         return instance;
     }
-   public void uploadItem(Item item, double price, double stepPrice, LocalDateTime startTime, LocalDateTime endTime) {
+   public synchronized void uploadItem(Item item, double price, double stepPrice, LocalDateTime startTime, LocalDateTime endTime) {
 
        if (price <= 0 || stepPrice <= 0 || stepPrice > price) {
            System.out.println("Lỗi: Giá khởi điểm và bước giá không hợp lệ!");
@@ -44,20 +47,27 @@ public class AuctionManager {
            System.out.println(e.getMessage());
        }
    }
-public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice){
+public synchronized boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice){
     AuctionDAO auctionDAO = AuctionDAO.getInstance();
     try(Connection connection = auctionDAO.getConnect()){
         connection.setAutoCommit(false);
         auctionDAO.updateAuction(connection, auctionInfo, bidder.getId(), oldPrice);
         auctionDAO.updateTransaction(connection, auctionInfo, bidder.getId());
-        
+        boolean success = true;
         connection.commit();
+        if (success) {
+        String jsonUpdate = "AUCTION | UPDATE_BID | " + gson.toJson(auctionInfo);
+        // Gửi chuỗi này cho tất cả Client đang kết nối Socket
+        // AuctionServer.broadcast(jsonUpdate); 
+    }
         return NotificationManager.getInstance().notiAll(auctionInfo, bidder);
     } catch (SQLException e){
         System.out.println(e.getMessage());
     }
-    return false;
+
+    return false; 
 }
+
     public Auction findAuction(int id){
         try(Connection connection = AuctionDAO.getInstance().getConnect()) {
             return AuctionDAO.getInstance().findById(connection, id);
@@ -66,9 +76,8 @@ public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice)
         }
         return null;
     }
-
     public ArrayList<AuctionInfo> auctionList(){
         return AuctionDAO.getInstance().getAllAuctions();
     }
-    
 }
+
