@@ -130,6 +130,13 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
             e.printStackTrace();
         }
     }
+    public void toSellerHubGui(User user){
+        navigate("seller/sellerhub.fxml", "seller hub - " + user.getUsername(), loader -> {
+            SellerHubController controller = loader.getController();
+            controller.setUser(user);
+            controller.showMyAuctions();
+        });
+    }
 
     private void navigate(String fxmlPath, String title, ControllerConsumer consumer) {
         try {
@@ -152,6 +159,7 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
             e.printStackTrace();
         }
     }
+
 
     @FunctionalInterface
     private interface ControllerConsumer {

@@ -17,9 +17,9 @@ public class SellerHubController {
 
     private User user;
 
-    @FXML
-    public void setUser(int userId){
-        this.user = UserDAO.getInstance().findById(userId);
+
+    public void setUser(User user){
+        this.user = user;
         if (topBarController != null) {
             topBarController.setUser(this.user);
         }
