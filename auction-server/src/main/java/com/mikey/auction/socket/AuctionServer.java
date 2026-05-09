@@ -2,16 +2,20 @@ package com.mikey.auction.socket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader; 
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.mikey.auction.database.AuctionDAO;
+import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.socket.Handlers.LoginHandlers;
 import com.mikey.auction.socket.Handlers.RegisterHandlers;
 
@@ -19,6 +23,21 @@ public class AuctionServer {
     // Danh sách lưu trữ tất cả các Client đang kết nối (Thread-safe)
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(20); // Tối đa 20 client cùng lúc
+
+    public static  void addClientWriter(PrintWriter out) {
+        clientWriters.add(out);
+    }
+    public static  void broadcast(String msg) {
+            synchronized (clientWriters) {
+                for (PrintWriter writer : clientWriters) {
+                    writer.println(msg);
+                }
+            }
+        }
+    public static void removeClientWriter(PrintWriter out) {
+        clientWriters.remove(out);
+    }
+   
 
     public static void main(String[] args) {
         int port = 12345;
@@ -29,10 +48,10 @@ public class AuctionServer {
             System.out.println("========================================");
 
             while (true) {
+                startAuctionTimer(); // Bắt đầu timer kiểm tra phiên đấu giá (nếu chưa chạy)
                 // Chấp nhận kết nối từ Client
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("[NEW CONNECTION] " + clientSocket.getInetAddress());
-
                 // Mỗi Client là một luồng riêng
                 threadPool.execute(new ClientHandler(clientSocket));
             }
@@ -42,9 +61,36 @@ public class AuctionServer {
         } finally {
             threadPool.shutdown();
         }
+
     }
 
-    private static class ClientHandler implements Runnable {
+    public static void startAuctionTimer() {
+    new Thread(() -> {
+        while (true) {
+            try {
+                // Kiểm tra danh sách phiên đấu giá từ AuctionDAO[cite: 6]
+                ArrayList<AuctionInfo> auctions = AuctionDAO.getInstance().getAllAuctions();
+                LocalDateTime now = LocalDateTime.now();
+
+                for (AuctionInfo a : auctions) {
+                    // Nếu thời gian kết thúc nhỏ hơn hiện tại và vẫn đang mở (status = 1)
+                    //if (a.getEndTime().isBefore(now) && a.getStatus() == 1) {
+                        // 1. Gọi hàm setStatus(a.getId(), 0) - (Dương/Huy sẽ viết)
+                        // 2. Gửi thông báo cho người thắng cuộc qua NotificationManager
+                        System.out.println("Phiên " + a.getId() + " đã hết hạn. Đang đóng...");
+                    //}
+                }
+                Thread.sleep(1000); // Kiểm tra lại sau mỗi 1 giây
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }).start();
+}
+
+}
+
+ class ClientHandler implements Runnable {
         private Socket socket;
         private PrintWriter out;
         private BufferedReader in;
@@ -60,7 +106,7 @@ public class AuctionServer {
                 out = new PrintWriter(socket.getOutputStream(), true);
 
                 // Thêm vào danh sách để Broadcast
-                clientWriters.add(out);
+                AuctionServer.addClientWriter(out);
 
                 String message;
                 while ((message = in.readLine()) != null) {
@@ -77,7 +123,7 @@ public class AuctionServer {
                         NotificationHandlers.handleNotification(message, out);
                     } else if (message.startsWith("BID|") || message.startsWith("CHAT|")) {
                         // Nếu là đặt giá hoặc chat thì gửi cho tất cả
-                        broadcast(message);
+                        AuctionServer.broadcast(message);
                     }
                 }
             } catch (IOException e) {
@@ -87,19 +133,9 @@ public class AuctionServer {
             }
         }
 
-       
-
-        private void broadcast(String msg) {
-            synchronized (clientWriters) {
-                for (PrintWriter writer : clientWriters) {
-                    writer.println(msg);
-                }
-            }
-        }
-
-        private void cleanUp() {
+      public void cleanUp() {
             if (out != null) {
-                clientWriters.remove(out);
+                AuctionServer.removeClientWriter(out);
             }
             try {
                 if (socket != null) socket.close();
@@ -107,6 +143,8 @@ public class AuctionServer {
                 e.printStackTrace();
             }
             System.out.println("[CLEANED UP] Tài nguyên của client đã được giải phóng.");
-        }
+        }   
+
+        
     }
-}
+    
