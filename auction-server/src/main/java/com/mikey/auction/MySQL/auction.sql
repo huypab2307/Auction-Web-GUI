@@ -51,26 +51,16 @@ CREATE TABLE messages (
 );
 ALTER TABLE messages MODIFY COLUMN auctionId INT NULL;
 
-SELECT 
-    a.id, 
-    i.title AS itemName, 
-    i.type AS type,
-    u_seller.username AS sellerName, 
-    u_bidder.username AS bidderName, 
-    a.curPrice, 
-    a.status, 
-    a.endTime 
-FROM auctions a
-INNER JOIN items i ON a.itemId = i.id
-INNER JOIN user u_seller ON a.sellerId = u_seller.id
-LEFT JOIN user u_bidder ON a.lastBidderId = u_bidder.id;
-ALTER TABLE items MODIFY imagePath VARCHAR(255) NOT NULL DEFAULT '/images/earth.png';
--- Cập nhật tất cả các dòng đang bị NULL về ảnh mặc định
-UPDATE items SET imagePath = "/images/xiaomi.jpg" WHERE id = 2;
-
-CREATE TABLE notificationList(
-    userId int, Foreign Key (userId) REFERENCES user(id),
-    auctionId int, Foreign Key (auctionId) REFERENCES auctions(id),
-    Foreign Key (userId) REFERENCES user(id),
-    id int PRIMARY KEY AUTO_INCREMENT
+CREATE TABLE autoBidding (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    auctionId INT NOT NULL,
+    userId INT NOT NULL,
+    maxPrice DECIMAL(15, 2) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_autobid_auction 
+        FOREIGN KEY (auctionId) REFERENCES auctions(id) ON DELETE CASCADE,
+        
+    CONSTRAINT fk_autobid_user 
+        FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
 );

@@ -21,6 +21,7 @@ public class ChangePasswordController  {
     }
 
     public void handleCancel(ActionEvent actionEvent) {
+
         SceneChanger.getInstance().openSettings(stage, user);
     }
 

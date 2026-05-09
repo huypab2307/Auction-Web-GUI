@@ -14,5 +14,6 @@
     },
     "terminal.integrated.defaultProfile.windows": "PowerShell UTF-8",
     "java.debug.settings.onBuildFailureProceed": true,
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "maven.view": "hierarchical"
 }

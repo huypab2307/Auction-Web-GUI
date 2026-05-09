@@ -2,6 +2,7 @@ package com.mikey.auction.javagui.auction;
 
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.javagui.bidder.AutoBidDialogController;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.Helper;
@@ -11,8 +12,13 @@ import com.mikey.auction.user.User;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -20,12 +26,18 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Role;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
@@ -35,6 +47,8 @@ import com.mikey.auction.javagui.topbar.SearchListener;
 
 
 public class AuctionItemController implements SearchListener {
+    public Button follow;
+    public Button unfollow;
     @FXML
     private StackPane mainStackPane;
     @FXML
@@ -81,6 +95,12 @@ public class AuctionItemController implements SearchListener {
         this.user = UserDAO.getInstance().findById(userId);
         if (topBarController != null) {
             topBarController.setUser(this.user);
+        }
+        NotificationManager notificationManager = NotificationManager.getInstance();
+        if (notificationManager.checkSubscribed(auctionInfo.getId(), userId)){
+            handleFollow(follow, unfollow);
+        }else{
+            handleFollow(unfollow, follow);
         }
     }
     public void setUser(User user){
@@ -185,6 +205,55 @@ public class AuctionItemController implements SearchListener {
         NotificationManager notificationManager = NotificationManager.getInstance();
         if (notificationManager.subscribeAuction(auctionInfo.getId(), user.getId())){
             showCongratulationEffect(2.5);
+            handleFollow(follow, unfollow);
         }
+    }
+
+    public void unFollowButton(ActionEvent actionEvent) {
+        NotificationManager notificationManager = NotificationManager.getInstance();
+        if (notificationManager.unsubcribeAuction(auctionInfo.getId(), user.getId())){
+            showCongratulationEffect(2.5);
+            handleFollow(unfollow, follow);
+        }
+    }
+    public void handleFollow(Button first, Button second){
+        first.setVisible(false);
+        first.setManaged(false);
+
+        second.setVisible(true);
+        second.setManaged(true);
+    }
+
+    @FXML
+    public void onAutoBidHandle(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/bidder/auto_bid_dialog.fxml"));
+        Parent root = loader.load();
+
+        // Tạo một Stage mới cho Pop-up
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.initStyle(StageStyle.TRANSPARENT);
+
+        AutoBidDialogController controller = loader.getController();
+        controller.setStage(popupStage);
+
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        popupStage.setScene(scene);
+
+        popupStage.showAndWait(); // Đợi user nhập xong
+
+        double result = controller.getMaxPrice();
+        if (result > 0) {
+            System.out.println("Kích hoạt Max Bid: " + result);
+            showCongratulationEffect(1.5);
+        }
+    }
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }
