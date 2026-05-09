@@ -2,6 +2,7 @@ package com.mikey.auction.javagui;
 
 import com.mikey.auction.javagui.bidder.AuctionHubController;
 import com.mikey.auction.javagui.seller.SellerController;
+import com.mikey.auction.javagui.seller.SellerHubController;
 import com.mikey.auction.javagui.auction.AuctionItemController;
 
 import com.mikey.auction.dto.AuctionInfo;
@@ -74,12 +75,24 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
             toLogin();
             return;
         }
-        navigate("seller/seller.fxml", "Seller Dashboard - " + user.getUsername(), loader -> {
+        navigate("seller/Seller.fxml", "Seller Dashboard - " + user.getUsername(), loader -> {
             SellerController controller = loader.getController();
             controller.setUser(user);
             controller.loadSellerAuctions();
         });
     }
+
+    public void toSellerHubGui(User user){
+        if (user == null) {
+            toLogin();
+            return;
+        }
+        navigate("seller/sellerhub.fxml", "Seller - " + user.getUsername(), loader -> {
+            SellerHubController controller = loader.getController();
+            controller.setUser(user.getId());
+        });
+    }
+
     public void openSettings(Stage stage, User user){
         if (user == null) {
             toLogin();

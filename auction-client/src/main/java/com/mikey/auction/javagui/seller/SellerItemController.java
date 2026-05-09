@@ -1,6 +1,10 @@
-package com.mikey.auction.javagui.bidder;
+package com.mikey.auction.javagui.seller;
 
 import com.mikey.auction.javagui.SceneChanger;
+import com.mikey.auction.javagui.topbar.TopBarController;
+import com.mikey.auction.user.User;
+
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -10,10 +14,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 
+import com.mikey.auction.database.UserDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
 
-public class ItemController {
+public class SellerItemController {
     @FXML
     private ImageView itemImage;
     @FXML
@@ -26,6 +31,8 @@ public class ItemController {
     private Label date;
     @FXML
     private Label curPrice;
+    @FXML private TopBarController topBarController;
+    private User user;
 
     private int userId;
     private AuctionInfo auctionInfo;
@@ -38,22 +45,6 @@ public class ItemController {
         curPrice.setText(String.format("%,.0f đ", i.getCurPrice()));
         date.setText(i.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         this.auctionInfo = i;
-
-        type.setText(itemSummary.getItemType().name() + " | " + i.getStatus().name());
-        
-        // Đổi màu Label type dựa trên trạng thái
-        if (i.getStatus().name().equals("OPEN")) {
-            type.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;"); // Xanh lá cho OPEN
-        } else if (i.getStatus().name().equals("PENDING")) {
-            type.setStyle("-fx-background-color: #ffc107; -fx-text-fill: black;"); // Vàng cho PENDING
-        } else {
-            type.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white;"); // Đỏ cho CLOSED/CANCELED
-        }
-
-        itemName.setText(itemSummary.getTitle());
-        sellerName.setText(i.getSellerUsername());
-        curPrice.setText(String.format("%,.0f đ", i.getCurPrice()));
-        date.setText(i.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         URL src = getClass().getResource(itemSummary.getImagePath());
 
         if (src != null) {
@@ -63,11 +54,24 @@ public class ItemController {
             itemImage.setImage(new Image("/images/earth.png"));
         }
     }
+
+
     @FXML
-    public void showDetailHandle() throws IOException {
-        SceneChanger.getInstance().toAuction(auctionInfo, userId);
-    }
     public void setUser(int userId){
-        this.userId = userId;
+        this.user = UserDAO.getInstance().findById(userId);
+        if (topBarController != null) {
+            topBarController.setUser(this.user);
+        }
+    }
+
+
+    @FXML
+    public void handleEdit(ActionEvent event) {
+        System.out.println("Nút Sửa được bấm cho sản phẩm: " + auctionInfo.getItemInfo().getTitle());
+    }
+
+    @FXML
+    public void handleDelete(ActionEvent event) {
+        System.out.println("Nút Xóa được bấm cho sản phẩm: " + auctionInfo.getItemInfo().getTitle());
     }
 }

@@ -1,8 +1,5 @@
 package com.mikey.auction.javagui.bidder;
 
-import com.mikey.auction.database.AuctionDAO;
-import com.mikey.auction.javagui.Helper;
-import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.javagui.dashboard.DashBoardController;
 import com.mikey.auction.javagui.topbar.SearchListener;
 import com.mikey.auction.javagui.topbar.TopBarController;
@@ -13,7 +10,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.FlowPane;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,6 +1,7 @@
 package com.mikey.auction.javagui.auction;
 
 import com.mikey.auction.auction.Auction;
+import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
 import com.mikey.auction.manager.AuctionManager;
@@ -119,11 +120,15 @@ public class AuctionItemController implements SearchListener {
             itemInfo.forEach((label, value) -> {
                 attributeBox.getChildren().add(new Label(label + ": " + value));
             });
+
+            String statusText = auctionInfo.getStatus().name();
+            datetime.setText("Trạng thái: " + statusText + " | Kết thúc: " +  auctionInfo.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             
             try (Connection connection = AuctionDAO.getInstance().getConnect()) {
-                Auction auction = AuctionDAO.getInstance().findById(connection,auctionInfo.getId());
+                AuctionInfo auction = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+                int sellerId = AuctionDAO.getInstance().findById(connection, auctionInfo.getId()).getSellerId();
 
-                if (user.getId() == auction.getSellerId()) {
+                if (user.getId() == sellerId) {
                     bidButton.setVisible(false);
                     bidButton.setManaged(false); 
                     return;
@@ -131,6 +136,25 @@ public class AuctionItemController implements SearchListener {
                     bidButton.setVisible(true);
                     bidButton.setManaged(true);
                 }
+
+            AuctionStatus status = auction.getStatus();
+
+            if (status == AuctionStatus.OPEN) {
+                bidButton.setDisable(false);
+                bidButton.setText("ĐẤU GIÁ NGAY");
+                bidButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"); 
+            } 
+            else if (status == AuctionStatus.PENDING) {
+                bidButton.setDisable(true); // Vô hiệu hóa vì chưa đến giờ
+                bidButton.setText("PHIÊN ĐẤU GIÁ CHƯA MỞ");
+                bidButton.setStyle("-fx-background-color: #ffc107; -fx-text-fill: black; -fx-font-weight: bold;");
+            } 
+            else {
+                bidButton.setDisable(true);
+                bidButton.setText("PHIÊN ĐẤU GIÁ ĐÃ KẾT THÚC");
+                bidButton.setStyle("-fx-background-color: #808080; -fx-text-fill: white; -fx-font-weight: bold;");
+            }
+
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.err.println("Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());

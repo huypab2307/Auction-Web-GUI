@@ -41,9 +41,9 @@ public class AuctionDAO extends BaseDAO {
 
         LocalDateTime startTime = rs.getObject("startTime", LocalDateTime.class);
         LocalDateTime endTime = rs.getObject("endTime", LocalDateTime.class);
-
-        AuctionStatus status = AuctionStatus.valueOf(rs.getString("status").toUpperCase());
         ItemType itemType = ItemType.valueOf(rs.getString("type").toUpperCase());
+
+        AuctionStatus status = calculateStatus(startTime, endTime, rs.getString("status"));
 
         ItemSummary itemInfo = new ItemSummary(itemId, itemName, description, itemType, imagePath);
         return new AuctionInfo(itemInfo, id, sellerName, lastBidder, curPrice, status, startTime, endTime, priceStep);
@@ -118,7 +118,8 @@ public class AuctionDAO extends BaseDAO {
     }
 
     public void updateAuction(Connection connection, AuctionInfo auction, int bidderId, double curPrice) throws SQLException {
-        String query = "UPDATE auctions SET curPrice = ?, lastBidderId = ? WHERE id = ? AND curPrice = ?;";
+        String query = "UPDATE auctions SET curPrice = ?, lastBidderId = ? " +
+                   "WHERE id = ? AND curPrice = ? AND status = 'OPEN' AND endTime > NOW();";
         try (PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setDouble(1, auction.getCurPrice() + auction.getBidStep());
             pr.setInt(2, bidderId);
@@ -160,4 +161,28 @@ public class AuctionDAO extends BaseDAO {
         }
         return null;
     }
+
+    public void refreshAuctionStatuses() throws SQLException {
+        try (Connection conn = getConnect()) {
+            String openSql = "UPDATE auctions SET status = 'OPEN' WHERE status = 'PENDING' AND startTime <= NOW()";
+            String closeSql = "UPDATE auctions SET status = 'CLOSED' WHERE status = 'OPEN' AND endTime <= NOW()";
+            
+            try (Statement st = conn.createStatement()) {
+                st.executeUpdate(openSql);
+                st.executeUpdate(closeSql);
+            }
+        }
+    }
+
+    private AuctionStatus calculateStatus(LocalDateTime start, LocalDateTime end, String dbStatus) {
+        AuctionStatus current = AuctionStatus.valueOf(dbStatus.toUpperCase());
+        if (current == AuctionStatus.CANCELED) return current;
+        
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(start)) return AuctionStatus.PENDING;
+        if (now.isAfter(end)) return AuctionStatus.CLOSED;
+        return AuctionStatus.OPEN;
+    }
+
+    
 }

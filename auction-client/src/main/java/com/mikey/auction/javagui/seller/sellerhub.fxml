@@ -6,13 +6,14 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="720.0" prefWidth="1200.0" style="-fx-background-color: #F4F7F6;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.seller.SellerHubController">
+<BorderPane prefHeight="720.0" prefWidth="1200.0" style="-fx-background-color: #F4F7F6;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.seller.SellerHubController">
     <top>
-        <fx:include source="../topbar/topbar.fxml"/>
+        <fx:include source="../topbar/topbar.fxml" />
     </top>
     <left>
         <VBox prefWidth="240.0" spacing="10.0" style="-fx-background-color: white; -fx-border-color: #E2E8F0; -fx-border-width: 0 1 0 0;">
@@ -25,12 +26,12 @@
                     <VBox.margin><Insets bottom="15.0" /></VBox.margin>
                 </Label>
 
-                <ToggleButton fx:id="myAuctionsBtn" maxWidth="Infinity" onAction="#showMyAuctions" selected="true" style="-fx-background-color: #F7FAFC; -fx-text-fill: #2D3748; -fx-alignment: CENTER_LEFT; -fx-padding: 12;" text="📦 Sản phẩm đang bán">
+                <ToggleButton fx:id="myAuctionsBtn" maxWidth="Infinity" onAction="#showMyAuctions" selected="true" style="-fx-background-color: #F7FAFC; -fx-text-fill: #2D3748; -fx-alignment: CENTER_LEFT; -fx-padding: 12;" styleClass="toggle-blue-pastel" stylesheets="@../style/SellerToggleButton.css" text="📦 Sản phẩm đang bán">
                     <toggleGroup><ToggleGroup fx:id="sellerMenu" /></toggleGroup>
                     <font><Font name="System Bold" size="13.0" /></font>
                 </ToggleButton>
 
-                <ToggleButton fx:id="addAuctionBtn" maxWidth="Infinity" onAction="#showCreateAuction" style="-fx-background-color: transparent; -fx-text-fill: #4A5568; -fx-alignment: CENTER_LEFT; -fx-padding: 12;" text="➕ Thêm phiên đấu giá" toggleGroup="$sellerMenu">
+                <ToggleButton fx:id="addAuctionBtn" maxWidth="Infinity" onAction="#showCreateAuction" style="-fx-background-color: transparent; -fx-text-fill: #4A5568; -fx-alignment: CENTER_LEFT; -fx-padding: 12;" styleClass="toggle-blue-pastel" stylesheets="@../style/SellerToggleButton.css" text="➕ Thêm phiên đấu giá" toggleGroup="$sellerMenu">
                     <font><Font name="System Bold" size="13.0" /></font>
                 </ToggleButton>
 
@@ -40,8 +41,11 @@
             </children>
         </VBox>
     </left>
-    <center>
-        <ScrollPane fx:id="contentScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #F4F7F6;">
-        </ScrollPane>
-    </center>
+   <center>
+      <ScrollPane fx:id="contentScrollPane" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" stylesheets="@../style/scrollPane.css" BorderPane.alignment="CENTER">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+        </content>
+      </ScrollPane>
+   </center>
 </BorderPane>

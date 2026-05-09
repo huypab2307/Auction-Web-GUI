@@ -90,7 +90,7 @@ public class TopBarController {
     @FXML
     public void sellerGuiHandle(ActionEvent actionEvent) {
         if (user != null) {
-            SceneChanger.getInstance().toSellerGui(user);
+            SceneChanger.getInstance().toSellerHubGui(user);
         } else {
             SceneChanger.getInstance().toLogin();
         }
