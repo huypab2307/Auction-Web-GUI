@@ -11,7 +11,12 @@ import com.mikey.auction.user.User;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -62,8 +67,8 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
     public void toAuction(AuctionInfo auctionInfo, int userId){
         navigate("auction/auctionitem.fxml", "Auction: " + auctionInfo.getItemInfo().getTitle(), loader -> {
             AuctionItemController controller = loader.getController();
-            controller.setUser(userId);
             controller.setAuctionInfo(auctionInfo);
+            controller.setUser(userId);
             controller.renderStaticInfo();
             controller.updateDynamicInfo();
         });
@@ -81,38 +86,49 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
             controller.loadSellerAuctions();
         });
     }
-
-    public void toSellerHubGui(User user){
-        if (user == null) {
-            toLogin();
-            return;
-        }
-        navigate("seller/sellerhub.fxml", "Seller - " + user.getUsername(), loader -> {
-            SellerHubController controller = loader.getController();
-            controller.setUser(user.getId());
-        });
-    }
-
-    public void openSettings(Stage stage, User user){
-        if (user == null) {
-            toLogin();
-            return;
-        }
+    public void openSettings(Stage popupStage, User user){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/user/User.fxml"));
             Parent root = loader.load();
+
             UserController controller = loader.getController();
             controller.setUser(user);
-            controller.setStage(stage);
-            stage.setTitle("User");
-            stage.setResizable(false);
-            stage.setAlwaysOnTop(true);
-            stage.setScene(new javafx.scene.Scene(root));
-            stage.show();
+            controller.setStage(popupStage);
+
+            if (!popupStage.isShowing()) {
+                try {
+                    popupStage.initStyle(StageStyle.TRANSPARENT);
+                    popupStage.initModality(Modality.APPLICATION_MODAL);
+                    if (mainStage != null) {
+                        popupStage.initOwner(mainStage);
+                    }
+                } catch (Exception e) {
+                }
+            }
+
+            if (mainStage != null && mainStage.getScene() != null) {
+                Parent mainRoot = mainStage.getScene().getRoot();
+                ColorAdjust dim = new ColorAdjust();
+                dim.setBrightness(-0.5);
+                mainRoot.setEffect(dim);
+
+                popupStage.setOnHidden(e -> {
+                    mainRoot.setEffect(null);
+                });
+            }
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            popupStage.setScene(scene);
+            popupStage.setAlwaysOnTop(true);
+
+            if (!popupStage.isShowing()) {
+                popupStage.show();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private void navigate(String fxmlPath, String title, ControllerConsumer consumer) {

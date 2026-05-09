@@ -27,29 +27,27 @@ public class UserController {
     }
 
     public void handleChangePassword(ActionEvent actionEvent) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("change_Password.fxml"));
-        Parent root = loader.load();
-        ChangePasswordController controller = loader.getController();
-        controller.setUser(user);
-        controller.setStage(stage);
-        stage.setScene(new Scene(root));
-        stage.show();
+        navigate("/change_password.fxml");
     }
 
     public void handleDeleteAccount(ActionEvent actionEvent) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("delete_confirm.fxml"));
-        Parent root = loader.load();
-        DeleteConfirmController controller = loader.getController();
-        controller.setUser(user);
-        controller.setStage(stage);
-        stage.setScene(new Scene(root));
-        stage.show();
+        navigate("/delete_confirm.fxml");
     }
 
     public void cancelHandle(ActionEvent actionEvent) {
         Stage stage = (Stage) usernameField.getScene().getWindow();
         stage.close();
 
-
+    }
+    public void navigate(String path) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
+        Parent root = loader.load();
+        ChangePasswordController controller = loader.getController();
+        controller.setUser(user);
+        controller.setStage(stage);
+        Scene scene = new Scene(root);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        stage.setScene(scene);
+        stage.show();
     }
 }

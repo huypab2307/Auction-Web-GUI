@@ -7,3 +7,6 @@ CREATE TABLE user (
     role ENUM('BIDDER','SELLER','ADMIN') NOT NULL DEFAULT 'BIDDER'
 );
 SELECT * FROM user;
+ALTER TABLE items DROP FOREIGN KEY item; -- Tên FK có thể khác tùy máy, Dương check lại
+ALTER TABLE items ADD CONSTRAINT fk_items_seller 
+    FOREIGN KEY (sellerId) REFERENCES user(id) ON DELETE CASCADE;

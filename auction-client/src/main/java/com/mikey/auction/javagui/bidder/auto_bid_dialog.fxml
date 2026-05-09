@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #eeeeee; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.bidder.AutoBidDialogController">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+    <children>
+        <Label text="🤖 Auto-Bidding Setup" textFill="#2575fc">
+            <font><Font name="System Bold" size="20.0" /></font>
+        </Label>
+        
+        <Label text="Nhập giá tối đa bạn sẵn sàng trả cho sản phẩm này. Hệ thống sẽ tự động đấu giá thay bạn." textAlignment="CENTER" wrapText="true" style="-fx-text-fill: #718096;" />
+
+        <VBox spacing="5.0">
+            <children>
+                <Label text="Mức giá trần (VNĐ)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                <TextField fx:id="maxPriceField" prefHeight="45.0" promptText="Ví dụ: 15,000,000" style="-fx-background-radius: 10; -fx-border-color: #cbd5e0; -fx-border-radius: 10; -fx-font-size: 16;" />
+            </children>
+        </VBox>
+
+        <HBox spacing="15.0">
+            <children>
+                <Button onAction="#handleCancel" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #EDF2F7; -fx-text-fill: #4A5568; -fx-background-radius: 10; -fx-font-weight: bold; -fx-cursor: hand;" text="Hủy" />
+                <Button onAction="#handleConfirm" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: linear-gradient(to right, #6a11cb, #2575fc); -fx-text-fill: white; -fx-background-radius: 10; -fx-font-weight: bold; -fx-cursor: hand;" text="Kích hoạt Auto-Bid" />
+            </children>
+        </HBox>
+    </children>
+</VBox>

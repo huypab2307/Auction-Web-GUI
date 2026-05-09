@@ -19,6 +19,7 @@ public class DeleteConfirmController {
     }
 
     public void handleCancel(ActionEvent actionEvent) {
+
         SceneChanger.getInstance().openSettings(stage, user);
     }
 
