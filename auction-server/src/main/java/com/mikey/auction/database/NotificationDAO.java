@@ -147,4 +147,21 @@ public class NotificationDAO extends BaseDAO {
             return auctions;
         }
     }
+    public boolean unsubscribeAuction(Connection connection, int auctionId, int userId) throws SQLException {
+        String query = "DELETE FROM notificationList WHERE userId = ? AND auctionId = ?";
+        try (PreparedStatement pr = connection.prepareStatement(query)) {
+            pr.setInt(1, userId);
+            pr.setInt(2, auctionId);
+            return pr.executeUpdate() > 0;
+        }
+    }
+    public boolean checkSubscribed(Connection connection, int auctionId, int userId) throws SQLException{
+        String query = "SELECT * FROM notificationList WHERE userId = ? AND auctionId = ?";
+        try ( PreparedStatement pr = connection.prepareStatement(query)){
+            pr.setInt(1,userId);
+            pr.setInt(2,auctionId);
+            ResultSet rs = pr.executeQuery();
+            return rs.next();
+        }
+    }
 }
