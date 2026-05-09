@@ -1,6 +1,5 @@
 package com.mikey.auction.database;
 
-import com.mikey.auction.database.BaseDAO;
 import com.mikey.auction.user.Admin;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Seller;
@@ -56,6 +55,7 @@ public class UserDAO extends BaseDAO {
                 int id = rs.getInt("id");
                 String user = rs.getString("username");
                 String pass = rs.getString("password");
+                System.out.println(role + id + user + pass);
 
                 if ("ADMIN".equals(role)) {
                     return new Admin(user, pass, id);

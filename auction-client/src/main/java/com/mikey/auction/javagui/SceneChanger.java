@@ -134,7 +134,6 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
         navigate("seller/sellerhub.fxml", "seller hub - " + user.getUsername(), loader -> {
             SellerHubController controller = loader.getController();
             controller.setUser(user);
-            controller.showMyAuctions();
         });
     }
 

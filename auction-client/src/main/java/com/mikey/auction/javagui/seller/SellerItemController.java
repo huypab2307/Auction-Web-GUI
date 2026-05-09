@@ -31,10 +31,8 @@ public class SellerItemController {
     private Label date;
     @FXML
     private Label curPrice;
-    @FXML private TopBarController topBarController;
-    private User user;
-
     private int userId;
+
     private AuctionInfo auctionInfo;
     @FXML
     public void setData(AuctionInfo i){
@@ -45,23 +43,29 @@ public class SellerItemController {
         curPrice.setText(String.format("%,.0f đ", i.getCurPrice()));
         date.setText(i.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         this.auctionInfo = i;
-        URL src = getClass().getResource(itemSummary.getImagePath());
+        String imagePath = itemSummary.getImagePath();
 
-        if (src != null) {
-            Image img = new Image(src.toExternalForm());
-            itemImage.setImage(img);
+        if (imagePath != null && imagePath.startsWith("http")) {
+            itemImage.setImage(new Image(imagePath, true));
         } else {
-            itemImage.setImage(new Image("/images/earth.png"));
+            try {
+                URL src = getClass().getResource(imagePath != null ? imagePath : "/images/earth.png");
+                if (src != null) {
+                    itemImage.setImage(new Image(src.toExternalForm()));
+                } else {
+                    itemImage.setImage(new Image(getClass().getResourceAsStream("/images/earth.png")));
+                }
+            } catch (Exception e) {
+                System.err.println("Không load được ảnh: " + imagePath);
+                itemImage.setImage(new Image(getClass().getResourceAsStream("/images/earth.png")));
+            }
         }
     }
 
 
     @FXML
     public void setUser(int userId){
-        this.user = UserDAO.getInstance().findById(userId);
-        if (topBarController != null) {
-            topBarController.setUser(this.user);
-        }
+        this.userId = userId;
     }
 
 

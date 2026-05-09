@@ -78,7 +78,7 @@
                                 <VBox prefWidth="350.0" spacing="20.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 5); -fx-background-radius: 10; -fx-padding: 2;" translateY="-220.0" AnchorPane.rightAnchor="0.0"> <!-- Nhấc lên vừa đủ để đẹp, không che Top -->
                                     <children>
                                         <ImageView fx:id="image" fitHeight="200.0" fitWidth="346.0" pickOnBounds="true" preserveRatio="false" style="-fx-background-radius: 10 10 0 0;">
-                                            <image><Image url="@/images/kaguya.jpg" /></image>
+
                                         </ImageView>
                                         <VBox spacing="15.0" style="-fx-padding: 20;">
                                             <children>

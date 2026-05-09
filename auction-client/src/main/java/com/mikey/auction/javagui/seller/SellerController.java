@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
+
+import com.mikey.auction.cloudinary.CloudinaryService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -139,32 +141,19 @@ public class SellerController {
 
     @FXML
     private void handleSubmit(ActionEvent e) {
-        boolean hasError = false;
-
+        // 1. Kiểm tra lỗi nhập liệu (Validation)
         checkItemName();
         checkPrice();
         checkStepPrice();
         checkFinalPrice();
         checkDates();
 
-        if (!errorItemName.getText().isEmpty()) {
-            hasError = true;
-        }
-        if (!errorPrice.getText().isEmpty()) {
-            hasError = true;
-        }
-        if (!errorStepPrice.getText().isEmpty()) {
-            hasError = true;
-        }
-        if (!errorFinalPrice.getText().isEmpty()) {
-            hasError = true;
-        }
-        if (!errorStartTime.getText().isEmpty()) {
-            hasError = true;
-        }
-        if (!errorEndTime.getText().isEmpty()) {
-            hasError = true;
-        }
+        boolean hasError = !errorItemName.getText().isEmpty() ||
+                !errorPrice.getText().isEmpty() ||
+                !errorStepPrice.getText().isEmpty() ||
+                !errorFinalPrice.getText().isEmpty() ||
+                !errorStartTime.getText().isEmpty() ||
+                !errorEndTime.getText().isEmpty();
 
         String selected = type.getValue();
         if (selected == null) {
@@ -173,115 +162,70 @@ public class SellerController {
         }
 
         if (selected.equals("Arts")) {
-            checkArtist();
-            checkYearOfCreation();
-            checkDimensions();
-            checkMedium();
-
-            String[] ids = {"#errorArtist", "#errorYear", "#errorDimensions", "#errorMedium"};
-            if (hasDynamicError(ids)) {
-                hasError = true;
-            }
+            checkArtist(); checkYearOfCreation(); checkDimensions(); checkMedium();
+            if (hasDynamicError(new String[]{"#errorArtist", "#errorYear", "#errorDimensions", "#errorMedium"})) hasError = true;
         } else if (selected.equals("Electronics")) {
-            checkEBrand();
-            checkEPower();
-            checkEVoltage();
-            checkECurrent();
-            checkEStatus();
-            checkEColor();
-            checkEWeight();
-
-            String[] ids = {"#errorEBrand", "#errorEPower", "#errorEVoltage", "#errorECurrent", "#errorEStatus", "#errorEColor", "#errorEWeight"};
-            if (hasDynamicError(ids)) {
-                hasError = true;
-            }
+            checkEBrand(); checkEPower(); checkEVoltage(); checkECurrent(); checkEStatus(); checkEColor(); checkEWeight();
+            if (hasDynamicError(new String[]{"#errorEBrand", "#errorEPower", "#errorEVoltage", "#errorECurrent", "#errorEStatus", "#errorEColor", "#errorEWeight"})) hasError = true;
         } else if (selected.equals("Vehicle")) {
-            checkVMileage();
-            checkVMFG();
-            checkVBrand();
-            checkVModel();
-            checkVTrim();
-            checkVTitleStatus();
-
-            String[] ids = {"#errorVMileage", "#errorVMFG", "#errorVBrand", "#errorVModel", "#errorVTrim", "#errorVTitleStatus"};
-            if (hasDynamicError(ids)) {
-                hasError = true;
-            }
+            checkVMileage(); checkVMFG(); checkVBrand(); checkVModel(); checkVTrim(); checkVTitleStatus();
+            if (hasDynamicError(new String[]{"#errorVMileage", "#errorVMFG", "#errorVBrand", "#errorVModel", "#errorVTrim", "#errorVTitleStatus"})) hasError = true;
         }
 
         if (hasError) {
-            System.out.println("Form bị lỗi, không gửi dữ liệu!");
+            System.out.println("Form còn lỗi, Dương kiểm tra lại nhé!");
             return;
         }
 
-        System.out.println("Mọi thứ đã chuẩn 100%. Bắt đầu lấy dữ liệu...");
+        submit.setDisable(true);
+        System.out.println("Đang xử lý dữ liệu và đẩy ảnh lên Cloudinary...");
 
-        String name = itemName.getText();
-        String description = itemDescription.getText();
-
-        String imagePath = "/images/earth.png";
+        String imagePath = "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg";
 
         if (selectedFiles != null && !selectedFiles.isEmpty()) {
-            String savedPath = saveImage(selectedFiles.get(0)); 
-            if (savedPath != null) {
-                imagePath = savedPath; 
+            String cloudUrl = CloudinaryService.upload(selectedFiles.get(0));
+            if (cloudUrl != null) {
+                imagePath = cloudUrl.replace("/upload/", "/upload/ar_16:9,c_fill,w_1000,g_auto/");
+                System.out.println("Link đã được 'phẫu thuật' thẩm mỹ: " + imagePath);
             }
         }
-
         HashMap<String, String> itemData = new HashMap<>();
         itemData.put("type", selected);
-        itemData.put("name", name);
-        itemData.put("description", description);
+        itemData.put("name", itemName.getText());
+        itemData.put("description", itemDescription.getText());
         itemData.put("sellerId", String.valueOf(user.getId()));
         itemData.put("imagePath", imagePath);
 
         switch (selected) {
-            case "Arts":
-                findArtworkData(itemData);
-                break;
-            case "Electronics":
-                findElectronicsData(itemData);
-                break;
-            case "Vehicle":
-                findVehicleData(itemData);
-                break;
-            default:
-                System.out.println("Loại sản phẩm không hợp lệ.");
-                return ;
+            case "Arts" -> findArtworkData(itemData);
+            case "Electronics" -> findElectronicsData(itemData);
+            case "Vehicle" -> findVehicleData(itemData);
         }
 
-        System.out.println("Mọi thứ đã chuẩn 100%. Bắt đầu gửi dữ liệu lên Server...");
-        AuctionManager.getInstance().uploadItem(ItemManager.getInstance().preProcessing(itemData), Double.parseDouble(price.getText()), Double.parseDouble(stepPrice.getText()), startTime.getValue().atStartOfDay(), endTime.getValue().atStartOfDay());
-
-        showCongratulationEffect(2.5);
-    }
-
-
-    private String saveImage(File file) {
         try {
-            String folder = "..\\auction-common\\src\\main\\resources\\images\\";
-            File dir = new File(folder);
+            double startPrice = Double.parseDouble(price.getText());
+            double step = Double.parseDouble(stepPrice.getText());
+            var startT = startTime.getValue().atStartOfDay();
+            var endT = endTime.getValue().atStartOfDay();
 
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String fileName = System.currentTimeMillis() + "_" + file.getName();
-            File dest = new File(folder + fileName);
-
-            java.nio.file.Files.copy(
-                file.toPath(),
-                dest.toPath(),
-                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            AuctionManager.getInstance().uploadItem(
+                    ItemManager.getInstance().preProcessing(itemData),
+                    startPrice,
+                    step,
+                    startT,
+                    endT
             );
 
-            return "/images/" + fileName;
+            showCongratulationEffect(2.5);
+            System.out.println("Đăng đấu giá thành công rực rỡ!");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        } catch (Exception ex) {
+            System.err.println("Lỗi khi gửi dữ liệu lên Server: " + ex.getMessage());
+        } finally {
+            submit.setDisable(false);
         }
     }
+
 
     public void findArtworkData(HashMap<String, String> itemData) {
         TextField artistField = (TextField) itemInfo.lookup("#artist");

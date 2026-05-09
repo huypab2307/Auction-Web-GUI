@@ -54,13 +54,12 @@ public class ItemController {
         sellerName.setText(i.getSellerUsername());
         curPrice.setText(String.format("%,.0f đ", i.getCurPrice()));
         date.setText(i.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        URL src = getClass().getResource(itemSummary.getImagePath());
-
-        if (src != null) {
-            Image img = new Image(src.toExternalForm());
-            itemImage.setImage(img);
+        String path = itemSummary.getImagePath();
+        if (path != null && path.startsWith("http")) {
+            itemImage.setImage(new Image(path, true));
         } else {
-            itemImage.setImage(new Image("/images/earth.png"));
+            URL src = getClass().getResource(path != null ? path : "/images/earth.png");
+            itemImage.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
         }
     }
     @FXML

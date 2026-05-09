@@ -11,7 +11,7 @@
     <children>
         <StackPane alignment="TOP_LEFT">
             <children>
-                <ImageView fx:id="itemImage" fitHeight="140.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true">
+                <ImageView fx:id="itemImage" fitHeight="140.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="false">
                     <image>
                         <Image url="@/images/earth.png" />
                     </image>

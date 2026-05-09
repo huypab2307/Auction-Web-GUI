@@ -132,8 +132,13 @@ public class AuctionItemController implements SearchListener {
             startTime.setText(auctionInfo.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             type.setText("Loại: " + itemSummary.getItemType().name());
 
-            URL src = getClass().getResource(itemSummary.getImagePath());
-            image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
+            String path = itemSummary.getImagePath();
+            if (path != null && path.startsWith("http")) {
+                image.setImage(new Image(path, true));
+            } else {
+                URL src = getClass().getResource(path != null ? path : "/images/earth.png");
+                image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
+            }
             pane.setStyle("-fx-padding: 40 400 40 100;" + Helper.randomColorPicker());
             attributeBox.getChildren().clear();
             Map<String, String> itemInfo = ItemManager.getInstance().findItemById(itemSummary.getItemType(), itemSummary.getItemId()).getSpecificInfo();
