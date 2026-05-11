@@ -40,6 +40,17 @@ public class NotificationHandlers {
             List<Notifications> list = NotificationManager.getInstance().findNotififications(userId);
             out.println(gson.toJson(list));
             break;
+        case "UNFOLLOW":
+            String[] unfollowIds = data.split(" ");
+           // boolean isUnfollowed = NotificationManager.getInstance()
+                                //.unsubscribeAuction(Integer.parseInt(unfollowIds[1]), Integer.parseInt(unfollowIds[0]));
+           // out.println(gson.toJson(isUnfollowed));
+            break;
+        case "CHECK":
+            String[] checkParams = data.split(" ");
+            break;
+        default:
+            break;
     }
 } catch (Exception e) {
     e.printStackTrace();
