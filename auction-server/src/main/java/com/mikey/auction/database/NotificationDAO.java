@@ -1,13 +1,16 @@
-package com.mikey.auction.database;
+    package com.mikey.auction.database;
 
-import com.mikey.auction.auction.Auction;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
 import com.mikey.auction.auction.Notifications;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.user.Bidder;
-
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 
 public class NotificationDAO extends BaseDAO {
