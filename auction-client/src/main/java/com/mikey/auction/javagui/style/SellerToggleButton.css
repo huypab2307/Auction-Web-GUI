@@ -1,0 +1,49 @@
+/* --- STYLE CLASS: BLUE PASTEL - FOCUS ON BACKGROUND --- */
+
+.toggle-blue-pastel {
+    /* 1. Trạng thái tĩnh: Sạch sẽ, tiệp màu với nền dashboard */
+    -fx-background-color: #F8FAFC; /* Màu nền trắng xám rất nhẹ giống Input */
+    -fx-border-color: transparent; /* Tắt viền tĩnh */
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    
+    -fx-text-fill: #64748B;        /* Màu chữ xám Slate nhạt */
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-padding: 12px 25px;
+    -fx-cursor: hand;
+    
+    /* Transition cho cảm giác mượt mà */
+    -fx-transition: all 0.2s ease-out;
+}
+
+/* 2. KHI DI CHUỘT VÀO (HOVER): LÊN MÀU NỀN PASTEL + PHÁT SÁNG NHẸ */
+.toggle-blue-pastel:hover {
+    /* Lên nền màu xanh Pastel nhẹ */
+    -fx-background-color: #DBEAFE; /* Màu Blue-100 dịu mát */
+    -fx-text-fill: #1E40AF;        /* Chữ đậm lên một chút */
+    
+    /* Hiệu ứng phát sáng nhẹ (Soft Glow) */
+    /* Dùng màu xanh dương nhẹ (rgba), bán kính tỏa rộng (20px) nhưng mờ (0.4) */
+    -fx-effect: dropshadow(three-pass-box, rgba(59, 130, 246, 0.4), 20, 0, 0, 0);
+    
+    -fx-translate-y: -1px;         /* Nhấc nhẹ nút lên tạo tương tác */
+}
+
+/* 3. KHI ĐƯỢC CHỌN (SELECTED): NỀN ĐẬM HƠN */
+.toggle-blue-pastel:selected {
+    /* Nền đậm hơn để khẳng định trạng thái */
+    -fx-background-color: #BFDBFE; /* Màu Blue-200 đậm đà hơn */
+    -fx-text-fill: #1D4ED8;        /* Chữ Navy đậm */
+    -fx-border-color: #93C5FD;     /* Có thể thêm viền mỏng tiệp màu nếu muốn rõ hơn */
+    -fx-border-width: 1px;
+
+    /* Giữ phát sáng nhẹ nhàng */
+    -fx-effect: dropshadow(three-pass-box, rgba(59, 130, 246, 0.5), 25, 0, 0, 0);
+}
+
+/* Hiệu ứng khi nhấn (Feedback) */
+.toggle-blue-pastel:pressed {
+    -fx-translate-y: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 1);
+}

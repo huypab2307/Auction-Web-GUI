@@ -87,4 +87,26 @@ public class NotificationManager {
             return false;
         }
     }
+    public boolean checkSubscribed(int auctionId,int userId){
+        NotificationDAO notificationDAO = NotificationDAO.getInstance();
+        try (Connection connection = notificationDAO.getConnect()) {
+            return notificationDAO.checkSubscribed(connection, auctionId, userId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean unsubcribeAuction(int auctionId,int userId){
+        NotificationDAO notificationDAO = NotificationDAO.getInstance();
+        try (Connection connection = notificationDAO.getConnect()) {
+            connection.setAutoCommit(false);
+            if (notificationDAO.unsubscribeAuction(connection, auctionId, userId)) {
+                connection.commit();
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

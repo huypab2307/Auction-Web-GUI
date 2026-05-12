@@ -1,6 +1,5 @@
 package com.mikey.auction.database;
 
-import com.mikey.auction.database.BaseDAO;
 import com.mikey.auction.user.Admin;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Seller;
@@ -56,6 +55,7 @@ public class UserDAO extends BaseDAO {
                 int id = rs.getInt("id");
                 String user = rs.getString("username");
                 String pass = rs.getString("password");
+                System.out.println(role + id + user + pass);
 
                 if ("ADMIN".equals(role)) {
                     return new Admin(user, pass, id);
@@ -83,5 +83,44 @@ public class UserDAO extends BaseDAO {
             System.out.println("Lỗi tìm user: " + ex.getMessage());
         }
         return null;
+    }
+    public boolean changePassword(int userId, String newPassword){
+        String query = "Update user set password = ? where id = ?";
+        try (Connection connection = getConnect()){
+            PreparedStatement pr = connection.prepareStatement(query);
+            pr.setString(1, newPassword);
+            pr.setInt(2, userId);
+            return pr.executeUpdate() > 0;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean checkPassword(int userId, String password){
+        String query = "SELECT password FROM user WHERE id = ?";
+        try (Connection connection = getConnect()){
+            PreparedStatement pr = connection.prepareStatement(query);
+            pr.setInt(1, userId);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()){
+                return rs.getString("password").equals(password);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+    public boolean deleteUser(int userId, String password){
+        String query = "DELETE FROM user WHERE id = ? AND password = ?";
+        try (Connection connection = getConnect()){
+            PreparedStatement pr = connection.prepareStatement(query);
+            pr.setInt(1, userId);
+            pr.setString(2, password);
+            return pr.executeUpdate() > 0;
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
     }
 }

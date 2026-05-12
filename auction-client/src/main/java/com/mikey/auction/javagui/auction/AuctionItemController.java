@@ -1,18 +1,26 @@
 package com.mikey.auction.javagui.auction;
 
+import com.mikey.auction.auction.Auction;
+import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.javagui.bidder.AutoBidDialogController;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
-import com.mikey.auction.javagui.RandomHelper;
+import com.mikey.auction.javagui.Helper;
 import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.user.User;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -20,22 +28,31 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Role;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
-import com.mikey.auction.factory.UserFactory;
+import com.mikey.auction.manager.UserManager;
 import com.mikey.auction.javagui.topbar.TopBarController;
-import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.javagui.topbar.SearchListener;
 
 
 public class AuctionItemController implements SearchListener {
+    public Button follow;
+    public Button unfollow;
     @FXML
     private StackPane mainStackPane;
     @FXML
@@ -83,6 +100,12 @@ public class AuctionItemController implements SearchListener {
         if (topBarController != null) {
             topBarController.setUser(this.user);
         }
+        NotificationManager notificationManager = NotificationManager.getInstance();
+        if (notificationManager.checkSubscribed(auctionInfo.getId(), userId)){
+            handleFollow(follow, unfollow);
+        }else{
+            handleFollow(unfollow, follow);
+        }
     }
     public void setUser(User user){
         this.user = user;
@@ -94,7 +117,7 @@ public class AuctionItemController implements SearchListener {
 
     @Override
     public void onSearchPerformed(ArrayList<AuctionInfo> results) {
-        SceneChanger.getInstance().toMainMenu(user, results);
+        SceneChanger.getInstance().toBidder(user, results);
     }
 
     public void renderStaticInfo() {
@@ -109,14 +132,59 @@ public class AuctionItemController implements SearchListener {
             startTime.setText(auctionInfo.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             type.setText("Loại: " + itemSummary.getItemType().name());
 
-            URL src = getClass().getResource(itemSummary.getImagePath());
-            image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
-            pane.setStyle("-fx-padding: 40 400 40 100;" + RandomHelper.randomColorPicker());
+            String path = itemSummary.getImagePath();
+            if (path != null && path.startsWith("http")) {
+                image.setImage(new Image(path, true));
+            } else {
+                URL src = getClass().getResource(path != null ? path : "/images/earth.png");
+                image.setImage(src != null ? new Image(src.toExternalForm()) : new Image("/images/earth.png"));
+            }
+            pane.setStyle("-fx-padding: 40 400 40 100;" + Helper.randomColorPicker());
             attributeBox.getChildren().clear();
             Map<String, String> itemInfo = ItemManager.getInstance().findItemById(itemSummary.getItemType(), itemSummary.getItemId()).getSpecificInfo();
             itemInfo.forEach((label, value) -> {
                 attributeBox.getChildren().add(new Label(label + ": " + value));
             });
+
+            String statusText = auctionInfo.getStatus().name();
+            datetime.setText("Trạng thái: " + statusText + " | Kết thúc: " +  auctionInfo.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            
+            try (Connection connection = AuctionDAO.getInstance().getConnect()) {
+                AuctionInfo auction = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
+                int sellerId = AuctionDAO.getInstance().findById(connection, auctionInfo.getId()).getSellerId();
+
+                if (user.getId() == sellerId) {
+                    bidButton.setVisible(false);
+                    bidButton.setManaged(false); 
+                    return;
+                } else {
+                    bidButton.setVisible(true);
+                    bidButton.setManaged(true);
+                }
+
+            AuctionStatus status = auction.getStatus();
+
+            if (status == AuctionStatus.OPEN) {
+                bidButton.setDisable(false);
+                bidButton.setText("ĐẤU GIÁ NGAY");
+                bidButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"); 
+            } 
+            else if (status == AuctionStatus.PENDING) {
+                bidButton.setDisable(true); // Vô hiệu hóa vì chưa đến giờ
+                bidButton.setText("PHIÊN ĐẤU GIÁ CHƯA MỞ");
+                bidButton.setStyle("-fx-background-color: #ffc107; -fx-text-fill: black; -fx-font-weight: bold;");
+            } 
+            else {
+                bidButton.setDisable(true);
+                bidButton.setText("PHIÊN ĐẤU GIÁ ĐÃ KẾT THÚC");
+                bidButton.setStyle("-fx-background-color: #808080; -fx-text-fill: white; -fx-font-weight: bold;");
+            }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.err.println("Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
+                return;
+            }
         }catch (Exception e){
             System.err.println(e.getMessage());
         }
@@ -129,12 +197,11 @@ public class AuctionItemController implements SearchListener {
 
     @FXML
     public void onBidHandle(ActionEvent actionEvent) {
-        Button bidButton = (Button) actionEvent.getSource();
         bidButton.setDisable(true);
         bidButton.setText("Đang xử lý...");
 
         try {
-            Bidder bidder = (Bidder) UserFactory.createUser(Role.BIDDER, user);
+            Bidder bidder = (Bidder) UserManager.getInstance().createUser(Role.BIDDER, user);
             if (AuctionManager.getInstance().placeBid(bidder, auctionInfo, auctionInfo.getCurPrice())) {
                 auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionInfo.getId());
                 showCongratulationEffect(2.5);
@@ -186,6 +253,55 @@ public class AuctionItemController implements SearchListener {
         NotificationManager notificationManager = NotificationManager.getInstance();
         if (notificationManager.subscribeAuction(auctionInfo.getId(), user.getId())){
             showCongratulationEffect(2.5);
+            handleFollow(follow, unfollow);
         }
+    }
+
+    public void unFollowButton(ActionEvent actionEvent) {
+        NotificationManager notificationManager = NotificationManager.getInstance();
+        if (notificationManager.unsubcribeAuction(auctionInfo.getId(), user.getId())){
+            showCongratulationEffect(2.5);
+            handleFollow(unfollow, follow);
+        }
+    }
+    public void handleFollow(Button first, Button second){
+        first.setVisible(false);
+        first.setManaged(false);
+
+        second.setVisible(true);
+        second.setManaged(true);
+    }
+
+    @FXML
+    public void onAutoBidHandle(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/bidder/auto_bid_dialog.fxml"));
+        Parent root = loader.load();
+
+        // Tạo một Stage mới cho Pop-up
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.initStyle(StageStyle.TRANSPARENT);
+
+        AutoBidDialogController controller = loader.getController();
+        controller.setStage(popupStage);
+
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        popupStage.setScene(scene);
+
+        popupStage.showAndWait(); // Đợi user nhập xong
+
+        double result = controller.getMaxPrice();
+        if (result > 0) {
+            System.out.println("Kích hoạt Max Bid: " + result);
+            showCongratulationEffect(1.5);
+        }
+    }
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

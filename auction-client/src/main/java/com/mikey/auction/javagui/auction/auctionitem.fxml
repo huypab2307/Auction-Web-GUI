@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.auction.AuctionItemController">
     <stylesheets>
@@ -77,7 +78,7 @@
                                 <VBox prefWidth="350.0" spacing="20.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 5); -fx-background-radius: 10; -fx-padding: 2;" translateY="-220.0" AnchorPane.rightAnchor="0.0"> <!-- Nhấc lên vừa đủ để đẹp, không che Top -->
                                     <children>
                                         <ImageView fx:id="image" fitHeight="200.0" fitWidth="346.0" pickOnBounds="true" preserveRatio="false" style="-fx-background-radius: 10 10 0 0;">
-                                            <image><Image url="@/images/kaguya.jpg" /></image>
+
                                         </ImageView>
                                         <VBox spacing="15.0" style="-fx-padding: 20;">
                                             <children>
@@ -89,7 +90,14 @@
                                                 </HBox>
                                                 <Label fx:id="datetime" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
                                                 <Button fx:id="bidButton" maxWidth="Infinity" onAction="#onBidHandle" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
-                                                <Button onAction="#followButton" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />
+                                                <Button fx:id="autoBidButton" maxWidth="Infinity" onAction="#onAutoBidHandle" prefHeight="45.0"
+                                                        style="-fx-background-color: transparent; -fx-border-color: #2575fc; -fx-border-width: 1; -fx-text-fill: #2575fc; -fx-font-weight: bold; -fx-cursor: hand;"
+                                                        text="ĐẶT GIÁ TỰ ĐỘNG" />
+                                                <Button fx:id="follow" maxWidth="Infinity" onAction="#followButton" prefHeight="45.0" style="-fx-background-color: transparent; -fx-border-color: #1c1d1f; -fx-border-width: 1; -fx-font-weight: bold;" text="Theo dõi phiên" />
+                                                <Button fx:id="unfollow" maxWidth="Infinity" onAction="#unFollowButton" prefHeight="45.0" style="-fx-background-color: #25b600; -fx-border-width: 1; -fx-font-weight: bold;" text="Đã Theo dõi phiên" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="17.0" />
+                                       </font></Button>
                                                 <VBox spacing="10.0" style="-fx-padding: 15 0 0 0;">
                                                     <children>
                                                         <Label style="-fx-font-weight: bold;" text="Thông tin phiên:" />

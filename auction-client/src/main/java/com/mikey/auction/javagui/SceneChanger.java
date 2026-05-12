@@ -1,16 +1,22 @@
 package com.mikey.auction.javagui;
 
-import com.mikey.auction.javagui.mainmenu.AuctionHubController;
+import com.mikey.auction.javagui.bidder.AuctionHubController;
 import com.mikey.auction.javagui.seller.SellerController;
+import com.mikey.auction.javagui.seller.SellerHubController;
 import com.mikey.auction.javagui.auction.AuctionItemController;
-import com.mikey.auction.javagui.dashboard.GeneralController;
 
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.javagui.user.UserController;
 import com.mikey.auction.user.User;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -35,56 +41,99 @@ public class SceneChanger {
         });
     }
 
-    public void toMainMenu(User user) {
-        navigate("mainmenu/auctionhub.fxml", "Auction Hub - " + user.getUsername(), loader -> {
+    public void toBidder(User user) {
+        navigate("bidder/auctionhub.fxml", "Auction Hub - " + user.getUsername(), loader -> {
             AuctionHubController controller = loader.getController();
             controller.setUser(user);
-            controller.loadAuction();
+            controller.loadDashBoard();
             mainStage.setResizable(true);
         });
     }
 
-    public void toMainMenu(User user, ArrayList<AuctionInfo> results) {
-        navigate("mainmenu/auctionhub.fxml", "Auction Hub - " + user.getUsername(), loader -> {
-            AuctionHubController controller = loader.getController();
-            controller.setUser(user);
-            if (results == null) {
-                controller.loadAuction();
-            } else {
-                controller.onSearchPerformed(results);
-            }
-        });
-    }
+public void toBidder(User user, ArrayList<AuctionInfo> results) {
+    // Navigate đến cái vỏ (Hub)
+    navigate("bidder/auctionhub.fxml", "Auction Hub - " + user.getUsername(), loader -> {
+        AuctionHubController controller = loader.getController();
+
+        controller.setUser(user);
+        
+        if (results == null) {
+            controller.handleCategoryClick(null); 
+        } else {
+            controller.onSearchPerformed(results);
+        }
+    });
+}
     public void toAuction(AuctionInfo auctionInfo, int userId){
         navigate("auction/auctionitem.fxml", "Auction: " + auctionInfo.getItemInfo().getTitle(), loader -> {
             AuctionItemController controller = loader.getController();
-            controller.setUser(userId);
             controller.setAuctionInfo(auctionInfo);
+            controller.setUser(userId);
             controller.renderStaticInfo();
             controller.updateDynamicInfo();
         });
     }
-    public void toUserGui(User user){
-        if (user == null) {
-            toLogin();
-            return;
-        }
-        navigate("dashboard/general.fxml", "Dashboard - " + user.getUsername(), loader -> {
-            GeneralController controller = loader.getController();
-            controller.setUser(user);
-            controller.generalButton();
-        });
-    }
+
 
     public void toSellerGui(User user){
         if (user == null) {
             toLogin();
             return;
         }
-        navigate("seller/seller.fxml", "Seller Dashboard - " + user.getUsername(), loader -> {
+        navigate("seller/Seller.fxml", "Seller Dashboard - " + user.getUsername(), loader -> {
             SellerController controller = loader.getController();
             controller.setUser(user);
             controller.loadSellerAuctions();
+        });
+    }
+    public void openSettings(Stage popupStage, User user){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/user/User.fxml"));
+            Parent root = loader.load();
+
+            UserController controller = loader.getController();
+            controller.setUser(user);
+            controller.setStage(popupStage);
+
+            if (!popupStage.isShowing()) {
+                try {
+                    popupStage.initStyle(StageStyle.TRANSPARENT);
+                    popupStage.initModality(Modality.APPLICATION_MODAL);
+                    if (mainStage != null) {
+                        popupStage.initOwner(mainStage);
+                    }
+                } catch (Exception e) {
+                }
+            }
+
+            if (mainStage != null && mainStage.getScene() != null) {
+                Parent mainRoot = mainStage.getScene().getRoot();
+                ColorAdjust dim = new ColorAdjust();
+                dim.setBrightness(-0.5);
+                mainRoot.setEffect(dim);
+
+                popupStage.setOnHidden(e -> {
+                    mainRoot.setEffect(null);
+                });
+            }
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            popupStage.setScene(scene);
+            popupStage.setAlwaysOnTop(true);
+
+            if (!popupStage.isShowing()) {
+                popupStage.show();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void toSellerHubGui(User user){
+        navigate("seller/sellerhub.fxml", "seller hub - " + user.getUsername(), loader -> {
+            SellerHubController controller = loader.getController();
+            controller.setUser(user);
         });
     }
 
@@ -109,6 +158,7 @@ public class SceneChanger {
             e.printStackTrace();
         }
     }
+
 
     @FunctionalInterface
     private interface ControllerConsumer {

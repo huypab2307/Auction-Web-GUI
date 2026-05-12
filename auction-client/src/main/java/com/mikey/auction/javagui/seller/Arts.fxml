@@ -25,24 +25,28 @@
                <children>
                   <Label styleClass="field-label" text="Nghệ sĩ:" />
                   <TextField fx:id="artist" prefHeight="35.0" promptText="Nhập tên nghệ sĩ" styleClass="input-field" />
+                  <Label fx:id="errorArtist" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
                <children>
                   <Label styleClass="field-label" text="Năm sáng tác:" />
                   <TextField fx:id="yearOfcreation" prefHeight="35.0" promptText="Nhập năm sáng tác" styleClass="input-field" />
+                  <Label fx:id="errorYear" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
                <children>
                   <Label styleClass="field-label" text="Kích thước:" />
                   <TextField fx:id="dimensions" prefHeight="35.0" promptText="VD: 23x29" styleClass="input-field" />
+                  <Label fx:id="errorDimensions" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
             <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <children>
                   <Label styleClass="field-label" text="Chất liệu:" />
                   <TextField fx:id="medium" prefHeight="35.0" promptText="VD: Gỗ" styleClass="input-field" />
+                  <Label fx:id="errorMedium" prefHeight="24.0" prefWidth="479.0" />
                </children>
             </VBox>
          </children>

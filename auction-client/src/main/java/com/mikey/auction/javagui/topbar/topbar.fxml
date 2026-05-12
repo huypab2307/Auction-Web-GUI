@@ -53,15 +53,13 @@
                         <graphic>
                             <ImageView fx:id="avatar" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-size: cover;-fx-background-position: center;-fx-background-radius: 10;">
                                 <image>
-                        <Image url="@/images/earth.png" />
+                                    <Image url="@/images/earth.png" />
                                 </image>
                             </ImageView>
                         </graphic>
                         <items>
-                            <MenuItem mnemonicParsing="false" onAction="#userGuiHandle" styleClass="menuItem" text="👤 Thông tin cá nhân" />
                             <MenuItem mnemonicParsing="false" onAction="#sellerGuiHandle" styleClass="menuItem" text="👤 Đến trang người bán" />
-                            <MenuItem mnemonicParsing="false" styleClass="menuItem" text="👤 lịch sử giao dịch" />
-                            <MenuItem mnemonicParsing="false" styleClass="menuItem" text="⚙️ Cài đặt" />
+                            <MenuItem mnemonicParsing="false" onAction="#userGuiHandle" styleClass="menuItem" text="👤 Thông tin cá nhân" />
                             <SeparatorMenuItem mnemonicParsing="false" />
                             <MenuItem mnemonicParsing="false" onAction="#logoutHandle" styleClass="menuItem" text="🚪 Đăng xuất" />
 
