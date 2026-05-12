@@ -43,7 +43,7 @@ public class AuctionDAO extends BaseDAO {
         LocalDateTime endTime = rs.getObject("endTime", LocalDateTime.class);
         ItemType itemType = ItemType.valueOf(rs.getString("type").toUpperCase());
 
-        AuctionStatus status = calculateStatus(startTime, endTime, rs.getString("status"));
+        AuctionStatus status = calculateStatus(startTime, endTime);
 
         ItemSummary itemInfo = new ItemSummary(itemId, itemName, description, itemType, imagePath);
         return new AuctionInfo(itemInfo, id, sellerName, lastBidder, curPrice, status, startTime, endTime, priceStep);
@@ -103,7 +103,9 @@ public class AuctionDAO extends BaseDAO {
 
 
     public boolean createAuction(Connection connection, int itemId, int sellerId, double price, double stepPrice, LocalDateTime startTime, LocalDateTime endTime) throws SQLException {
-        String query = "INSERT INTO auctions(itemId, sellerId, startingPrice, priceStep, curPrice, startTime, endTime) VALUES(?,?,?,?,?,?,?);";
+        AuctionStatus initialStatus = AuctionDAO.getInstance().calculateStatus(startTime, endTime);
+        
+        String query = "INSERT INTO auctions(itemId, sellerId, startingPrice, priceStep, curPrice, startTime, endTime, status) VALUES(?,?,?,?,?,?,?,?);";
 
         try (PreparedStatement pr = connection.prepareStatement(query)) {
             pr.setInt(1, itemId);
@@ -113,6 +115,7 @@ public class AuctionDAO extends BaseDAO {
             pr.setDouble(5, price);
             pr.setTimestamp(6, Timestamp.valueOf(startTime));
             pr.setTimestamp(7, Timestamp.valueOf(endTime));
+            pr.setString(8, initialStatus.name());
             return pr.executeUpdate() > 0;
         }
     }
@@ -174,14 +177,26 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
-    private AuctionStatus calculateStatus(LocalDateTime start, LocalDateTime end, String dbStatus) {
-        AuctionStatus current = AuctionStatus.valueOf(dbStatus.toUpperCase());
-        if (current == AuctionStatus.CANCELED) return current;
-        
+    private AuctionStatus calculateStatus(LocalDateTime start, LocalDateTime end) {
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(start)) return AuctionStatus.PENDING;
         if (now.isAfter(end)) return AuctionStatus.CLOSED;
         return AuctionStatus.OPEN;
+    }
+
+    public void autoUpdateStatuses() {
+        String sql = "UPDATE auctions SET status = " +
+                    "CASE " +
+                    "  WHEN startTime > NOW() THEN 'PENDING' " +
+                    "  WHEN endTime < NOW() THEN 'CLOSED' " +
+                    "  ELSE 'OPEN' " +
+                    "END " +
+                    "WHERE status != 'CANCELED' AND status != 'CLOSED'";
+        try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     

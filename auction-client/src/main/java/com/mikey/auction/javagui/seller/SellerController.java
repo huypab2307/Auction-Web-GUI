@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.mikey.auction.cloudinary.CloudinaryService;
+import com.mikey.auction.dto.AuctionInfo;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -17,10 +19,12 @@ import javafx.scene.Parent;
 import javafx.animation.PauseTransition;
 import com.mikey.auction.user.User;
 import com.mikey.auction.auction.Auction;
+import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.javagui.topbar.TopBarController;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
+import com.mikey.auction.socket.RequestHandler;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -29,6 +33,7 @@ import javafx.scene.image.ImageView;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TextArea;
 import javafx.util.Duration;
 
@@ -141,7 +146,6 @@ public class SellerController {
 
     @FXML
     private void handleSubmit(ActionEvent e) {
-        // 1. Kiểm tra lỗi nhập liệu (Validation)
         checkItemName();
         checkPrice();
         checkStepPrice();
@@ -177,6 +181,8 @@ public class SellerController {
             return;
         }
 
+        AuctionInfo newAuction = new AuctionInfo(null, currentEditingId, selected, selected, currentEditingId, null, null, null, currentEditingId);
+        RequestHandler.getInstance().requestCreateAuction(newAuction);
         submit.setDisable(true);
         System.out.println("Đang xử lý dữ liệu và đẩy ảnh lên Cloudinary...");
 
@@ -218,6 +224,12 @@ public class SellerController {
 
             showCongratulationEffect(2.5);
             System.out.println("Đăng đấu giá thành công rực rỡ!");
+
+            if (currentEditingId != -1) {
+                System.out.println("Updating ID: " + currentEditingId);
+            } else {
+                System.out.println("Creating new auction");
+            }
 
         } catch (Exception ex) {
             System.err.println("Lỗi khi gửi dữ liệu lên Server: " + ex.getMessage());
@@ -786,6 +798,58 @@ private void setTextFieldError(TextField field, Label label, String message) {
             setTextFieldError(field, error, "Không được bỏ trống!");
         } else {
             clearTextFieldError(field, error);
+        }
+    }
+
+    private int currentEditingId = -1;
+    
+    public void setEditMode(AuctionInfo info) {
+        this.currentEditingId = info.getId();
+        submit.setText("Cập nhật sản phẩm");
+
+        // Đổ dữ liệu cũ vào các ô nhập
+        itemName.setText(info.getItemInfo().getTitle());
+        price.setText(String.valueOf(info.getCurPrice()));
+        stepPrice.setText(String.valueOf(info.getBidStep()));
+        itemDescription.setText(info.getItemInfo().getDescription());
+        type.setValue(info.getItemInfo().getItemType().toString());
+        
+        // Mặc định là mở khóa tất cả (dành cho PENDING)
+        itemName.setDisable(false);
+        price.setDisable(false);
+        stepPrice.setDisable(false);
+        itemDescription.setDisable(false);
+        type.setDisable(false);
+        // startTimeField.setDisable(false); // Nếu bạn có ô chọn giờ bắt đầu
+        
+        // KIỂM TRA LOGIC NGHIỆP VỤ
+        if (info.getStatus() == AuctionStatus.OPEN) {
+            
+            // Khóa thời gian bắt đầu vì phiên đã chạy rồi
+            // startTimeField.setDisable(true); 
+
+            // Giả sử getIdNgườiBidCuoiCùng() trả về 0 hoặc null nếu chưa có ai bid
+            boolean hasBids = (info.getLastBidderName() != null && !info.getLastBidderName().isEmpty()); 
+
+            if (hasBids) {
+                // KỊCH BẢN: ĐANG MỞ VÀ ĐÃ CÓ NGƯỜI ĐẤU GIÁ
+                // Khóa toàn bộ thông số tài chính và định danh cốt lõi
+                itemName.setDisable(true);
+                price.setDisable(true);
+                stepPrice.setDisable(true);
+                type.setDisable(true);
+                // endTimeField.setDisable(true); 
+                
+                Tooltip tooltip = new Tooltip("Đã có người đấu giá, chỉ được phép cập nhật thêm mô tả!");
+                price.setTooltip(tooltip);
+                submit.setText("Cập nhật mô tả");
+                
+            } else {
+                // KỊCH BẢN: ĐANG MỞ NHƯNG CHƯA AI ĐẤU GIÁ
+                // Vẫn cho sửa giá để kích cầu, chỉ hiện nhắc nhở
+                Tooltip tooltip = new Tooltip("Chưa có ai đấu giá, bạn vẫn có thể sửa giá khởi điểm.");
+                price.setTooltip(tooltip);
+            }
         }
     }
 }

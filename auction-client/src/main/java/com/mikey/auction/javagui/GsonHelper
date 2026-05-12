@@ -1,0 +1,22 @@
+package com.mikey.auction.javagui;
+
+import com.google.gson.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.lang.reflect.Type;
+
+public class GsonHelper {
+    private static Gson gson;
+
+    public static Gson getInstance() {
+        if (gson == null) {
+            gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) -> 
+                    new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> 
+                    LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .create();
+        }
+        return gson;
+    }
+}
