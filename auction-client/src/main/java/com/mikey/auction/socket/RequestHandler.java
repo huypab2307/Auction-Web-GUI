@@ -1,13 +1,27 @@
 package com.mikey.auction.socket;
 
-import com.google.gson.Gson;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.ItemType;
 import java.io.PrintWriter;
 
+// THÊM BỘ CÔNG CỤ XỬ LÝ NGÀY THÁNG
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
+
 public class RequestHandler {
     private static RequestHandler instance;
-    private final Gson gson = new Gson();
+    
+    // ĐÃ THAY LÕI GSON ĐỂ CHỐNG CRASH KHI ĐĂNG SẢN PHẨM MỚI
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, t, ctx) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            .create();
+            
     private PrintWriter out;
 
     private RequestHandler() {}
@@ -17,12 +31,10 @@ public class RequestHandler {
         return instance;
     }
 
-    // Được gọi 1 lần duy nhất khi Client kết nối thành công tới Server
     public void setPrintWriter(PrintWriter out) { 
         this.out = out; 
     }
 
-    // Hàm lõi để gửi dữ liệu
     private void send(String message) {
         if (out != null) {
             out.println(message);
@@ -68,7 +80,6 @@ public class RequestHandler {
     }
 
     public void requestCreateAuction(AuctionInfo info) {
-        // Đóng gói toàn bộ object AuctionInfo thành JSON
         send("AUCTION|CREATE|" + gson.toJson(info));
     }
 
@@ -114,4 +125,8 @@ public class RequestHandler {
         send("ITEM|FIND|" + type.name() + "|" + itemId);
     }
 
+    // Thêm vào RequestHandler.java
+    public void requestDeleteAuction(int auctionId) {
+        send("AUCTION|DELETE|" + auctionId);
+    }
 }

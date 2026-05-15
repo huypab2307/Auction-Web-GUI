@@ -1,7 +1,9 @@
 package com.mikey.auction.javagui.seller;
 
 import com.mikey.auction.javagui.SceneChanger;
+import com.mikey.auction.javagui.login.LoginController;
 import com.mikey.auction.javagui.topbar.TopBarController;
+import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.user.User;
 
 import javafx.animation.FadeTransition;
@@ -10,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -43,17 +46,33 @@ public class SellerItemController {
     private int userId;
 
     private AuctionInfo auctionInfo;
+
     @FXML
     public void setData(AuctionInfo i){
         ItemSummary itemSummary = i.getItemInfo();
-        type.setText(itemSummary.getItemType().name());
+        
+        // 👉 1. Cập nhật Text hiển thị cả Loại sản phẩm và Trạng thái
+        type.setText(itemSummary.getItemType().name() + " | " + i.getStatus().name());
+
+        // 👉 2. Đổi màu Label type dựa trên trạng thái để người bán dễ nhìn
+        String statusStr = i.getStatus().name();
+        if ("OPEN".equals(statusStr)) {
+            type.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;"); // Xanh lá
+        } else if ("PENDING".equals(statusStr)) {
+            type.setStyle("-fx-background-color: #ffc107; -fx-text-fill: black;"); // Vàng
+        } else {
+            type.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white;"); // Đỏ cho CLOSED/CANCELED
+        }
+
+        // 3. Đổ các dữ liệu còn lại
         itemName.setText(itemSummary.getTitle());
         sellerName.setText(i.getSellerUsername());
         curPrice.setText(String.format("%,.0f đ", i.getCurPrice()));
         date.setText(i.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         this.auctionInfo = i;
+        
+        // 4. Xử lý load ảnh (Giữ nguyên code cũ của bạn)
         String imagePath = itemSummary.getImagePath();
-
         if (imagePath != null && imagePath.startsWith("http")) {
             itemImage.setImage(new Image(imagePath, true));
         } else {
@@ -81,7 +100,7 @@ public class SellerItemController {
     @FXML
     public void handleDelete(ActionEvent event) {
         if (auctionInfo.getStatus() == AuctionStatus.OPEN) {
-            Alert warning = new Alert(Alert.AlertType.WARNING, "Không thể xóa phiên đấu giá đang diễn ra!", ButtonType.OK);
+            Alert warning = new Alert(Alert.AlertType.WARNING, "Không thể xóa phiên đang diễn ra!", ButtonType.OK);
             warning.showAndWait();
             return;
         }
@@ -89,12 +108,16 @@ public class SellerItemController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Xác nhận xóa");
         alert.setHeaderText("Xóa sản phẩm: " + auctionInfo.getItemInfo().getTitle());
-        alert.setContentText("Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa không?");
+        alert.setContentText("Bạn có chắc chắn muốn xóa vĩnh viễn khỏi Database không?");
 
         if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            Node sourceButton = (Node) event.getSource();
-            Node cardRoot = sourceButton.getParent().getParent();
+            
+            // 👉 ĐÃ SỬA: Gọi đúng hàm xóa đấu giá thay vì xóa tài khoản
+            System.out.println("Gửi yêu cầu xóa vĩnh viễn ID: " + auctionInfo.getId());
+            RequestHandler.getInstance().requestDeleteAuction(auctionInfo.getId()); 
 
+            // Hiệu ứng biến mất trên UI (giữ nguyên)
+            Node cardRoot = ((Node) event.getSource()).getParent().getParent();
             FadeTransition fade = new FadeTransition(Duration.millis(300), cardRoot);
             fade.setFromValue(1.0);
             fade.setToValue(0.0);
@@ -103,30 +126,46 @@ public class SellerItemController {
                 cardRoot.setManaged(false);
             });
             fade.play();
-            
-            System.out.println("Deleted ID: " + auctionInfo.getId());
         }
     }
 
     @FXML
     public void handleEdit(ActionEvent event) {
+        // 1. Chặn nếu phiên đã đóng
         if (auctionInfo.getStatus() == AuctionStatus.CLOSED || auctionInfo.getStatus() == AuctionStatus.CANCELED) {
-            Alert warning = new Alert(Alert.AlertType.WARNING, "Không thể sửa phiên đấu giá đã kết thúc hoặc bị hủy!", ButtonType.OK);
+            Alert warning = new Alert(Alert.AlertType.WARNING, "Không thể sửa phiên đã kết thúc!", ButtonType.OK);
             warning.showAndWait();
             return;
         }
 
         try {
+            // 2. Load file Seller.fxml (form nhập liệu)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/seller/Seller.fxml"));
             Parent root = loader.load();
 
+            // 3. Lấy controller của form đó và gọi hàm tự động điền thông tin (EditMode)
             SellerController controller = loader.getController();
-            controller.setEditMode(auctionInfo);
+            controller.setUser(LoginController.currentUser); // Truyền user hiện tại vào
+            controller.setEditMode(auctionInfo); // <--- ĐÂY LÀ HÀM TỰ ĐIỀN THÔNG TIN BẠN ĐÃ VIẾT
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
+            // 4. Tìm cái khung ScrollPane của màn hình chính để nhét form vào (Giữ nguyên Menu)
+            // Lưu ý: ID "contentScrollPane" phải khớp với ID trong file SellerHub.fxml của bạn
+            javafx.scene.control.ScrollPane hubScrollPane = 
+                (javafx.scene.control.ScrollPane) ((Node) event.getSource()).getScene().lookup("#contentScrollPane");
+            
+            if (hubScrollPane != null) {
+                hubScrollPane.setContent(root);
+                System.out.println("Đã chuyển sang chế độ Sửa cho sản phẩm: " + auctionInfo.getItemInfo().getTitle());
+            } else {
+                // Nếu không tìm thấy ScrollPane (phòng hờ), thì đè cả màn hình
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.getScene().setRoot(root);
+            }
+
+            
 
         } catch (Exception e) {
+            System.err.println("Lỗi khi mở form sửa: " + e.getMessage());
             e.printStackTrace();
         }
     }

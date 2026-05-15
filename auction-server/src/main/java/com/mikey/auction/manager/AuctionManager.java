@@ -83,5 +83,11 @@ public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice)
         }
         return null;
     }
+
+    public boolean updateAuction(AuctionInfo info) {
+        // Gọi xuống DAO để thực hiện cập nhật vào Database
+        // Bạn cần đảm bảo AuctionDAO đã có hàm updateAuction(info)
+        return AuctionDAO.getInstance().updateAuction(info);
+    }
     
 }

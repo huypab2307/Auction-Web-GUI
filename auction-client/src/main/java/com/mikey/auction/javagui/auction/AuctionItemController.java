@@ -1,6 +1,5 @@
 package com.mikey.auction.javagui.auction;
 
-import com.google.gson.Gson;
 import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.items.Arts;
 import com.mikey.auction.items.Electronics;
@@ -46,6 +45,14 @@ import com.mikey.auction.dto.ItemSummary;
 import com.mikey.auction.javagui.topbar.TopBarController;
 import com.mikey.auction.javagui.topbar.SearchListener;
 
+// THÊM THƯ VIỆN GSON CHO NGÀY THÁNG
+import java.time.LocalDateTime;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
+
 public class AuctionItemController implements SearchListener, SocketListener {
     public Button follow;
     public Button unfollow;
@@ -59,26 +66,23 @@ public class AuctionItemController implements SearchListener, SocketListener {
 
     private User user;
     private AuctionInfo auctionInfo;
-    private final Gson gson = new Gson();
+    
+    // ĐÃ FIX LỖI GSON CRASH APP
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, t, ctx) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            .create();
 
     @FXML
     public void initialize() {
         if (topBarController != null) topBarController.setListener(this);
     }
 
-    public void setAuctionInfo(AuctionInfo auctionInfo) {
-        this.auctionInfo = auctionInfo;
-    }
+    public void setAuctionInfo(AuctionInfo auctionInfo) { this.auctionInfo = auctionInfo; }
 
     public void setUser(int userId) {
-        // Lấy thông tin đối tượng User từ biến toàn cục lúc đăng nhập
         this.user = LoginController.currentUser;
-        
-        if (topBarController != null) {
-            topBarController.setUser(this.user);
-        }
-        
-        // Đăng ký Listener và kiểm tra xem User này đã Follow phiên đấu giá chưa
+        if (topBarController != null) { topBarController.setUser(this.user); }
         SocketClient.getInstance().setListener(this);
         RequestHandler.getInstance().requestCheckSubscription(userId, auctionInfo.getId());
     }
@@ -91,7 +95,6 @@ public class AuctionItemController implements SearchListener, SocketListener {
     public void renderStaticInfo() {
         try {
             ItemSummary itemSummary = auctionInfo.getItemInfo();
-
             title.setText(itemSummary.getTitle());
             description.setText(itemSummary.getDescription());
             sellerName.setText("Người bán: " + auctionInfo.getSellerUsername());
@@ -107,14 +110,11 @@ public class AuctionItemController implements SearchListener, SocketListener {
             }
             
             pane.setStyle("-fx-padding: 40 400 40 100;" + Helper.randomColorPicker());
-            
-            // Yêu cầu lấy thông số kỹ thuật (Specific Info) từ Server
             RequestHandler.getInstance().requestFindItem(itemSummary.getItemType(), itemSummary.getItemId());
 
             String statusText = auctionInfo.getStatus().name();
             datetime.setText("Trạng thái: " + statusText + " | Kết thúc: " + auctionInfo.getEndTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             
-            // So sánh Tên người bán và Tên User hiện tại để ẩn nút Bid nếu là người bán
             if (user != null && user.getUsername().equals(auctionInfo.getSellerUsername())) {
                 bidButton.setVisible(false);
                 bidButton.setManaged(false); 
@@ -126,21 +126,16 @@ public class AuctionItemController implements SearchListener, SocketListener {
 
             AuctionStatus status = auctionInfo.getStatus();
             if (status == AuctionStatus.OPEN) {
-                bidButton.setDisable(false);
-                bidButton.setText("ĐẤU GIÁ NGAY");
+                bidButton.setDisable(false); bidButton.setText("ĐẤU GIÁ NGAY");
                 bidButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"); 
             } else if (status == AuctionStatus.PENDING) {
-                bidButton.setDisable(true);
-                bidButton.setText("PHIÊN ĐẤU GIÁ CHƯA MỞ");
+                bidButton.setDisable(true); bidButton.setText("PHIÊN ĐẤU GIÁ CHƯA MỞ");
                 bidButton.setStyle("-fx-background-color: #ffc107; -fx-text-fill: black; -fx-font-weight: bold;");
             } else {
-                bidButton.setDisable(true);
-                bidButton.setText("PHIÊN ĐẤU GIÁ ĐÃ KẾT THÚC");
+                bidButton.setDisable(true); bidButton.setText("PHIÊN ĐẤU GIÁ ĐÃ KẾT THÚC");
                 bidButton.setStyle("-fx-background-color: #808080; -fx-text-fill: white; -fx-font-weight: bold;");
             }
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+        } catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
     public void updateDynamicInfo() {
@@ -152,24 +147,17 @@ public class AuctionItemController implements SearchListener, SocketListener {
     public void onBidHandle(ActionEvent actionEvent) {
         bidButton.setDisable(true);
         bidButton.setText("Đang xử lý...");
-
-        // Gửi Request đặt giá thay vì gọi Manager
         RequestHandler.getInstance().requestPlaceBid(auctionInfo.getId(), user.getId());
         
         PauseTransition pause = new PauseTransition(Duration.seconds(1));
-        pause.setOnFinished(e -> {
-            bidButton.setDisable(false);
-            bidButton.setText("ĐẤU GIÁ NGAY");
-        });
+        pause.setOnFinished(e -> { bidButton.setDisable(false); bidButton.setText("ĐẤU GIÁ NGAY"); });
         pause.play();
     }
 
-    // ==== HÀM HỨNG TẤT CẢ DỮ LIỆU TỪ SERVER ====
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
         Platform.runLater(() -> {
             try {
-                // Hứng chi tiết cấu hình Item
                 if ("ITEM".equals(category) && "FIND".equals(action)) {
                     if (!"null".equals(jsonData)) {
                         ItemType currentType = auctionInfo.getItemInfo().getItemType();
@@ -184,61 +172,35 @@ public class AuctionItemController implements SearchListener, SocketListener {
                             specificInfo.forEach((lbl, val) -> attributeBox.getChildren().add(new Label(lbl + ": " + val)));
                         }
                     }
-                }
-                // Hứng kết quả kiểm tra Follow lúc mới mở màn hình
-                else if ("NOTIFICATION".equals(category) && "CHECK".equals(action)) {
+                } else if ("NOTIFICATION".equals(category) && "CHECK".equals(action)) {
                     boolean isSubscribed = gson.fromJson(jsonData, Boolean.class);
                     if (isSubscribed) handleFollow(follow, unfollow);
                     else handleFollow(unfollow, follow);
-                }
-                // Hứng kết quả bấm nút Follow
-                else if ("NOTIFICATION".equals(category) && "FOLLOW".equals(action)) {
+                } else if ("NOTIFICATION".equals(category) && "FOLLOW".equals(action)) {
                     if (gson.fromJson(jsonData, Boolean.class)) {
-                        showCongratulationEffect(2.5);
-                        handleFollow(follow, unfollow);
+                        showCongratulationEffect(2.5); handleFollow(follow, unfollow);
                     }
-                }
-                // Hứng kết quả bấm nút Unfollow
-                else if ("NOTIFICATION".equals(category) && "UNFOLLOW".equals(action)) {
+                } else if ("NOTIFICATION".equals(category) && "UNFOLLOW".equals(action)) {
                     if (gson.fromJson(jsonData, Boolean.class)) {
-                        showCongratulationEffect(2.5);
-                        handleFollow(unfollow, follow);
+                        showCongratulationEffect(2.5); handleFollow(unfollow, follow);
                     }
-                }
-                // Hứng kết quả Đặt giá
-                else if ("AUCTION".equals(category) && "PLACEBID".equals(action)) {
+                } else if ("AUCTION".equals(category) && "PLACEBID".equals(action)) {
                     boolean success = gson.fromJson(jsonData, Boolean.class);
                     if (success) {
                         showCongratulationEffect(2.5);
-                        // Lấy lại thông tin giá mới nhất để cập nhật màn hình
                         RequestHandler.getInstance().requestSearchById(auctionInfo.getId());
-                    } else {
-                        showAlert("Lỗi", "Đặt giá thất bại! Vui lòng thử lại.");
-                    }
-                }
-                // Hứng thông tin Auction mới nhất (sau khi đặt giá thành công)
-                else if ("AUCTION".equals(category) && "SEARCH_BY_ID".equals(action)) {
+                    } else showAlert("Lỗi", "Đặt giá thất bại! Vui lòng thử lại.");
+                } else if ("AUCTION".equals(category) && "SEARCH_BY_ID".equals(action)) {
                     this.auctionInfo = gson.fromJson(jsonData, AuctionInfo.class);
-                    updateDynamicInfo(); // Cập nhật lại giá tiền và tên người giữ giá
+                    updateDynamicInfo(); 
                 }
             } catch (Exception e) { e.printStackTrace(); }
         });
     }
 
-    public void followButton(ActionEvent actionEvent) {
-        RequestHandler.getInstance().requestFollow(user.getId(), auctionInfo.getId());
-    }
-
-    public void unFollowButton(ActionEvent actionEvent) {
-        RequestHandler.getInstance().requestUnfollow(user.getId(), auctionInfo.getId());
-    }
-
-    public void handleFollow(Button first, Button second){
-        first.setVisible(false);
-        first.setManaged(false);
-        second.setVisible(true);
-        second.setManaged(true);
-    }
+    public void followButton(ActionEvent actionEvent) { RequestHandler.getInstance().requestFollow(user.getId(), auctionInfo.getId()); }
+    public void unFollowButton(ActionEvent actionEvent) { RequestHandler.getInstance().requestUnfollow(user.getId(), auctionInfo.getId()); }
+    public void handleFollow(Button first, Button second){ first.setVisible(false); first.setManaged(false); second.setVisible(true); second.setManaged(true); }
 
     @FXML
     public void onAutoBidHandle(ActionEvent event) throws IOException {
@@ -266,10 +228,7 @@ public class AuctionItemController implements SearchListener, SocketListener {
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(content); alert.showAndWait();
     }
 
     private void showCongratulationEffect(double seconds) {
@@ -279,9 +238,7 @@ public class AuctionItemController implements SearchListener, SocketListener {
             if (imgUrl != null) animImg.setImage(new Image(imgUrl.toExternalForm()));
         } catch (Exception e) { return; }
 
-        animImg.setFitWidth(900);
-        animImg.setPreserveRatio(true);
-        animImg.setMouseTransparent(true);
+        animImg.setFitWidth(900); animImg.setPreserveRatio(true); animImg.setMouseTransparent(true);
         mainStackPane.getChildren().add(animImg);
 
         PauseTransition cleanup = new PauseTransition(Duration.seconds(seconds));

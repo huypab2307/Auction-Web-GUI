@@ -3,10 +3,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.mikey.auction.cloudinary.CloudinaryService;
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.dto.ItemSummary;
+import com.mikey.auction.items.ItemType;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +28,12 @@ import com.mikey.auction.javagui.topbar.TopBarController;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.socket.RequestHandler;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mikey.auction.socket.SocketListener;
+import com.mikey.auction.socket.SocketClient;
 
+import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import java.io.File;
 import javafx.scene.image.Image;
@@ -37,7 +45,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TextArea;
 import javafx.util.Duration;
 
-public class SellerController {
+public class SellerController implements SocketListener {
     @FXML private StackPane mainStackPane;
     private List<File> selectedFiles = new ArrayList<>();
     @FXML private ComboBox<String> type;
@@ -82,19 +90,18 @@ public class SellerController {
     public void loadSellerAuctions() { 
         
     }
+
     @FXML
     public void changeItemInfo() {
         String selected = type.getValue();
         if (selected == null) return;
         String fxmlPath = null;
 
-        if (selected.equals("Arts")) {
-            fxmlPath = "Arts.fxml";
-        } else if (selected.equals("Electronics")) {
-            fxmlPath = "Electronics.fxml";
-        } else if (selected.equals("Vehicle")) {
-            fxmlPath = "Vehicles.fxml";
-        }
+        // Dùng toUpperCase() để bao trọn mọi trường hợp
+        String typeUpper = selected.toUpperCase();
+        if (typeUpper.equals("ARTS")) fxmlPath = "Arts.fxml";
+        else if (typeUpper.equals("ELECTRONICS")) fxmlPath = "Electronics.fxml";
+        else if (typeUpper.equals("VEHICLE")) fxmlPath = "Vehicles.fxml";
 
         if (fxmlPath == null) return;
 
@@ -177,24 +184,23 @@ public class SellerController {
         }
 
         if (hasError) {
-            System.out.println("Form còn lỗi, Dương kiểm tra lại nhé!");
+            System.out.println("Form còn lỗi. Vui lòng kiểm tra lại!");
             return;
         }
 
-        AuctionInfo newAuction = new AuctionInfo(null, currentEditingId, selected, selected, currentEditingId, null, null, null, currentEditingId);
-        RequestHandler.getInstance().requestCreateAuction(newAuction);
         submit.setDisable(true);
         System.out.println("Đang xử lý dữ liệu và đẩy ảnh lên Cloudinary...");
 
+        // Xử lý ảnh (Giữ nguyên logic của bạn)
         String imagePath = "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg";
-
         if (selectedFiles != null && !selectedFiles.isEmpty()) {
             String cloudUrl = CloudinaryService.upload(selectedFiles.get(0));
             if (cloudUrl != null) {
                 imagePath = cloudUrl.replace("/upload/", "/upload/ar_16:9,c_fill,w_1000,g_auto/");
-                System.out.println("Link đã được 'phẫu thuật' thẩm mỹ: " + imagePath);
+                System.out.println("Link: " + imagePath);
             }
         }
+
         HashMap<String, String> itemData = new HashMap<>();
         itemData.put("type", selected);
         itemData.put("name", itemName.getText());
@@ -203,41 +209,61 @@ public class SellerController {
         itemData.put("imagePath", imagePath);
 
         switch (selected) {
-            case "Arts" -> findArtworkData(itemData);
-            case "Electronics" -> findElectronicsData(itemData);
-            case "Vehicle" -> findVehicleData(itemData);
+            case "ARTS" -> findArtworkData(itemData);
+            case "ELECTRONICS" -> findElectronicsData(itemData);
+            case "VEHICLE" -> findVehicleData(itemData);
         }
 
-        try {
-            double startPrice = Double.parseDouble(price.getText());
-            double step = Double.parseDouble(stepPrice.getText());
-            var startT = startTime.getValue().atStartOfDay();
-            var endT = endTime.getValue().atStartOfDay();
+    try {
+        // 1. Lấy dữ liệu thực từ giao diện
+        String name = itemName.getText();
+        String desc = itemDescription.getText();
+        double startPrice = Double.parseDouble(price.getText());
+        double step = Double.parseDouble(stepPrice.getText());
+        
+        // 👉 ĐÃ RÚT GỌN: Dùng trực tiếp LocalDateTime
+        LocalDateTime startT = startTime.getValue().atStartOfDay();
+        LocalDateTime endT = endTime.getValue().atStartOfDay();
+        
+        String selectedType = type.getValue();
 
-            AuctionManager.getInstance().uploadItem(
-                    ItemManager.getInstance().preProcessing(itemData),
-                    startPrice,
-                    step,
-                    startT,
-                    endT
-            );
+        // 2. Tạo đối tượng ItemSummary (Rút gọn tên class)
+        ItemSummary itemSum = new ItemSummary();
+        itemSum.setTitle(name);
+        itemSum.setDescription(desc);
+        itemSum.setImagePath(imagePath); 
+        itemSum.setItemType(ItemType.valueOf(selectedType.toUpperCase()));
 
-            showCongratulationEffect(2.5);
-            System.out.println("Đăng đấu giá thành công rực rỡ!");
+        // 3. Khởi tạo AuctionInfo để gửi đi
+        // currentEditingId giúp Server biết đây là lệnh UPDATE cho sản phẩm số 3
+        AuctionInfo updateData = new AuctionInfo(
+            itemSum,
+            currentEditingId,      
+            user.getUsername(),    
+            null,                  
+            startPrice, // Giá khởi điểm mới
+            AuctionStatus.PENDING, 
+            startT,
+            endT,
+            step        // Bước giá mới
+        );
 
-            if (currentEditingId != -1) {
-                System.out.println("Updating ID: " + currentEditingId);
-            } else {
-                System.out.println("Creating new auction");
-            }
+        // 👉 QUAN TRỌNG: Đưa itemData (chứa Artist, Brand...) vào gói tin
+        // Biến itemData bạn đã khai báo và fill ở dòng 159-166 rồi đấy!
+        updateData.setExtraData(itemData); 
 
-        } catch (Exception ex) {
-            System.err.println("Lỗi khi gửi dữ liệu lên Server: " + ex.getMessage());
-        } finally {
-            submit.setDisable(false);
-        }
+        // 4. GỬI QUA SOCKET
+        RequestHandler.getInstance().requestCreateAuction(updateData);
+
+        showCongratulationEffect(2.5);
+        System.out.println("Đã gửi yêu cầu cập nhật cho ID: " + currentEditingId);
+
+    } catch (Exception ex) {
+        System.err.println("Lỗi khi đóng gói dữ liệu: " + ex.getMessage());
+    } finally {
+        submit.setDisable(false);
     }
-
+}
 
     public void findArtworkData(HashMap<String, String> itemData) {
         TextField artistField = (TextField) itemInfo.lookup("#artist");
@@ -807,49 +833,103 @@ private void setTextFieldError(TextField field, Label label, String message) {
         this.currentEditingId = info.getId();
         submit.setText("Cập nhật sản phẩm");
 
-        // Đổ dữ liệu cũ vào các ô nhập
+        // 1. Đổ dữ liệu cơ bản
         itemName.setText(info.getItemInfo().getTitle());
         price.setText(String.valueOf(info.getCurPrice()));
         stepPrice.setText(String.valueOf(info.getBidStep()));
         itemDescription.setText(info.getItemInfo().getDescription());
-        type.setValue(info.getItemInfo().getItemType().toString());
+        if (info.getStartTime() != null) {
+            startTime.setValue(info.getStartTime().toLocalDate());
+        }
+        if (info.getEndTime() != null) {
+            endTime.setValue(info.getEndTime().toLocalDate());
+        }
         
-        // Mặc định là mở khóa tất cả (dành cho PENDING)
-        itemName.setDisable(false);
-        price.setDisable(false);
-        stepPrice.setDisable(false);
-        itemDescription.setDisable(false);
-        type.setDisable(false);
-        // startTimeField.setDisable(false); // Nếu bạn có ô chọn giờ bắt đầu
-        
-        // KIỂM TRA LOGIC NGHIỆP VỤ
-        if (info.getStatus() == AuctionStatus.OPEN) {
-            
-            // Khóa thời gian bắt đầu vì phiên đã chạy rồi
-            // startTimeField.setDisable(true); 
+        // 2. Set danh mục và ÉP form load ngay lập tức các ô nhập chi tiết
+        type.setValue(info.getItemInfo().getItemType().name());
+        changeItemInfo(); 
 
-            // Giả sử getIdNgườiBidCuoiCùng() trả về 0 hoặc null nếu chưa có ai bid
+        // 3. Yêu cầu Server trả về thông tin chi tiết (Nghệ sĩ, Kích thước...)
+        SocketClient.getInstance().setListener(this);
+        RequestHandler.getInstance().requestFindItem(info.getItemInfo().getItemType(), info.getItemInfo().getItemId());
+
+        // 4. Load ảnh cũ
+        String imgPath = info.getItemInfo().getImagePath();
+        if (imgPath != null && !imgPath.isEmpty()) {
+            if (imgPath.startsWith("http")) preview1.setImage(new Image(imgPath, true));
+            else preview1.setImage(new Image(getClass().getResourceAsStream(imgPath)));
+        }
+
+        // 5. KIỂM TRA LOGIC NGHIỆP VỤ (Khóa form)
+        itemName.setDisable(false); price.setDisable(false); stepPrice.setDisable(false);
+        itemDescription.setDisable(false); type.setDisable(false); itemInfo.setDisable(false); // Mở khóa khung chi tiết
+
+        if (info.getStatus() == AuctionStatus.OPEN) {
             boolean hasBids = (info.getLastBidderName() != null && !info.getLastBidderName().isEmpty()); 
 
             if (hasBids) {
-                // KỊCH BẢN: ĐANG MỞ VÀ ĐÃ CÓ NGƯỜI ĐẤU GIÁ
-                // Khóa toàn bộ thông số tài chính và định danh cốt lõi
+                // ĐÃ CÓ NGƯỜI ĐẤU GIÁ: Khóa hết thông số tài chính & thuộc tính sản phẩm
                 itemName.setDisable(true);
                 price.setDisable(true);
                 stepPrice.setDisable(true);
                 type.setDisable(true);
-                // endTimeField.setDisable(true); 
+                itemInfo.setDisable(true); // KHÓA TOÀN BỘ Ô NHẬP NGHỆ SĨ, KÍCH THƯỚC...
                 
-                Tooltip tooltip = new Tooltip("Đã có người đấu giá, chỉ được phép cập nhật thêm mô tả!");
-                price.setTooltip(tooltip);
+                price.setTooltip(new Tooltip("Đã có người đấu giá, chỉ được phép cập nhật thêm mô tả!"));
                 submit.setText("Cập nhật mô tả");
-                
             } else {
-                // KỊCH BẢN: ĐANG MỞ NHƯNG CHƯA AI ĐẤU GIÁ
-                // Vẫn cho sửa giá để kích cầu, chỉ hiện nhắc nhở
-                Tooltip tooltip = new Tooltip("Chưa có ai đấu giá, bạn vẫn có thể sửa giá khởi điểm.");
-                price.setTooltip(tooltip);
+                price.setTooltip(new Tooltip("Chưa có ai đấu giá, bạn vẫn có thể sửa giá và thông tin."));
             }
         }
+    }
+
+    @Override
+    public void onResponseReceived(String category, String action, String jsonData) {
+        if ("ITEM".equals(category) && "FIND".equals(action)) {
+            Platform.runLater(() -> {
+                try {
+                    if (jsonData == null || jsonData.equals("null")) return;
+                    JsonObject itemObj = JsonParser.parseString(jsonData).getAsJsonObject();
+                    String itemType = type.getValue().toUpperCase();
+
+                    // Mẹo: Dùng hàm getJsonStr để lấy an toàn không bị lỗi Null
+                    if (itemType.equals("ARTS")) {
+                        ((TextField) itemInfo.lookup("#artist")).setText(getJsonStr(itemObj, "artist"));
+                        ((TextField) itemInfo.lookup("#yearOfcreation")).setText(getJsonStr(itemObj, "year", "yearOfCreation"));
+                        ((TextField) itemInfo.lookup("#dimensions")).setText(getJsonStr(itemObj, "dimensions"));
+                        ((TextField) itemInfo.lookup("#medium")).setText(getJsonStr(itemObj, "medium"));
+                    } 
+                    else if (itemType.equals("ELECTRONICS")) {
+                        ((TextField) itemInfo.lookup("#brand")).setText(getJsonStr(itemObj, "brand"));
+                        ((TextField) itemInfo.lookup("#power")).setText(getJsonStr(itemObj, "power"));
+                        ((TextField) itemInfo.lookup("#voltage")).setText(getJsonStr(itemObj, "voltage"));
+                        ((TextField) itemInfo.lookup("#current")).setText(getJsonStr(itemObj, "current"));
+                        ((TextField) itemInfo.lookup("#status")).setText(getJsonStr(itemObj, "status"));
+                        ((TextField) itemInfo.lookup("#color")).setText(getJsonStr(itemObj, "color"));
+                        ((TextField) itemInfo.lookup("#weight")).setText(getJsonStr(itemObj, "weight"));
+                    } 
+                    else if (itemType.equals("VEHICLE")) {
+                        ((TextField) itemInfo.lookup("#mileage")).setText(getJsonStr(itemObj, "mileage"));
+                        ((TextField) itemInfo.lookup("#mFG")).setText(getJsonStr(itemObj, "mFG", "mfg"));
+                        ((TextField) itemInfo.lookup("#brand")).setText(getJsonStr(itemObj, "brand"));
+                        ((TextField) itemInfo.lookup("#model")).setText(getJsonStr(itemObj, "model"));
+                        ((TextField) itemInfo.lookup("#trim")).setText(getJsonStr(itemObj, "trim"));
+                        ((TextField) itemInfo.lookup("#titleStatus")).setText(getJsonStr(itemObj, "titleStatus"));
+                    }
+                } catch (Exception e) {
+                    System.err.println("Lỗi khi bóc tách chi tiết sản phẩm: " + e.getMessage());
+                }
+            });
+        }
+    }
+
+    // Hàm hỗ trợ bóc tách JSON an toàn
+    private String getJsonStr(JsonObject obj, String... possibleKeys) {
+        for (String key : possibleKeys) {
+            if (obj.has(key) && !obj.get(key).isJsonNull()) {
+                return obj.get(key).getAsString();
+            }
+        }
+        return "";
     }
 }

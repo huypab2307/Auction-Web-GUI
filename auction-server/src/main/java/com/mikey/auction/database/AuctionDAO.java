@@ -11,6 +11,7 @@ import com.mikey.auction.items.ItemType;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 public class AuctionDAO extends BaseDAO {
@@ -199,5 +200,97 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
+    public boolean deleteAuction(int itemId) {
+        String sql = "DELETE FROM items WHERE id = ?"; 
+        try (Connection conn = getConnect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, itemId);
+            return pstmt.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+public boolean updateAuction(AuctionInfo info) {
+        // 1. SQL cho bảng items (Tên, mô tả)
+        String sqlItem = "UPDATE items SET title = ?, description = ? WHERE id = (SELECT itemId FROM auctions WHERE id = ?)";
+        
+        // 2. SQL cho bảng auctions (Giá, Bước giá)
+        String sqlAuc = "UPDATE auctions SET startingPrice = ?, priceStep = ?, startTime = ?, endTime = ? WHERE id = ?";
+        
+        // 3. SQL cho bảng chi tiết (Tùy loại) - Đã viết đủ cột
+        String sqlDetail = switch (info.getItemInfo().getItemType()) {
+            case ARTS -> "UPDATE arts SET artist = ?, yearOfcreation = ?, dimensions = ?, medium = ? WHERE itemId = (SELECT itemId FROM auctions WHERE id = ?)";
+            case ELECTRONICS -> "UPDATE electronics SET brand = ?, power = ?, voltage = ?, current = ?, status = ?, color = ?, weight = ? WHERE itemId = (SELECT itemId FROM auctions WHERE id = ?)";
+            case VEHICLE -> "UPDATE vehicles SET brand = ?, model = ?, mileage = ?, mFG = ?, trim = ?, titleStatus = ? WHERE itemId = (SELECT itemId FROM auctions WHERE id = ?)";
+            default -> "";
+        };
+
+        try (Connection conn = getConnect()) {
+            conn.setAutoCommit(false); // Bắt đầu Transaction
+
+            try (PreparedStatement psItem = conn.prepareStatement(sqlItem);
+                 PreparedStatement psAuc = conn.prepareStatement(sqlAuc);
+                 PreparedStatement psDetail = conn.prepareStatement(sqlDetail)) {
+
+                // Bind dữ liệu cho Items
+                psItem.setString(1, info.getItemInfo().getTitle());
+                psItem.setString(2, info.getItemInfo().getDescription());
+                psItem.setInt(3, info.getId());
+                psItem.executeUpdate();
+
+                // Bind dữ liệu cho Auctions
+                psAuc.setDouble(1, info.getCurPrice());
+                psAuc.setDouble(2, info.getBidStep());
+                psAuc.setTimestamp(3, Timestamp.valueOf(info.getStartTime()));
+                psAuc.setTimestamp(4, Timestamp.valueOf(info.getEndTime()));
+                psAuc.setInt(5, info.getId());
+                psAuc.executeUpdate();
+
+                // 👉 ĐÃ FIX: Bind dữ liệu đầy đủ cho từng loại mặt hàng
+                Map<String, String> data = info.getExtraData();
+                if (data != null && !sqlDetail.isEmpty()) {
+                    switch (info.getItemInfo().getItemType()) {
+                        case ARTS -> {
+                            psDetail.setString(1, data.getOrDefault("artist", ""));
+                            psDetail.setInt(2, Integer.parseInt(data.getOrDefault("year", "0")));
+                            psDetail.setString(3, data.getOrDefault("dimensions", ""));
+                            psDetail.setString(4, data.getOrDefault("medium", ""));
+                            psDetail.setInt(5, info.getId());
+                        }
+                        case ELECTRONICS -> {
+                            psDetail.setString(1, data.getOrDefault("brand", ""));
+                            psDetail.setInt(2, Integer.parseInt(data.getOrDefault("power", "0")));
+                            psDetail.setDouble(3, Double.parseDouble(data.getOrDefault("voltage", "0")));
+                            psDetail.setDouble(4, Double.parseDouble(data.getOrDefault("current", "0")));
+                            psDetail.setString(5, data.getOrDefault("status", ""));
+                            psDetail.setString(6, data.getOrDefault("color", ""));
+                            psDetail.setDouble(7, Double.parseDouble(data.getOrDefault("weight", "0")));
+                            psDetail.setInt(8, info.getId());
+                        }
+                        case VEHICLE -> {
+                            psDetail.setString(1, data.getOrDefault("brand", ""));
+                            psDetail.setString(2, data.getOrDefault("model", ""));
+                            psDetail.setDouble(3, Double.parseDouble(data.getOrDefault("mileage", "0")));
+                            psDetail.setInt(4, Integer.parseInt(data.getOrDefault("mFG", "0")));
+                            psDetail.setString(5, data.getOrDefault("trim", ""));
+                            psDetail.setString(6, data.getOrDefault("titleStatus", ""));
+                            psDetail.setInt(7, info.getId());
+                        }
+                    }
+                    psDetail.executeUpdate(); // Lệnh thực thi đã an toàn
+                }
+
+                conn.commit(); // Chốt đơn!
+                return true;
+            } catch (Exception e) {
+                conn.rollback(); 
+                e.printStackTrace();
+            }
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
+        return false;
+    }
     
 }

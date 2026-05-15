@@ -1,35 +1,56 @@
 package com.mikey.auction.javagui.bidder;
 
-import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.ItemType;
-import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.user.User;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.FlowPane;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.lang.reflect.Type;
 
-public class AuctionListController {
+// THƯ VIỆN SOCKET & GSON
+import com.mikey.auction.socket.RequestHandler;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
+
+// Bổ sung implements SocketListener
+public class AuctionListController implements SocketListener {
     @FXML public FlowPane mainContainer;
     private User user;
+    
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, t, ctx) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            .create();
 
     public void setUser(User user) { this.user = user; }
 
     public void loadData(ItemType type) {
-        try {
-            ArrayList<AuctionInfo> list;
-            if (type == null) {
-                list = AuctionDAO.getInstance().getAllAuctions();
-            } else {
-                list = AuctionDAO.getInstance().getAuctionsType(type);
-            }
-            renderAuctions(list);
-        } catch (Exception e) { e.printStackTrace(); }
+        // Đăng ký nhận dữ liệu từ Server
+        SocketClient.getInstance().setListener(this);
+        
+        // CẮT BỎ AuctionDAO, gửi yêu cầu qua Socket!
+        // Lưu ý: Đảm bảo bên Server của bạn có code để xử lý 2 Request này nhé!
+        if (type == null) {
+            // VD: Server sẽ gửi về "AUCTION|ALL|[{...}]"
+            RequestHandler.getInstance().requestAllAuctions(); // Thay tên hàm cho đúng với hàm bạn đã viết trong RequestHandler
+        } else {
+            // VD: Server sẽ gửi về "AUCTION|TYPE|[{...}]"
+            RequestHandler.getInstance().requestAuctionsByType(type); // Thay tên hàm cho đúng
+        }
     }
 
     public void setSearchResults(ArrayList<AuctionInfo> results) {
@@ -45,6 +66,24 @@ public class AuctionListController {
             itemController.setData(i);
             if (user != null) itemController.setUser(user.getId());
             mainContainer.getChildren().add(root);
+        }
+    }
+
+    // HỨNG DỮ LIỆU TỪ SERVER VÀ RENDER
+    @Override
+    public void onResponseReceived(String category, String action, String jsonData) {
+        // Bạn nhớ chỉnh lại chữ "ALL" hoặc "TYPE" cho khớp với hành động Server gửi về nhé
+        if ("AUCTION".equals(category) && ("All".equals(action) || "TYPE".equals(action))) {
+            Type listType = new TypeToken<ArrayList<AuctionInfo>>(){}.getType();
+            ArrayList<AuctionInfo> list = gson.fromJson(jsonData, listType);
+
+            Platform.runLater(() -> {
+                try {
+                    if (list != null) renderAuctions(list);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 }

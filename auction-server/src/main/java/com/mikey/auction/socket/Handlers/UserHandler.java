@@ -1,11 +1,21 @@
 package com.mikey.auction.socket.Handlers;
 
 import java.io.PrintWriter;
-import com.google.gson.Gson;
 import com.mikey.auction.database.UserDAO;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
+
 public class UserHandler {
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, t, ctx) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            .create();
 
     public static void handleUser(String message, PrintWriter out) {
         try {
@@ -28,7 +38,6 @@ public class UserHandler {
                     }
                     break;
                 case "DELETE_ACCOUNT":
-                    // Chèn logic DAO xóa tài khoản ở đây nếu có
                     result = true;
                     break;
             }

@@ -10,6 +10,28 @@ public class ItemSummary {
     private String imagePath;
     private ItemType itemType;
 
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
+    }
+
+    public ItemSummary() {}
+
     public ItemSummary(int itemId, String title, String description, ItemType itemType, String imagePath) {
         this.itemId = itemId;
         this.title = title;

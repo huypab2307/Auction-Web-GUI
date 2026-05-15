@@ -97,7 +97,7 @@ public class LoginController implements SocketListener {
                         System.err.println("Lỗi chuyển cảnh: " + ex.getMessage());
                     }
                 });
-            } else {
+            } else if ("FAIL".equals(action) || "ERROR".equals(action)) {
                 Platform.runLater(() -> {
                     loginButton.setDisable(false); 
                     username.clear();
