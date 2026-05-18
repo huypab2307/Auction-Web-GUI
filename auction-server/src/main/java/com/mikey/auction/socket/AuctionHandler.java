@@ -93,6 +93,23 @@ public class AuctionHandler {
                     // "DELETE FROM auctions WHERE id = ?"
                     result = AuctionDAO.getInstance().deleteAuction(idToDelete); 
                     break;
+
+                case "AUTOBID":
+                    // Xử lý gói tin: AUTOBID|SET|{json_data}
+                    if (parts.length >= 3) {
+                        // Nhớ tạo class AutoBidInfo trong package dto nhé!
+                        com.mikey.auction.dto.AutoBidInfo autoInfo = gson.fromJson(parts[2], com.mikey.auction.dto.AutoBidInfo.class);
+                        result = AuctionManager.getInstance().registerAutoBid(autoInfo);
+                    }
+                    break;
+
+                case "DASHBOARD":
+                    if (parts.length >= 3) {
+                        int userId = Integer.parseInt(parts[2].trim());
+                        // Lấy thống kê dữ liệu trực tiếp từ DAO
+                        result = AuctionDAO.getInstance().getDashboardStats(userId);
+                    }
+                    break;
             }
 
             if (result != null) {

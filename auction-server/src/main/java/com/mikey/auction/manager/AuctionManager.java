@@ -3,9 +3,11 @@ package com.mikey.auction.manager;
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.NotificationDAO;
+import com.mikey.auction.database.UserDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.Item;
 import com.mikey.auction.user.Bidder;
+import com.mikey.auction.user.Role;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -41,20 +43,37 @@ public class AuctionManager {
            System.out.println(e.getMessage());
        }
    }
-public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice){
-    AuctionDAO auctionDAO = AuctionDAO.getInstance();
-    try(Connection connection = auctionDAO.getConnect()){
-        connection.setAutoCommit(false);
-        auctionDAO.updateAuction(connection, auctionInfo, bidder.getId(), oldPrice);
-        auctionDAO.updateTransaction(connection, auctionInfo, bidder.getId());
-        
-        connection.commit();
-        return NotificationManager.getInstance().notiAll(auctionInfo, bidder);
-    } catch (SQLException e){
-        System.out.println(e.getMessage());
+
+
+// 👉 ĐÃ SỬA: Đổi kiểu trả về từ boolean sang AuctionInfo để lấy giá mới lập tức
+    public AuctionInfo placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice) {
+        AuctionDAO auctionDAO = AuctionDAO.getInstance();
+        try (Connection connection = auctionDAO.getConnect()) {
+            connection.setAutoCommit(false);
+            auctionDAO.updateAuction(connection, auctionInfo, bidder.getId(), oldPrice);
+            auctionDAO.updateTransaction(connection, auctionInfo, bidder.getId());
+            
+            connection.commit(); // Chốt đơn cho người đặt giá thủ công
+
+            // KÍCH HOẠT AUTO BIDDING: Máy tự động đọ giá (nếu có)
+            auctionDAO.triggerAutoBids(auctionInfo.getId());
+
+            // LẤY DỮ LIỆU MỚI NHẤT: Bao gồm cả giá sau khi Auto-Bid đọ nhau xong
+            AuctionInfo freshAuctionInfo = auctionDAO.searchAuctionById(auctionInfo.getId());
+
+            // Bắn thông báo qua cổng phụ cho các máy KHÁC đang cùng xem
+            NotificationManager.getInstance().notiAll(freshAuctionInfo, bidder);
+            
+            // 👉 QUAN TRỌNG: Trả về đối tượng mới tinh cho CHÍNH MÁY vừa bấm nút
+            return freshAuctionInfo;
+            
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null; // Thất bại trả về null
     }
-    return false;
-}
+
+
     public Auction findAuction(int id){
         try(Connection connection = AuctionDAO.getInstance().getConnect()) {
             return AuctionDAO.getInstance().findById(connection, id);
@@ -85,9 +104,24 @@ public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice)
     }
 
     public boolean updateAuction(AuctionInfo info) {
-        // Gọi xuống DAO để thực hiện cập nhật vào Database
-        // Bạn cần đảm bảo AuctionDAO đã có hàm updateAuction(info)
         return AuctionDAO.getInstance().updateAuction(info);
     }
-    
+
+// 👉 ĐÃ SỬA: Đổi kiểu trả về thành AuctionInfo để trả nguyên cục dữ liệu chứa giá mới cho Client
+    public AuctionInfo registerAutoBid(com.mikey.auction.dto.AutoBidInfo info) {
+        boolean success = AuctionDAO.getInstance().registerAutoBid(info);
+        if (success) {
+            AuctionDAO.getInstance().triggerAutoBids(info.getAuctionId());
+            AuctionInfo freshInfo = AuctionDAO.getInstance().searchAuctionById(info.getAuctionId());
+            if (freshInfo != null) {
+                try {
+                    Bidder bidder = (Bidder) UserManager.getInstance().createUser(Role.BIDDER, UserDAO.getInstance().findById(info.getUserId()));
+                    NotificationManager.getInstance().notiAll(freshInfo, bidder);
+                } catch (Exception e) {}
+                
+                return freshInfo; // TRẢ VỀ CHO MÁY VỪA CÀI AUTO BID BIẾT ĐỂ NHẢY SỐ
+            }
+        }
+        return null;
+    }
 }

@@ -211,14 +211,14 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
-public boolean updateAuction(AuctionInfo info) {
-        // 1. SQL cho bảng items (Tên, mô tả)
+    public boolean updateAuction(AuctionInfo info) {
+        // 1. SQL cho bảng items (Chỉ cập nhật Tên, Mô tả - BỎ cập nhật cột type)
         String sqlItem = "UPDATE items SET title = ?, description = ? WHERE id = (SELECT itemId FROM auctions WHERE id = ?)";
         
-        // 2. SQL cho bảng auctions (Giá, Bước giá)
-        String sqlAuc = "UPDATE auctions SET startingPrice = ?, priceStep = ?, startTime = ?, endTime = ? WHERE id = ?";
+        // 2. SQL cho bảng auctions (Đã cập nhật cả startingPrice và curPrice để đồng bộ UI hiển thị)
+        String sqlAuc = "UPDATE auctions SET startingPrice = ?, curPrice = ?, priceStep = ?, startTime = ?, endTime = ? WHERE id = ?";
         
-        // 3. SQL cho bảng chi tiết (Tùy loại) - Đã viết đủ cột
+        // 3. SQL cho các bảng chi tiết (Quay lại dùng UPDATE trực tiếp vì loại hàng đã được khóa cố định)
         String sqlDetail = switch (info.getItemInfo().getItemType()) {
             case ARTS -> "UPDATE arts SET artist = ?, yearOfcreation = ?, dimensions = ?, medium = ? WHERE itemId = (SELECT itemId FROM auctions WHERE id = ?)";
             case ELECTRONICS -> "UPDATE electronics SET brand = ?, power = ?, voltage = ?, current = ?, status = ?, color = ?, weight = ? WHERE itemId = (SELECT itemId FROM auctions WHERE id = ?)";
@@ -227,29 +227,30 @@ public boolean updateAuction(AuctionInfo info) {
         };
 
         try (Connection conn = getConnect()) {
-            conn.setAutoCommit(false); // Bắt đầu Transaction
+            conn.setAutoCommit(false); // Bắt đầu Transaction để bảo vệ dữ liệu
 
             try (PreparedStatement psItem = conn.prepareStatement(sqlItem);
                  PreparedStatement psAuc = conn.prepareStatement(sqlAuc);
-                 PreparedStatement psDetail = conn.prepareStatement(sqlDetail)) {
+                 PreparedStatement psDetail = !sqlDetail.isEmpty() ? conn.prepareStatement(sqlDetail) : null) {
 
-                // Bind dữ liệu cho Items
+                // Bind dữ liệu cho bảng Items (Tên & Mô tả)
                 psItem.setString(1, info.getItemInfo().getTitle());
                 psItem.setString(2, info.getItemInfo().getDescription());
                 psItem.setInt(3, info.getId());
                 psItem.executeUpdate();
 
-                // Bind dữ liệu cho Auctions
-                psAuc.setDouble(1, info.getCurPrice());
-                psAuc.setDouble(2, info.getBidStep());
-                psAuc.setTimestamp(3, Timestamp.valueOf(info.getStartTime()));
-                psAuc.setTimestamp(4, Timestamp.valueOf(info.getEndTime()));
-                psAuc.setInt(5, info.getId());
+                // Bind dữ liệu cho bảng Auctions (Giá khởi điểm, Giá hiện tại, Bước giá và Thời gian)
+                psAuc.setDouble(1, info.getCurPrice()); // Lưu vào cột startingPrice mới
+                psAuc.setDouble(2, info.getCurPrice()); // Cập nhật luôn cột curPrice giúp UI đồng bộ lập tức
+                psAuc.setDouble(3, info.getBidStep());
+                psAuc.setTimestamp(4, Timestamp.valueOf(info.getStartTime()));
+                psAuc.setTimestamp(5, Timestamp.valueOf(info.getEndTime()));
+                psAuc.setInt(6, info.getId());
                 psAuc.executeUpdate();
 
-                // 👉 ĐÃ FIX: Bind dữ liệu đầy đủ cho từng loại mặt hàng
+                // Bind dữ liệu cho bảng thuộc tính chi tiết tương ứng
                 Map<String, String> data = info.getExtraData();
-                if (data != null && !sqlDetail.isEmpty()) {
+                if (psDetail != null && data != null) {
                     switch (info.getItemInfo().getItemType()) {
                         case ARTS -> {
                             psDetail.setString(1, data.getOrDefault("artist", ""));
@@ -278,19 +279,187 @@ public boolean updateAuction(AuctionInfo info) {
                             psDetail.setInt(7, info.getId());
                         }
                     }
-                    psDetail.executeUpdate(); // Lệnh thực thi đã an toàn
+                    psDetail.executeUpdate();
                 }
 
-                conn.commit(); // Chốt đơn!
+                conn.commit(); // Lưu toàn bộ thay đổi thành công vào Database
                 return true;
             } catch (Exception e) {
-                conn.rollback(); 
+                conn.rollback(); // Hoàn tác nếu có bất kỳ lỗi xung đột nào xảy ra
                 e.printStackTrace();
             }
-        } catch (SQLException e) { 
-            e.printStackTrace(); 
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }
     
+    // 1. Hàm lưu cài đặt của người dùng vào bảng autoBidding
+    public boolean registerAutoBid(com.mikey.auction.dto.AutoBidInfo info) {
+        // ON DUPLICATE KEY UPDATE: Nếu họ cài rồi mà muốn đổi giá Max, nó sẽ tự update chứ không sinh ra 2 dòng
+        String sql = "INSERT INTO autoBidding (userId, auctionId, maxPrice) VALUES (?, ?, ?) " +
+                     "ON DUPLICATE KEY UPDATE maxPrice = ?";
+        try (Connection conn = getConnect(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, info.getUserId());
+            ps.setInt(2, info.getAuctionId());
+            ps.setDouble(3, info.getMaxAmount()); // Lấy số tiền từ DTO
+            ps.setDouble(4, info.getMaxAmount());
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+// Trái tim của Auto Bidding: Đọ giá tự động bằng vòng lặp (Chống Deadlock)
+    public void triggerAutoBids(int auctionId) {
+        // Dùng 1 connection duy nhất xuyên suốt quá trình
+        try (Connection conn = getConnect()) {
+            boolean keepBidding = true;
+            
+            // Dùng vòng lặp thay cho đệ quy để tránh tràn bộ nhớ (StackOverflow)
+            while (keepBidding) {
+                conn.setAutoCommit(false); // Bắt đầu giao dịch an toàn
+                try {
+                    // 1. Lấy trạng thái MỚI NHẤT của phiên đấu giá (Dùng hàm findById để xài chung conn)
+                    Auction currentAuc = findById(conn, auctionId);
+                    if (currentAuc == null || currentAuc.getStatus() != AuctionStatus.OPEN) {
+                        conn.rollback();
+                        break; // Phiên đã đóng thì nghỉ luôn
+                    }
+
+                    // Giá tổi thiểu cần để nhảy vào đua: Giá hiện tại + Bước giá
+                    double requiredToBid = currentAuc.getCurPrice() + currentAuc.getStepPrice();
+
+                    // 2. Tìm người Auto Bid (Tiền phải đủ và không phải người vừa đặt giá)
+                    String sqlFindAuto = "SELECT userId, maxPrice FROM autoBidding " +
+                                         "WHERE auctionId = ? AND userId != ? AND maxPrice >= ? " +
+                                         "ORDER BY maxPrice DESC LIMIT 1";
+
+                    int autoBidderId = -1;
+                    try (PreparedStatement ps = conn.prepareStatement(sqlFindAuto)) {
+                        ps.setInt(1, auctionId);
+                        ps.setInt(2, currentAuc.getLastBidder()); // Tránh tự đè giá chính mình
+                        ps.setDouble(3, requiredToBid);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                autoBidderId = rs.getInt("userId");
+                            }
+                        }
+                    }
+
+                    // 3. Nếu có người đủ điều kiện -> Tiến hành đè giá!
+                    if (autoBidderId != -1) {
+                        // Viết lệnh SQL update trực tiếp cho nhẹ nhàng
+                        String updateAuc = "UPDATE auctions SET curPrice = ?, lastBidderId = ? WHERE id = ? AND curPrice = ?";
+                        try (PreparedStatement psUp = conn.prepareStatement(updateAuc)) {
+                            psUp.setDouble(1, requiredToBid);
+                            psUp.setInt(2, autoBidderId);
+                            psUp.setInt(3, auctionId);
+                            psUp.setDouble(4, currentAuc.getCurPrice()); // Chống đồng thời (Optimistic Locking)
+                            
+                            int rows = psUp.executeUpdate();
+                            if (rows > 0) {
+                                // Ghi đè thành công -> Lưu luôn vào lịch sử bidTransactions
+                                String insertTrans = "INSERT INTO bidTransactions(userId, auctionId, bidAmount) VALUES (?,?,?)";
+                                try (PreparedStatement psTrans = conn.prepareStatement(insertTrans)) {
+                                    psTrans.setInt(1, autoBidderId);
+                                    psTrans.setInt(2, auctionId);
+                                    psTrans.setDouble(3, requiredToBid);
+                                    psTrans.executeUpdate();
+                                }
+                                conn.commit(); 
+                                System.out.println("🔥 AUTO-BID: User " + autoBidderId + " tự động trả " + requiredToBid + " đ cho Auction " + auctionId);
+                                // Vòng lặp sẽ tiếp tục chạy để xem có đại gia nào khác muốn vào đọ tiền tiếp không!
+                            } else {
+                                conn.rollback(); // Giá bị lệch nhịp, roll lại rồi vòng sau check lại
+                            }
+                        }
+                    } else {
+                        // Không tìm thấy ai thỏa mãn nữa -> Dừng cuộc chơi
+                        conn.rollback(); 
+                        keepBidding = false; 
+                    }
+                } catch (SQLException e) {
+                    conn.rollback();
+                    System.err.println("Lỗi vòng lặp Auto Bid: " + e.getMessage());
+                    keepBidding = false; // Có biến là dừng luôn
+                } finally {
+                    conn.setAutoCommit(true); // Trả lại trạng thái mặc định cho Connection
+                }
+            } // Hết while
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public com.mikey.auction.dto.DashboardStats getDashboardStats(int userId) {
+        com.mikey.auction.dto.DashboardStats stats = new com.mikey.auction.dto.DashboardStats();
+        
+        try (Connection conn = getConnect()) {
+            // 1. Tổng chi tiêu (Mua thành công)
+            String sqlSpent = "SELECT IFNULL(SUM(curPrice), 0) FROM auctions WHERE lastBidderId = ? AND status = 'CLOSED'";
+            try (PreparedStatement ps = conn.prepareStatement(sqlSpent)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setTotalSpent(rs.getDouble(1)); }
+            }
+
+            // 2. Đang tham gia đấu giá (Phiên đang OPEN và mình đang giữ top giá)
+            String sqlActive = "SELECT COUNT(*) FROM auctions WHERE lastBidderId = ? AND status = 'OPEN'";
+            try (PreparedStatement ps = conn.prepareStatement(sqlActive)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setActiveBids(rs.getInt(1)); }
+            }
+
+            // 3. Sản phẩm đã đấu giá thắng
+            String sqlWon = "SELECT COUNT(*) FROM auctions WHERE lastBidderId = ? AND status = 'CLOSED'";
+            try (PreparedStatement ps = conn.prepareStatement(sqlWon)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setWonItems(rs.getInt(1)); }
+            }
+
+            // 4. Số phiên bị vượt giá (Có vết lịch sử đặt giá nhưng hiện tại top 1 thuộc về người khác)
+            String sqlOutbid = "SELECT COUNT(DISTINCT auctionId) FROM bidTransactions WHERE userId = ? " +
+                               "AND auctionId IN (SELECT id FROM auctions WHERE lastBidderId != ? AND status = 'OPEN')";
+            try (PreparedStatement ps = conn.prepareStatement(sqlOutbid)) {
+                ps.setInt(1, userId);
+                ps.setInt(2, userId);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setOutbidCount(rs.getInt(1)); }
+            }
+
+            // 5. Sản phẩm đang theo dõi (Yêu thích)
+            String sqlFollow = "SELECT COUNT(*) FROM subscriptions WHERE userId = ?"; // Bạn đổi tên bảng 'subscriptions' nếu đặt tên khác nha
+            try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setFollowingCount(rs.getInt(1)); }
+            }
+
+            // 6. Sản phẩm người này đã bán thành công
+            String sqlSold = "SELECT COUNT(*) FROM auctions WHERE sellerId = ? AND status = 'CLOSED' AND lastBidderId IS NOT NULL";
+            try (PreparedStatement ps = conn.prepareStatement(sqlSold)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setSoldItems(rs.getInt(1)); }
+            }
+
+            // 7. Tính toán tỷ lệ thắng (%) = (Số phiên thắng / Tổng số phiên đã tham gia và đã kết thúc) * 100
+            String sqlTotalJoined = "SELECT COUNT(DISTINCT auctionId) FROM bidTransactions t " +
+                                    "INNER JOIN auctions a ON t.auctionId = a.id WHERE t.userId = ? AND a.status = 'CLOSED'";
+            try (PreparedStatement ps = conn.prepareStatement(sqlTotalJoined)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        double rate = ((double) stats.getWonItems() / rs.getInt(1)) * 100;
+                        stats.setWinRate(Math.round(rate * 10.0) / 10.0); // Làm tròn 1 chữ số thập phân
+                    } else {
+                        stats.setWinRate(0.0);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return stats;
+    }
 }

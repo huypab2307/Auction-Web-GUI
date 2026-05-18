@@ -184,15 +184,45 @@ public class AuctionItemController implements SearchListener, SocketListener {
                     if (gson.fromJson(jsonData, Boolean.class)) {
                         showCongratulationEffect(2.5); handleFollow(unfollow, follow);
                     }
-                } else if ("AUCTION".equals(category) && "PLACEBID".equals(action)) {
-                    boolean success = gson.fromJson(jsonData, Boolean.class);
-                    if (success) {
-                        showCongratulationEffect(2.5);
-                        RequestHandler.getInstance().requestSearchById(auctionInfo.getId());
-                    } else showAlert("Lỗi", "Đặt giá thất bại! Vui lòng thử lại.");
+                } else if ("AUCTION".equals(category) && ("PLACEBID".equals(action) || "AUTOBID".equals(action))) {
+                    if (jsonData != null && !jsonData.equals("null") && !jsonData.equals("false")) {
+                        try {
+                            // 1. Phân tích gói JSON trả về từ Server thành Object mang giá mới nhất
+                            this.auctionInfo = gson.fromJson(jsonData, AuctionInfo.class);
+                            
+                            // 2. Ép các Label (nhãn) trên màn hình đổi số lập tức!
+                            updateDynamicInfo(); 
+                            showCongratulationEffect(2.5);
+                            
+                        } catch (Exception e) {
+                            // Dự phòng nếu lỗi mạng, ép tải lại toàn bộ thông qua ID sản phẩm
+                            RequestHandler.getInstance().requestSearchById(auctionInfo.getId());
+                        }
+                    } else {
+                        showAlert("Lỗi", "Thao tác thất bại! Có thể giá đã bị thay đổi.");
+                    }
+                    
                 } else if ("AUCTION".equals(category) && "SEARCH_BY_ID".equals(action)) {
-                    this.auctionInfo = gson.fromJson(jsonData, AuctionInfo.class);
-                    updateDynamicInfo(); 
+                    // 👉 KHỐI NÀY VẪN GIỮ LẠI ĐỂ HỨNG DỮ LIỆU DỰ PHÒNG TỪ CÚ CATCH PHÍA TRÊN
+                    if (jsonData != null && !jsonData.equals("null")) {
+                        this.auctionInfo = gson.fromJson(jsonData, AuctionInfo.class);
+                        updateDynamicInfo(); 
+                    }
+                } else if ("AUCTION".equals(category) && "UPDATE_PRICE".equals(action)) {
+                    // 👉 LUỒNG HỨNG DỮ LIỆU BROADCAST TỪ SERVER KHI CÓ NGƯỜI KHÁC ĐẤU GIÁ
+                    if (jsonData != null && !jsonData.equals("null")) {
+                        try {
+                            AuctionInfo incomingInfo = gson.fromJson(jsonData, AuctionInfo.class);
+                            
+                            // KIỂM TRA QUAN TRỌNG: Chỉ nhảy số nếu người này ĐANG XEM đúng cái sản phẩm bị đổi giá
+                            if (this.auctionInfo != null && this.auctionInfo.getId() == incomingInfo.getId()) {
+                                this.auctionInfo = incomingInfo; // Lấy giá trị mới
+                                updateDynamicInfo();             // Ép giao diện nhảy số tiền
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             } catch (Exception e) { e.printStackTrace(); }
         });
@@ -219,10 +249,23 @@ public class AuctionItemController implements SearchListener, SocketListener {
         popupStage.setScene(scene);
         popupStage.showAndWait(); 
 
-        double result = controller.getMaxPrice();
-        if (result > 0) {
-            System.out.println("Kích hoạt Max Bid: " + result);
-            showCongratulationEffect(1.5);
+        double maxLimit = controller.getMaxPrice();
+        if (maxLimit > 0) {
+            // Rào lỗi logic: Không được nhập giá Max thấp hơn giá hợp lệ tiếp theo
+            double requiredMin = auctionInfo.getCurPrice() + auctionInfo.getBidStep();
+            if (maxLimit < requiredMin) {
+                showAlert("Lỗi", "Giá tối đa phải từ " + requiredMin + "đ trở lên!");
+                return;
+            }
+
+            // Gói dữ liệu để gửi đi
+            com.mikey.auction.dto.AutoBidInfo autoData = new com.mikey.auction.dto.AutoBidInfo(
+                    user.getId(), auctionInfo.getId(), maxLimit
+            );
+            
+            // Gửi qua mạng lên Server kích hoạt Auto Bidding
+            RequestHandler.getInstance().requestSetAutoBid(autoData);
+            System.out.println("Đang gửi yêu cầu cài Auto Bid với Max Price: " + maxLimit);
         }
     }
 

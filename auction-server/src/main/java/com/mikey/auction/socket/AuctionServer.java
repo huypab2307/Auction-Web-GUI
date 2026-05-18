@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +18,9 @@ import java.util.concurrent.Executors;
 
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.socket.Handlers.*;
+import com.mikey.auction.user.Bidder;
 
 public class AuctionServer {
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
@@ -119,5 +123,54 @@ class ClientHandler implements Runnable {
             if (out != null) AuctionServer.removeClientWriter(out);
             try { if (socket != null) socket.close(); } catch (IOException e) { e.printStackTrace(); }
         }
+    }
+
+    // 👉 ĐÃ SỬA: Thêm lệnh Phát sóng (Broadcast) sau khi chốt đơn
+    public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice) {
+        AuctionDAO auctionDAO = AuctionDAO.getInstance();
+        try (Connection connection = auctionDAO.getConnect()) {
+            connection.setAutoCommit(false);
+            auctionDAO.updateAuction(connection, auctionInfo, bidder.getId(), oldPrice);
+            auctionDAO.updateTransaction(connection, auctionInfo, bidder.getId());
+            
+            connection.commit(); // Chốt đơn cho người đặt giá thủ công
+
+            // Máy sẽ tự động kiểm tra xem có ai muốn nâng giá đè lên không
+            auctionDAO.triggerAutoBids(auctionInfo.getId());
+
+            // LẤY DỮ LIỆU MỚI NHẤT & CHUYỂN THÀNH JSON
+            AuctionInfo freshInfo = auctionDAO.searchAuctionById(auctionInfo.getId());
+            if (freshInfo != null) {
+                com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+                    .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                    .create();
+                    
+                // PHÁT SÓNG CHO TẤT CẢ CÁC MÁY KHÁC ĐỂ ÉP NHẢY SỐ (Broadcast)
+                com.mikey.auction.socket.AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + gson.toJson(freshInfo));
+            }
+
+            return NotificationManager.getInstance().notiAll(auctionInfo, bidder);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
+    // 👉 ĐÃ SỬA: Phát sóng ngay cả khi Auto Bid tự động làm nhảy giá
+    public boolean registerAutoBid(com.mikey.auction.dto.AutoBidInfo info) {
+        boolean success = AuctionDAO.getInstance().registerAutoBid(info);
+        if (success) {
+            AuctionDAO.getInstance().triggerAutoBids(info.getAuctionId());
+            
+            // Lấy giá mới nhất và phát sóng cho toàn bộ Client
+            AuctionInfo freshInfo = AuctionDAO.getInstance().searchAuctionById(info.getAuctionId());
+            if (freshInfo != null) {
+                com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+                    .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                    .create();
+                com.mikey.auction.socket.AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + gson.toJson(freshInfo));
+            }
+        }
+        return success;
     }
 }

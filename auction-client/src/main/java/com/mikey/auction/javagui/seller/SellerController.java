@@ -861,8 +861,12 @@ private void setTextFieldError(TextField field, Label label, String message) {
         }
 
         // 5. KIỂM TRA LOGIC NGHIỆP VỤ (Khóa form)
-        itemName.setDisable(false); price.setDisable(false); stepPrice.setDisable(false);
-        itemDescription.setDisable(false); type.setDisable(false); itemInfo.setDisable(false); // Mở khóa khung chi tiết
+        itemName.setDisable(false); 
+        price.setDisable(false); 
+        stepPrice.setDisable(false);
+        itemDescription.setDisable(false); 
+        itemInfo.setDisable(false); // Mở khóa khung chi tiết
+        type.setDisable(true);
 
         if (info.getStatus() == AuctionStatus.OPEN) {
             boolean hasBids = (info.getLastBidderName() != null && !info.getLastBidderName().isEmpty()); 

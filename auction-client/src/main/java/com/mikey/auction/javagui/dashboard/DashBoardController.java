@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.dto.DashboardStats;
 import com.mikey.auction.javagui.bidder.ItemController;
 import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.socket.SocketClient;
@@ -16,6 +17,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 
 import java.io.IOException;
@@ -24,16 +26,21 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-/**
- * Controller hiển thị danh sách các phiên đấu giá mà người dùng quan tâm.
- */
 public class DashBoardController implements SocketListener {
-    @FXML
-    private FlowPane myInterestedAuction; 
+    // 1. Dành cho danh sách sản phẩm theo dõi
+    @FXML private FlowPane myInterestedAuction; 
+
+    // 2. Dành cho 7 con số thống kê (Tên biến đã khớp 100% với 7 file FXML của bạn)
+    @FXML private Label totalSpentValue;   // File StatCard_TotalSpent.fxml
+    @FXML private Label activeBidsValue;   // File StatCard_ActiveBids.fxml
+    @FXML private Label winsValue;         // File StatCard_Wins.fxml
+    @FXML private Label winRateValue;      // File StatCard_WinRate.fxml
+    @FXML private Label outbidCount;       // File StatCard_Outbid.fxml
+    @FXML private Label watchCount;        // File StatCard_Watchlist.fxml
+    @FXML private Label soldCount;         // File StatCard_Sold.fxml
 
     private User user;
     
-    // ĐIỂM SỬA DUY NHẤT: Thêm cấu hình đọc/ghi LocalDateTime cho Gson để tránh lỗi InaccessibleObjectException
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) -> 
                 new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
@@ -41,63 +48,66 @@ public class DashBoardController implements SocketListener {
                 LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
             .create();
 
-    /**
-     * Thiết lập thông tin người dùng và bắt đầu quá trình tải dữ liệu.
-     */
     public void setUser(User user) {
         this.user = user;
-        // Đăng ký nhận dữ liệu Socket cho màn hình Dashboard
         SocketClient.getInstance().setListener(this);
-        loadFollowedAuctions();
-    }
-
-    /**
-     * Gửi yêu cầu lấy danh sách đấu giá quan tâm qua Socket.
-     */
-    private void loadFollowedAuctions() {
-        if (user == null) return;
         
-        // Yêu cầu Server trả về danh sách các phiên đấu giá của User thông qua RequestHandler
+        // Gửi 2 yêu cầu lên Server
         RequestHandler.getInstance().requestUserAuctions(user.getId());
+        RequestHandler.getInstance().requestDashboardStats(user.getId());
     }
 
-    /**
-     * Hàm hứng dữ liệu mảng AuctionInfo từ Server trả về.
-     */
+    // Hàm hỗ trợ tìm kiếm Label an toàn trong trường hợp dùng FXML rời (<fx:include>)
+    private void updateLabelText(Label label, String id, String text) {
+        if (label != null) {
+            label.setText(text);
+        } else if (myInterestedAuction != null && myInterestedAuction.getScene() != null) {
+            // Quét toàn bộ giao diện để tìm ID nếu nó nằm trong file FXML con
+            Label foundLabel = (Label) myInterestedAuction.getScene().lookup(id);
+            if (foundLabel != null) foundLabel.setText(text);
+        }
+    }
+
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
-        // Kiểm tra đúng danh mục AUCTION và hành động USER dành cho Dashboard
+        // NHÁNH 1: Load danh sách thẻ sản phẩm
         if ("AUCTION".equals(category) && "USER".equals(action)) {
-            
-            // Giải mã mảng JSON thành danh sách ArrayList<AuctionInfo> bằng GSON
             Type listType = new TypeToken<ArrayList<AuctionInfo>>(){}.getType();
             ArrayList<AuctionInfo> followedList = gson.fromJson(jsonData, listType);
 
-            // Cập nhật giao diện trên luồng Platform.runLater để tránh lỗi JavaFX
             Platform.runLater(() -> {
                 myInterestedAuction.getChildren().clear();
+                if (followedList == null || followedList.isEmpty()) return;
 
-                if (followedList == null || followedList.isEmpty()) {
-                    System.out.println("User chưa theo dõi phiên nào.");
-                    return;
-                }
-
-                // Hiển thị từng phiên đấu giá lên giao diện
                 for (AuctionInfo info : followedList) {
                     try {
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/bidder/item.fxml"));
                         Parent itemCard = loader.load();
-                        
                         ItemController controller = loader.getController();
                         controller.setData(info);
-                        controller.setUser(user.getId()); // Giữ nguyên cách truyền ID của bạn
-                        
+                        controller.setUser(user.getId()); 
                         myInterestedAuction.getChildren().add(itemCard);
-                    } catch (IOException e) {
-                        System.err.println("Lỗi khi nạp item card trong Dashboard: " + e.getMessage());
-                    }
+                    } catch (IOException e) { e.printStackTrace(); }
                 }
             });
+        }
+        
+        // NHÁNH 2: Gán số liệu thống kê cho 7 Card
+        else if ("AUCTION".equals(category) && "DASHBOARD".equals(action)) {
+            if (jsonData != null && !jsonData.equals("null")) {
+                DashboardStats stats = gson.fromJson(jsonData, DashboardStats.class);
+
+                Platform.runLater(() -> {
+                    // Dùng hàm updateLabelText để "vượt rào" các file FXML rời rạc
+                    updateLabelText(totalSpentValue, "#totalSpentValue", String.format("%,.0f", stats.getTotalSpent()));
+                    updateLabelText(activeBidsValue, "#activeBidsValue", String.format("%02d", stats.getActiveBids()));
+                    updateLabelText(winsValue, "#winsValue", String.format("%02d", stats.getWonItems()));
+                    updateLabelText(winRateValue, "#winRateValue", stats.getWinRate() + "%");
+                    updateLabelText(outbidCount, "#outbidCount", String.format("%02d", stats.getOutbidCount()));
+                    updateLabelText(watchCount, "#watchCount", String.format("%02d", stats.getFollowingCount()));
+                    updateLabelText(soldCount, "#soldCount", String.format("%02d", stats.getSoldItems()));
+                });
+            }
         }
     }
 }

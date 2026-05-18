@@ -129,4 +129,24 @@ public class RequestHandler {
     public void requestDeleteAuction(int auctionId) {
         send("AUCTION|DELETE|" + auctionId);
     }
+
+// Hàm gửi yêu cầu cài đặt Auto Bid lên Server
+    public void requestSetAutoBid(com.mikey.auction.dto.AutoBidInfo autoInfo) {
+        try {
+            // Tận dụng luôn biến gson đã được cấu hình sẵn ở đầu class
+            String jsonData = gson.toJson(autoInfo);
+            
+            // 👉 ĐÃ SỬA: Gọi đúng tên hàm send() đang có trong class của bạn
+            send("AUCTION|AUTOBID|" + jsonData); 
+            
+        } catch (Exception e) {
+            System.err.println("Lỗi khi gửi yêu cầu Auto Bid: " + e.getMessage());
+        }
+    }   
+
+    public void requestDashboardStats(int userId) {
+        send("AUCTION|DASHBOARD|" + userId);
+    }
+
+    
 }
