@@ -1,48 +1,43 @@
 package com.mikey.auction.javagui.seller;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.cloudinary.CloudinaryService;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
 import com.mikey.auction.items.ItemType;
+import com.mikey.auction.javagui.topbar.TopBarController;
+import com.mikey.auction.socket.RequestHandler;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
+import com.mikey.auction.user.User;
 
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.Parent;
-import javafx.animation.PauseTransition;
-import com.mikey.auction.user.User;
-import com.mikey.auction.auction.Auction;
-import com.mikey.auction.auction.AuctionStatus;
-import com.mikey.auction.javagui.SceneChanger;
-import com.mikey.auction.javagui.topbar.TopBarController;
-import com.mikey.auction.manager.AuctionManager;
-import com.mikey.auction.manager.ItemManager;
-import com.mikey.auction.socket.RequestHandler;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mikey.auction.socket.SocketListener;
-import com.mikey.auction.socket.SocketClient;
-
-import javafx.application.Platform;
-import javafx.stage.FileChooser;
-import java.io.File;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 public class SellerController implements SocketListener {
@@ -209,9 +204,9 @@ public class SellerController implements SocketListener {
         itemData.put("imagePath", imagePath);
 
         switch (selected) {
-            case "ARTS" -> findArtworkData(itemData);
-            case "ELECTRONICS" -> findElectronicsData(itemData);
-            case "VEHICLE" -> findVehicleData(itemData);
+            case "Arts" -> findArtworkData(itemData);
+            case "Electronics" -> findElectronicsData(itemData);
+            case "Vehicle" -> findVehicleData(itemData);
         }
 
     try {

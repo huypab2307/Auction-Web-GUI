@@ -56,26 +56,36 @@ public class AuctionHandler {
                 case "CREATE":
                     // 1. Giải mã JSON nhận được từ Client
                     AuctionInfo p = gson.fromJson(parts[2], AuctionInfo.class);
-                    
+
                     // 2. Kiểm tra: Nếu ID > 0 thì đây là yêu cầu CẬP NHẬT
                     if (p.getId() > 0) {
-                        // Gọi hàm update trong Manager (bạn cần viết thêm hàm này)
+                        // Gọi hàm update trong Manager
                         result = AuctionManager.getInstance().updateAuction(p);
                     } else {
-                        // 3. Nếu ID <= 0 thì mới là TẠO MỚI (Logic cũ của bạn)
-                        Item item = ItemManager.getInstance().findItemById(
-                            p.getItemInfo().getItemType(), 
-                            p.getItemInfo().getItemId()
-                        );
-                        
-                        if (item != null) {
+                        // 3. Nếu ID <= 0 thì TẠO MỚI
+                        java.sql.Connection conn = null;
+                        try {
+                            conn = AuctionDAO.getInstance().getConnect();
+
+                            // Tạo Item mới từ dữ liệu trong extraData
+                            java.util.HashMap<String, String> itemDataMap = new java.util.HashMap<>(p.getExtraData());
+                            Item item = ItemManager.getInstance().preProcessing(itemDataMap);
+
+                            // Lưu Item vào database (sẽ tạo ID tự động)
+                            item = ItemManager.getInstance().uploadItem(conn, item);
+
+                            // Tạo Auction từ Item đã lưu
                             AuctionManager.getInstance().uploadItem(
-                                item, p.getCurPrice(), p.getBidStep(), 
+                                item, p.getCurPrice(), p.getBidStep(),
                                 p.getStartTime(), p.getEndTime()
                             );
                             result = true;
-                        } else {
+                        } catch (Exception e) {
+                            System.err.println("Lỗi khi tạo sản phẩm: " + e.getMessage());
+                            e.printStackTrace();
                             result = false;
+                        } finally {
+                            if (conn != null) try { conn.close(); } catch (Exception e) {}
                         }
                     }
                     break;

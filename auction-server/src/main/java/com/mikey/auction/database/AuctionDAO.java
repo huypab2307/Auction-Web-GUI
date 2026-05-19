@@ -429,10 +429,13 @@ public class AuctionDAO extends BaseDAO {
             }
 
             // 5. Sản phẩm đang theo dõi (Yêu thích)
-            String sqlFollow = "SELECT COUNT(*) FROM subscriptions WHERE userId = ?"; // Bạn đổi tên bảng 'subscriptions' nếu đặt tên khác nha
+            String sqlFollow = "SELECT COUNT(*) FROM subscriptions WHERE userId = ?";
             try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) {
                 ps.setInt(1, userId);
                 try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setFollowingCount(rs.getInt(1)); }
+            } catch (Exception e) {
+                // Tạm bỏ qua lỗi subscriptions table
+                stats.setFollowingCount(0);
             }
 
             // 6. Sản phẩm người này đã bán thành công
