@@ -120,6 +120,18 @@ public class AuctionHandler {
                         result = AuctionDAO.getInstance().getDashboardStats(userId);
                     }
                     break;
+
+                // THÊM NHÁNH NÀY VÀO TRONG switch (action)
+                case "HISTORY":
+                    int histAuctionId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getBidHistory(histAuctionId);
+                    break;
+
+                // THÊM VÀO TRONG switch (action) CỦA AuctionHandler.java
+                case "HISTORY_DAILY":
+                    int dailyAucId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getBidHistoryByDate(dailyAucId);
+                    break;
             }
 
             if (result != null) {

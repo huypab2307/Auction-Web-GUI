@@ -33,6 +33,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 
 import java.io.IOException;
 import java.net.URL;
@@ -63,6 +67,12 @@ public class AuctionItemController implements SearchListener, SocketListener {
     @FXML private TopBarController topBarController;
     @FXML private Button bidButton;
     @FXML private Pane pane;
+
+// Đổi toàn bộ String thành Number
+    @FXML 
+    private LineChart<Number, Number> priceChart;
+    private XYChart.Series<Number, Number> priceSeries;
+    private int bidCounter = 1; // Đếm số lượt đấu để gán nhãn trục X
 
     private User user;
     private AuctionInfo auctionInfo;
@@ -135,12 +145,49 @@ public class AuctionItemController implements SearchListener, SocketListener {
                 bidButton.setDisable(true); bidButton.setText("PHIÊN ĐẤU GIÁ ĐÃ KẾT THÚC");
                 bidButton.setStyle("-fx-background-color: #808080; -fx-text-fill: white; -fx-font-weight: bold;");
             }
+
+            // KÉO XUỐNG CUỐI HÀM renderStaticInfo(), XÓA ĐOẠN CODE KHỞI TẠO BIỂU ĐỒ CŨ VÀ THAY BẰNG DÒNG NÀY:
+            RequestHandler.getInstance().requestBidHistory(auctionInfo.getId());
         } catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
-    public void updateDynamicInfo() {
+public void updateDynamicInfo() {
         curPrice.setText(auctionInfo.getCurPrice() + "đ");
         curBidder.setText(auctionInfo.getLastBidderName() != null ? "người giữ giá: " + auctionInfo.getLastBidderName() : "Chưa có người ra giá");
+        
+        if (priceSeries != null) {
+            String uname = auctionInfo.getLastBidderName() != null ? auctionInfo.getLastBidderName() : "Ẩn danh";
+            double amt = auctionInfo.getCurPrice();
+            
+            // XÓA BỎ đoạn code if (priceSeries.getData().size() > 15) đi để giữ full 100% lịch sử!
+            
+            XYChart.Data<Number, Number> newDataPoint = new XYChart.Data<>(bidCounter++, amt);
+            
+            // Cài ma thuật TRƯỚC
+            newDataPoint.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    newNode.setStyle("-fx-background-color: transparent;");
+                    javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip("Người đặt: " + uname + "\nGiá: " + amt + "đ");
+                    tooltip.setStyle("-fx-font-size: 13px; -fx-background-color: #2b2b2b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px;");
+                    tooltip.setShowDelay(javafx.util.Duration.millis(100));
+
+                    newNode.setOnMouseEntered(event -> {
+                        newNode.setStyle("-fx-background-color: #2575fc, white; -fx-background-insets: 0, 2; -fx-background-radius: 5px; -fx-padding: 5px;");
+                        newNode.setCursor(javafx.scene.Cursor.HAND);
+                        javafx.scene.control.Tooltip.install(newNode, tooltip);
+                        newNode.toFront();
+                    });
+
+                    newNode.setOnMouseExited(event -> {
+                        newNode.setStyle("-fx-background-color: transparent;");
+                        javafx.scene.control.Tooltip.uninstall(newNode, tooltip);
+                    });
+                }
+            });
+            
+            // VẼ LÊN BIỂU ĐỒ SAU CÙNG
+            priceSeries.getData().add(newDataPoint);
+        }
     }
 
     @FXML
@@ -223,6 +270,61 @@ public class AuctionItemController implements SearchListener, SocketListener {
                             e.printStackTrace();
                         }
                     }
+                // CHÈN THÊM VÀO CHUỖI if-else TRONG onResponseReceived()
+                } else if ("AUCTION".equals(category) && "HISTORY".equals(action)) {
+                    java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<ArrayList<String>>(){}.getType();
+                    ArrayList<String> historyList = gson.fromJson(jsonData, listType);
+
+                    Platform.runLater(() -> {
+                        if (priceChart != null) {
+                            priceChart.getData().clear();
+                            priceSeries = new XYChart.Series<>();
+                            priceSeries.setName("Lịch sử giá");
+                            priceChart.getData().add(priceSeries);
+                            bidCounter = 1;
+
+                            if (historyList != null && !historyList.isEmpty()) {
+                                for (String record : historyList) {
+                                    String[] parts = record.split("\\|");
+                                    String uname = parts[0];
+                                    double amt = Double.parseDouble(parts[1]);
+                                    
+// 1. Tạo điểm tọa độ
+                                    XYChart.Data<Number, Number> dataPoint = new XYChart.Data<>(bidCounter++, amt);
+                                    
+                                    // 2. 👉 ÉP MA THUẬT VÀO TRƯỚC KHI VẼ
+                                    dataPoint.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                                        if (newNode != null) {
+                                            // Tàng hình
+                                            newNode.setStyle("-fx-background-color: transparent;");
+
+                                            // Setup bong bóng
+                                            javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip("Người đặt: " + uname + "\nGiá: " + amt + "đ");
+                                            tooltip.setStyle("-fx-font-size: 13px; -fx-background-color: #2b2b2b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px;");
+                                            tooltip.setShowDelay(javafx.util.Duration.millis(100));
+
+                                            // Khi rê chuột vào: Hiện viền xanh dương, lõm trắng ở giữa
+                                            newNode.setOnMouseEntered(event -> {
+                                                newNode.setStyle("-fx-background-color: #2575fc, white; -fx-background-insets: 0, 2; -fx-background-radius: 5px; -fx-padding: 5px;");
+                                                newNode.setCursor(javafx.scene.Cursor.HAND);
+                                                javafx.scene.control.Tooltip.install(newNode, tooltip);
+                                                newNode.toFront(); // Nổi lên trên cùng để không bị vạch kẻ đè
+                                            });
+
+                                            // Khi chuột rời đi: Tàng hình lại
+                                            newNode.setOnMouseExited(event -> {
+                                                newNode.setStyle("-fx-background-color: transparent;");
+                                                javafx.scene.control.Tooltip.uninstall(newNode, tooltip);
+                                            });
+                                        }
+                                    });
+                                    
+                                    // 3. 👉 CÀI ĐẶT XONG XUÔI MỚI NÉM LÊN BIỂU ĐỒ
+                                    priceSeries.getData().add(dataPoint);
+                                }
+                            }
+                        }
+                    });
                 }
             } catch (Exception e) { e.printStackTrace(); }
         });

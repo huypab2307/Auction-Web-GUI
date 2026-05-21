@@ -465,4 +465,53 @@ public class AuctionDAO extends BaseDAO {
         }
         return stats;
     }
+
+// ĐÃ SỬA: Đổi 'users' thành 'user' cho khớp với Database của bạn
+    public java.util.ArrayList<String> getBidHistory(int auctionId) {
+        java.util.ArrayList<String> history = new java.util.ArrayList<>();
+        
+        // Chú ý dòng SQL thứ 2: JOIN user u
+        String sql = "SELECT u.username, b.bidAmount FROM bidTransactions b " +
+                     "JOIN user u ON b.userId = u.id " +
+                     "WHERE b.auctionId = ? ORDER BY b.createdAt ASC";
+                     
+        try (java.sql.Connection conn = getConnect();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    history.add(rs.getString("username") + "|" + rs.getDouble("bidAmount"));
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return history;
+    }
+
+    // THÊM VÀO AuctionDAO.java
+    public java.util.ArrayList<String> getBidHistoryByDate(int auctionId) {
+        java.util.ArrayList<String> history = new java.util.ArrayList<>();
+        // Gom nhóm theo ngày và lấy giá cao nhất (MAX) của ngày đó
+        String sql = "SELECT DATE(b.createdAt) as bidDate, MAX(b.bidAmount) as maxPrice " +
+                     "FROM bidTransactions b " +
+                     "JOIN user u ON b.userId = u.id " +
+                     "WHERE b.auctionId = ? " +
+                     "GROUP BY DATE(b.createdAt) " +
+                     "ORDER BY bidDate ASC";
+                     
+        try (java.sql.Connection conn = getConnect();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    // Trả về dạng: "2026-05-21|8500.0"
+                    history.add(rs.getString("bidDate") + "|" + rs.getDouble("maxPrice"));
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return history;
+    }
 }

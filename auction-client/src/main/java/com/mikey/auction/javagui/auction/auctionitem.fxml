@@ -5,6 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.chart.*?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="900.0" prefHeight="720.0" prefWidth="1180.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.auction.AuctionItemController">
     <stylesheets>
@@ -66,12 +67,19 @@
                                                 <TilePane fx:id="attributeBox" hgap="20.0" vgap="10.0" />
                                             </children>
                                         </VBox>
-                                        <VBox spacing="15.0">
-                                            <children>
-                                                <Label style="-fx-font-weight: bold; -fx-font-size: 20;" text="Future Feature" />
-                                                <Label lineSpacing="5.0" text="All bid transaction will be updated soon!" wrapText="true" />
-                                            </children>
-                                        </VBox>
+                                            <VBox spacing="10.0" style="-fx-padding: 20 0 0 0;">
+                                                <children>
+                                                    <Label text="Biểu đồ biến động giá" style="-fx-font-weight: bold; -fx-font-size: 16; -fx-text-fill: #2d3748;" />
+                                                    <LineChart fx:id="priceChart" prefHeight="280.0" prefWidth="550.0" animated="true" legendVisible="false" style="-fx-background-color: white; -fx-background-radius: 10;">
+                                                            <xAxis>
+                                                                <NumberAxis fx:id="xAxis" label="Thứ tự lượt đấu giá" forceZeroInRange="false" />
+                                                            </xAxis>
+                                                        <yAxis>
+                                                            <NumberAxis label="Mức giá (đ)" side="LEFT" fx:id="yAxis" />
+                                                        </yAxis>
+                                                    </LineChart>
+                                                </children>
+                                            </VBox>
                                     </children>
                                 </VBox>
 
