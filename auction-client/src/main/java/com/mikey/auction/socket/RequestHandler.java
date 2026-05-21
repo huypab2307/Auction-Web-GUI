@@ -148,5 +148,15 @@ public class RequestHandler {
         send("AUCTION|DASHBOARD|" + userId);
     }
 
+    // THÊM VÀO RequestHandler.java
+    public void requestBidHistory(int auctionId) {
+        send("AUCTION|HISTORY|" + auctionId);
+    }
+
+    // THÊM VÀO RequestHandler.java
+    public void requestBidHistoryDaily(int auctionId) {
+        send("AUCTION|HISTORY_DAILY|" + auctionId);
+    }
+
     
 }
