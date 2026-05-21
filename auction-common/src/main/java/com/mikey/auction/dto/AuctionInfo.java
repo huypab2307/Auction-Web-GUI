@@ -17,7 +17,16 @@ public class AuctionInfo {
     private LocalDateTime endTime;
     private LocalDateTime startTime;
     private ItemSummary itemInfo;
+    private int bidderId;
+    private String itemName;
+    private String highestBidderId; // Thêm thuộc tính này ở phần khai báo biến nếu chưa có
 
+    public int getBidderId() {
+        return this.bidderId;
+    }
+    public void setBidderId(int bidderId) {
+        this.bidderId = bidderId;
+    }
     public void setId(int id) {
         this.id = id;
     }
@@ -89,5 +98,20 @@ public class AuctionInfo {
 
     public void setExtraData(Map<String, String> extraData) {
         this.extraData = extraData;
+    }
+
+    public String getItemName() {
+        return this.itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+    public String getHighestBidderId() {
+        return this.highestBidderId;
+    }
+
+    public void setHighestBidderId(String highestBidderId) {
+        this.highestBidderId = highestBidderId;
     }
 }

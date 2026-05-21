@@ -109,7 +109,7 @@ public class AuctionHandler {
                     if (parts.length >= 3) {
                         // Nhớ tạo class AutoBidInfo trong package dto nhé!
                         com.mikey.auction.dto.AutoBidInfo autoInfo = gson.fromJson(parts[2], com.mikey.auction.dto.AutoBidInfo.class);
-                        result = AuctionManager.getInstance().registerAutoBid(autoInfo);
+                        result = AuctionDAO.getInstance().registerAutoBid(autoInfo);
                     }
                     break;
 

@@ -3,6 +3,7 @@ package com.mikey.auction.manager;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
+import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AuctionInfo;
 
 public class UserWalletSecurityTest {
@@ -21,7 +22,7 @@ public class UserWalletSecurityTest {
 
         // Khẳng định: Hệ thống phải từ chối hoặc ném lỗi, không cho phép đặt giá
         assertThrows(IllegalArgumentException.class, () -> {
-            AuctionManager.getInstance().updateAuction(info);
+            AuctionDAO.getInstance().updateAuction(info);
         }, "Hệ thống phải chặn đứng lượt đặt giá nếu ví người dùng không đủ tiền");
     }
 
@@ -37,7 +38,7 @@ public class UserWalletSecurityTest {
         // infoFromUserB.setBidderId(UserB_ID);
 
         // Kích hoạt lượt đặt giá của người B
-        AuctionManager.getInstance().updateAuction(infoFromUserB);
+        AuctionDAO.getInstance().updateAuction(infoFromUserB);
 
         // Khẳng định: Ví của người A phải được tự động cộng trả lại 500,000 VND ngay lập tức
         // double walletA = UserManager.getInstance().getUser(UserA_ID).getBalance();

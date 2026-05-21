@@ -76,3 +76,4 @@ public synchronized boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, dou
         return AuctionDAO.getInstance().getAllAuctions();
     }
 }
+

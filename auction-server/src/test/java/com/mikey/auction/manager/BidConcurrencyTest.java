@@ -8,9 +8,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
+import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AuctionInfo;
 
 public class BidConcurrencyTest {
+
+    private Object AuctionDAO;
 
     @Test
     public void testConcurrentBiddingOnSingleAuction() throws InterruptedException {
@@ -31,12 +34,8 @@ public class BidConcurrencyTest {
         for (int i = 0; i < numberOfThreads; i++) {
             service.submit(() -> {
                 try {
-                    latch.await(); // Chờ lệnh xuất phát để cả 10 thread cùng chạy đồng thời
-                    
-                    // Gọi hàm cập nhật của AuctionManager
-                    // Lưu ý: Hàm updateAuction trong logic của bạn phải trả về boolean 
-                    // hoặc ném Exception nếu có người đã nhanh tay đặt mức giá đó trước.
-                    AuctionManager.getInstance().updateAuction(info);
+                    latch.await(); 
+                    ((AuctionDAO) AuctionDAO).updateAuction(info);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();

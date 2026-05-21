@@ -1,10 +1,13 @@
 package com.mikey.auction.manager;
 
 import java.time.LocalDateTime;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-import com.mikey.auction.auction.Auction;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Test;
+
+import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AutoBidInfo;
 import com.mikey.auction.items.Electronics;
 import com.mikey.auction.items.Item;
@@ -32,7 +35,7 @@ public class AuctionFlowIntegrationTest {
         assertFalse(auctions.isEmpty(), "Danh sách không được rỗng sau khi đã tạo auction");
         
         // Lấy auction vừa được thêm vào hệ thống
-        Auction latestAuction = auctions.get(auctions.size() - 1);
+        var latestAuction = auctions.get(auctions.size() - 1);
         int auctionId = latestAuction.getId(); // Lấy ID thật do hệ thống sinh ra thay vì dùng số lụi 99999
 
         // 3. Tiến hành đăng ký Auto-Bid trực tiếp lên cuộc đấu giá thật này
@@ -40,7 +43,7 @@ public class AuctionFlowIntegrationTest {
         AutoBidInfo autoBidInfo = new AutoBidInfo(5, auctionId, 18000000);
         
         assertDoesNotThrow(() -> {
-            AuctionManager.getInstance().registerAutoBid(autoBidInfo);
+            AuctionDAO.getInstance().registerAutoBid(autoBidInfo);
         }, "Đăng ký Auto-bid trên một Auction có thật trong hệ thống thì không được phép lỗi");
     }
 }

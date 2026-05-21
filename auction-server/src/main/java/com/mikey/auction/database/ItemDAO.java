@@ -1,10 +1,13 @@
 package com.mikey.auction.database;
 
-import com.mikey.auction.database.BaseDAO;
-import com.mikey.auction.items.Item;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
+
+import com.mikey.auction.items.Item;
 
 
 

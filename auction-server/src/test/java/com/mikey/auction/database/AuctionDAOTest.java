@@ -1,12 +1,18 @@
 package com.mikey.auction.database;
 
-import com.mikey.auction.auction.Auction;
-import com.mikey.auction.dto.AuctionInfo;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.sql.Connection;
 import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
+
+import com.mikey.auction.auction.Auction;
+import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.dto.AutoBidInfo;
 
 public class AuctionDAOTest {
 
@@ -82,7 +88,7 @@ public class AuctionDAOTest {
         info.setId(99);
         info.setCurPrice(2500000);
         info.setItemName("Laptop");
-        info.setHighestBidderId(5);
+        info.setHighestBidderId("A");
 
         assertEquals(99, info.getId());
         assertEquals(2500000, info.getCurPrice());
@@ -121,10 +127,7 @@ public class AuctionDAOTest {
     public void testRegisterAutoBid() {
         // Kiểm tra đăng ký auto-bid
         assertDoesNotThrow(() -> {
-            com.mikey.auction.dto.AutoBidInfo info = new com.mikey.auction.dto.AutoBidInfo();
-            info.setUserId(1);
-            info.setAuctionId(1);
-            info.setMaxPrice(5000000);
+        AutoBidInfo info = new AutoBidInfo(1, 1, 5000000.0);
 
             boolean result = AuctionDAO.getInstance().registerAutoBid(info);
             // Result phụ thuộc vào database
