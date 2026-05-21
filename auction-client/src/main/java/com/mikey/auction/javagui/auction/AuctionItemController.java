@@ -38,6 +38,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
+
 import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -76,6 +77,12 @@ public class AuctionItemController implements SearchListener, SocketListener {
 
     private User user;
     private AuctionInfo auctionInfo;
+
+    @FXML private Button btnTickView;
+    @FXML private Button btnDailyView;
+    @FXML private NumberAxis xAxis;
+    
+    private boolean isDailyMode = false; // Biến ghi nhớ chế độ xem hiện tại
     
     // ĐÃ FIX LỖI GSON CRASH APP
     private final Gson gson = new GsonBuilder()
@@ -151,10 +158,17 @@ public class AuctionItemController implements SearchListener, SocketListener {
         } catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
-public void updateDynamicInfo() {
+    public void updateDynamicInfo() {
         curPrice.setText(auctionInfo.getCurPrice() + "đ");
         curBidder.setText(auctionInfo.getLastBidderName() != null ? "người giữ giá: " + auctionInfo.getLastBidderName() : "Chưa có người ra giá");
         
+        // 👉 NÂNG CẤP: Nếu đang xem chế độ Ngày thì ra lệnh tải lại biểu đồ ngày, không tự chấm điểm lượt
+        if (isDailyMode) {
+            RequestHandler.getInstance().requestBidHistoryDaily(auctionInfo.getId());
+            return; 
+        }
+        
+        // Đoạn code if (priceSeries != null) xử lý chấm điểm lượt cũ của bạn giữ nguyên phía dưới...
         if (priceSeries != null) {
             String uname = auctionInfo.getLastBidderName() != null ? auctionInfo.getLastBidderName() : "Ẩn danh";
             double amt = auctionInfo.getCurPrice();
@@ -255,6 +269,7 @@ public void updateDynamicInfo() {
                         this.auctionInfo = gson.fromJson(jsonData, AuctionInfo.class);
                         updateDynamicInfo(); 
                     }
+
                 } else if ("AUCTION".equals(category) && "UPDATE_PRICE".equals(action)) {
                     // 👉 LUỒNG HỨNG DỮ LIỆU BROADCAST TỪ SERVER KHI CÓ NGƯỜI KHÁC ĐẤU GIÁ
                     if (jsonData != null && !jsonData.equals("null")) {
@@ -270,6 +285,83 @@ public void updateDynamicInfo() {
                             e.printStackTrace();
                         }
                     }
+                        
+                    
+                } else if ("AUCTION".equals(category) && "HISTORY_DAILY".equals(action)) {
+                    java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<ArrayList<String>>(){}.getType();
+                    ArrayList<String> historyList = gson.fromJson(jsonData, listType);
+
+                    Platform.runLater(() -> {
+                        if (priceChart != null) {
+                            priceChart.getData().clear();
+                            priceSeries = new XYChart.Series<>();
+                            priceSeries.setName("Xu hướng ngày");
+                            priceChart.getData().add(priceSeries);
+                            
+                            // 👉 TẠO DANH SÁCH LƯU NGÀY THÁNG ĐỂ MAPPING VỚI TRỤC X
+                            java.util.List<String> dateLabels = new java.util.ArrayList<>();
+                            
+                            int dayCounter = 1;
+                            if (historyList != null && !historyList.isEmpty()) {
+                                for (String record : historyList) {
+                                    String[] parts = record.split("\\|");
+                                    String dateStr = parts[0]; // Dạng "2026-05-15"
+                                    double maxAmt = Double.parseDouble(parts[1]);
+                                    
+                                    // Rút gọn ngày cho đẹp (từ 2026-05-15 thành 15/05)
+                                    String[] dParts = dateStr.split("-");
+                                    String shortDate = (dParts.length == 3) ? (dParts[2] + "/" + dParts[1]) : dateStr;
+                                    dateLabels.add(shortDate); // Lưu vào danh sách
+                                    
+                                    XYChart.Data<Number, Number> dataPoint = new XYChart.Data<>(dayCounter++, maxAmt);
+                                    
+                                    // (Đoạn cài đặt Tooltip ma thuật giữ nguyên)
+                                    dataPoint.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                                        if (newNode != null) {
+                                            newNode.setStyle("-fx-background-color: transparent;");
+                                            javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip("Ngày: " + dateStr + "\nGiá chốt: " + maxAmt + "đ");
+                                            tooltip.setStyle("-fx-font-size: 13px; -fx-background-color: #2b2b2b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px;");
+                                            tooltip.setShowDelay(javafx.util.Duration.millis(100));
+
+                                            newNode.setOnMouseEntered(e -> {
+                                                newNode.setStyle("-fx-background-color: #e53e3e, white; -fx-background-insets: 0, 2; -fx-background-radius: 5px; -fx-padding: 5px;");
+                                                newNode.setCursor(javafx.scene.Cursor.HAND);
+                                                javafx.scene.control.Tooltip.install(newNode, tooltip);
+                                                newNode.toFront();
+                                            });
+
+                                            newNode.setOnMouseExited(e -> {
+                                                newNode.setStyle("-fx-background-color: transparent;");
+                                                javafx.scene.control.Tooltip.uninstall(newNode, tooltip);
+                                            });
+                                        }
+                                    });
+                                    priceSeries.getData().add(dataPoint);
+                                }
+                            }
+                            
+                            // 👉 MA THUẬT Ở ĐÂY: BIẾN SỐ THÀNH CHỮ NGÀY THÁNG TRÊN TRỤC X
+                            xAxis.setTickLabelFormatter(new javafx.util.StringConverter<Number>() {
+                                @Override
+                                public String toString(Number object) {
+                                    // Số 1 -> lấy index 0 trong danh sách dateLabels
+                                    int index = object.intValue() - 1;
+                                    // Chỉ in ra chữ nếu là số nguyên và nằm trong danh sách
+                                    if (index >= 0 && index < dateLabels.size() && object.doubleValue() == object.intValue()) {
+                                        return dateLabels.get(index); 
+                                    }
+                                    // Nếu là số lẻ (như 1.5, 2.5) thì ẩn đi cho gọn
+                                    return ""; 
+                                }
+                                @Override
+                                public Number fromString(String string) { return null; }
+                            });
+                            
+                            xAxis.setTickUnit(1); // Ép mỗi khoảng cách là 1 đơn vị ngày
+                            xAxis.setMinorTickVisible(false); // Tắt các vạch kẻ phụ cho sạch sẽ
+                        }
+                    });
+
                 // CHÈN THÊM VÀO CHUỖI if-else TRONG onResponseReceived()
                 } else if ("AUCTION".equals(category) && "HISTORY".equals(action)) {
                     java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<ArrayList<String>>(){}.getType();
@@ -389,5 +481,27 @@ public void updateDynamicInfo() {
         PauseTransition cleanup = new PauseTransition(Duration.seconds(seconds));
         cleanup.setOnFinished(event -> mainStackPane.getChildren().remove(animImg));
         cleanup.play();
+    }
+
+    @FXML
+    public void handleTickView(ActionEvent event) {
+        isDailyMode = false;
+        btnTickView.setStyle("-fx-background-color: #2575fc; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;");
+        btnDailyView.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #4a5568; -fx-background-radius: 5; -fx-font-weight: bold;");
+        xAxis.setLabel("Thứ tự lượt đấu giá");
+        
+        // 👉 BỔ SUNG DÒNG NÀY: Reset trục X về chế độ hiện Số bình thường
+        xAxis.setTickLabelFormatter(null); 
+        
+        RequestHandler.getInstance().requestBidHistory(auctionInfo.getId());
+    }
+
+    @FXML
+    public void handleDailyView(ActionEvent event) {
+        isDailyMode = true;
+        btnDailyView.setStyle("-fx-background-color: #2575fc; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;");
+        btnTickView.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #4a5568; -fx-background-radius: 5; -fx-font-weight: bold;");
+        xAxis.setLabel("Thứ tự ngày đấu giá");
+        RequestHandler.getInstance().requestBidHistoryDaily(auctionInfo.getId());
     }
 }
