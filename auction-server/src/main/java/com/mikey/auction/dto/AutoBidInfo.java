@@ -13,6 +13,18 @@ public class AutoBidInfo {
     }
 
     // Thêm Getter/Setter cho id và curPrice nếu AuctionManagerTest cần dùng
+    public int getUserId() {
+        return userId;
+    }
+
+    public int getAuctionId() {
+        return auctionId;
+    }
+
+    public double getMaxPrice() {
+        return maxPrice;
+    }
+
     public void setId(int id) { this.auctionId = id; }
     public void setCurPrice(double price) { this.maxPrice = price; }
 }
