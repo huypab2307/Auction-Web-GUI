@@ -1,22 +1,17 @@
 package com.mikey.auction.database;
 
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Map;
-
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
-import com.mikey.auction.items.Item;
 import com.mikey.auction.items.ItemType;
+
+
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Map;
 
 
 public class AuctionDAO extends BaseDAO {
@@ -308,8 +303,8 @@ public class AuctionDAO extends BaseDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, info.getUserId());
             ps.setInt(2, info.getAuctionId());
-            ps.setDouble(3, info.getMaxPrice()); // Lấy số tiền từ DTO
-            ps.setDouble(4, info.getMaxPrice());
+            ps.setDouble(3, info.getMaxAmount()); // Lấy số tiền từ DTO
+            ps.setDouble(4, info.getMaxAmount());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -471,79 +466,52 @@ public class AuctionDAO extends BaseDAO {
         return stats;
     }
 
-public boolean uploadItem(Item item, double startPrice, double stepPrice, LocalDateTime startTime, LocalDateTime endTime) {
-    String sqlItem = "INSERT INTO items(title, sellerId, description, type, imagePath) VALUES(?, ?, ?, ?, ?)";
-    String sqlAuction = "INSERT INTO auctions(item_id, seller_id, current_price, step_price, start_time, end_time) VALUES(?, ?, ?, ?, ?, ?)";
-
-    Connection connection = null;
-    try {
-        connection = getConnect();
-        // Tắt auto-commit để gom cả 2 lệnh INSERT vào cùng 1 Transaction
-        connection.setAutoCommit(false);
-
-        int itemId = -1;
-
-        // BƯỚC 1: Insert vào bảng items để lấy ID tự động tăng (Generated Keys)
-        try (PreparedStatement prItem = connection.prepareStatement(sqlItem, Statement.RETURN_GENERATED_KEYS)) {
-            prItem.setString(1, item.getName());
-            prItem.setInt(2, item.getSellerId());
-            prItem.setString(3, item.getDescription());
-            // Giả định item có hàm getType() trả về String hoặc Enum, nếu không hãy truyền chuỗi mặc định
-            prItem.setString(4, item.getType() != null ? item.getType().toString() : "COMMON"); 
-            prItem.setString(5, item.getImagePath());
-
-            prItem.executeUpdate();
-
-            // Lấy ID tự động sinh ra từ bảng items
-            try (ResultSet rs = prItem.getGeneratedKeys()) {
-                if (rs.next()) {
-                    itemId = rs.getInt(1);
+// ĐÃ SỬA: Đổi 'users' thành 'user' cho khớp với Database của bạn
+    public java.util.ArrayList<String> getBidHistory(int auctionId) {
+        java.util.ArrayList<String> history = new java.util.ArrayList<>();
+        
+        // Chú ý dòng SQL thứ 2: JOIN user u
+        String sql = "SELECT u.username, b.bidAmount FROM bidTransactions b " +
+                     "JOIN user u ON b.userId = u.id " +
+                     "WHERE b.auctionId = ? ORDER BY b.createdAt ASC";
+                     
+        try (java.sql.Connection conn = getConnect();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    history.add(rs.getString("username") + "|" + rs.getDouble("bidAmount"));
                 }
             }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
         }
-
-        if (itemId == -1) {
-            throw new SQLException("Không lấy được ID từ bảng items sau khi insert.");
-        }
-
-        // BƯỚC 2: Insert vào bảng auctions sử dụng itemId vừa lấy được
-        try (PreparedStatement prAuction = connection.prepareStatement(sqlAuction)) {
-            prAuction.setInt(1, itemId);
-            prAuction.setInt(2, item.getSellerId());
-            prAuction.setDouble(3, startPrice); // Giá hiện tại ban đầu bằng giá khởi điểm
-            prAuction.setDouble(4, stepPrice);
-            prAuction.setTimestamp(5, Timestamp.valueOf(startTime));
-            prAuction.setTimestamp(6, Timestamp.valueOf(endTime));
-
-            prAuction.executeUpdate();
-        }
-
-        // Nếu cả 2 bước đều chạy mượt mà, tiến hành commit lưu vào DB
-        connection.commit();
-        return true;
-
-    } catch (SQLException e) {
-        System.out.println("Lỗi khi upload item và tạo đấu giá: " + e.getMessage());
-        // Nếu có bất kỳ lỗi nào xảy ra, rollback lại toàn bộ để tránh rác dữ liệu
-        if (connection != null) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                System.out.println("Không thể rollback: " + ex.getMessage());
-            }
-        }
-    } finally {
-        // Đóng kết nối an toàn
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                System.out.println("Không thể đóng kết nối: " + e.getMessage());
-            }
-        }
+        return history;
     }
-    return false;
-}
 
-
+    public java.util.ArrayList<String> getBidHistoryByDate(int auctionId) {
+        java.util.ArrayList<String> history = new java.util.ArrayList<>();
+        // Lệnh GROUP BY DATE() là trái tim của tính năng này!
+        String sql = "SELECT DATE(b.createdAt) as bidDate, MAX(b.bidAmount) as maxPrice " +
+                     "FROM bidTransactions b " +
+                     "JOIN user u ON b.userId = u.id " +
+                     "WHERE b.auctionId = ? " +
+                     "GROUP BY DATE(b.createdAt) " +
+                     "ORDER BY bidDate ASC";
+                     
+        try (java.sql.Connection conn = getConnect();
+             // ... phần code phía dưới giữ nguyên
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    // Trả về dạng: "2026-05-21|8500.0"
+                    history.add(rs.getString("bidDate") + "|" + rs.getDouble("maxPrice"));
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return history;
+    }
 }

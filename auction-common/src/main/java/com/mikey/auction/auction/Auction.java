@@ -1,6 +1,6 @@
 package com.mikey.auction.auction;
 
-import java.time.LocalDateTime;
+import java.time.*;
 
 public class Auction{
     private int id;
@@ -13,7 +13,6 @@ public class Auction{
     private double curPrice;
     private int LastBidder;
     private AuctionStatus status;
-    private boolean isFinished;
 
     public int getId() {
         return id;
@@ -66,8 +65,4 @@ public class Auction{
         this.status = status;
         this.stepPrice = stepPrice;
     }
-
-    public boolean isFinished() {
-    return this.isFinished; // Hoặc logic tính toán trạng thái kết thúc của bạn
-}
 }

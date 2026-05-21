@@ -1,30 +1,26 @@
 package com.mikey.auction.dto;
 
-public class AutoBidInfo {
+import java.io.Serializable;
+
+public class AutoBidInfo implements Serializable {
     private int userId;
     private int auctionId;
-    private double maxPrice;
+    private double maxAmount;
 
-    // Constructor
-    public AutoBidInfo(int userId, int auctionId, double maxPrice) {
+    public AutoBidInfo(int userId, int auctionId, double maxAmount) {
         this.userId = userId;
         this.auctionId = auctionId;
-        this.maxPrice = maxPrice;
+        this.maxAmount = maxAmount;
     }
 
-    // Thêm Getter/Setter cho id và curPrice nếu AuctionManagerTest cần dùng
-    public int getUserId() {
-        return userId;
+    public int getUserId() { 
+        return userId; 
+    }
+    public int getAuctionId() { 
+        return auctionId; 
     }
 
-    public int getAuctionId() {
-        return auctionId;
+    public double getMaxAmount() { 
+        return maxAmount; 
     }
-
-    public double getMaxPrice() {
-        return maxPrice;
-    }
-
-    public void setId(int id) { this.auctionId = id; }
-    public void setCurPrice(double price) { this.maxPrice = price; }
 }

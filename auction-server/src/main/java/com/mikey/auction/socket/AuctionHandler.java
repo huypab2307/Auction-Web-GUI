@@ -109,7 +109,7 @@ public class AuctionHandler {
                     if (parts.length >= 3) {
                         // Nhớ tạo class AutoBidInfo trong package dto nhé!
                         com.mikey.auction.dto.AutoBidInfo autoInfo = gson.fromJson(parts[2], com.mikey.auction.dto.AutoBidInfo.class);
-                        result = AuctionDAO.getInstance().registerAutoBid(autoInfo);
+                        result = AuctionManager.getInstance().registerAutoBid(autoInfo);
                     }
                     break;
 
@@ -119,6 +119,18 @@ public class AuctionHandler {
                         // Lấy thống kê dữ liệu trực tiếp từ DAO
                         result = AuctionDAO.getInstance().getDashboardStats(userId);
                     }
+                    break;
+
+                // THÊM NHÁNH NÀY VÀO TRONG switch (action)
+                case "HISTORY":
+                    int histAuctionId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getBidHistory(histAuctionId);
+                    break;
+
+                // THÊM VÀO TRONG switch (action) CỦA AuctionHandler.java
+                case "HISTORY_DAILY":
+                    int dailyAucId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getBidHistoryByDate(dailyAucId);
                     break;
             }
 
