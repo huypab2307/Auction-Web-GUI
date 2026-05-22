@@ -159,5 +159,24 @@ public class RequestHandler {
         send("AUCTION|HISTORY_DAILY|" + auctionId);
     }
 
+    public void requestAllUsers() {
+        send("AUCTION|GET_ALL_USERS"); // Sửa lại thành AUCTION
+    }
+
+    // THÊM VÀO RequestHandler.java
+    public void requestBanUser(int userId) {
+        send("AUCTION|BAN_USER|" + userId);
+    }
+
+    // THÊM VÀO CUỐI FILE RequestHandler.java
+    public void requestUnbanUser(int userId) {
+        send("AUCTION|UNBAN_USER|" + userId);
+    }
+
+// SỬA LẠI HÀM NÀY CHO CHUẨN VỚI KIẾN TRÚC CỦA BẠN:
+    public void requestAllBidHistory() {
+        send("AUCTION|GET_ALL_BID_HISTORY");
+    }
+
     
 }

@@ -6,6 +6,7 @@ import com.mikey.auction.user.Seller;
 import com.mikey.auction.user.User;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class UserDAO extends BaseDAO {
     private static final UserDAO user = new UserDAO();
@@ -42,7 +43,7 @@ public class UserDAO extends BaseDAO {
         }
     return null;
     }
-
+    
     public User login(String username, String password){
         String query = "SELECT * FROM user WHERE username = ? AND password = ?";
         try(Connection connect = getConnect()){
@@ -55,21 +56,28 @@ public class UserDAO extends BaseDAO {
                 int id = rs.getInt("id");
                 String user = rs.getString("username");
                 String pass = rs.getString("password");
-                System.out.println(role + id + user + pass);
+                String status = rs.getString("status"); // 👉 Đọc thêm cột status từ Database
 
+                User u = null;
                 if ("ADMIN".equals(role)) {
-                    return new Admin(user, pass, id);
+                    u = new Admin(user, pass, id);
                 } else if ("SELLER".equals(role)) {
-                    return new Seller(user, pass, id);
+                    u = new Seller(user, pass, id);
                 } else {
-                    return new Bidder(user, pass, id);
+                    u = new Bidder(user, pass, id);
                 }
+
+                if (u != null) {
+                    u.setStatus(status); // 👉 Gán trạng thái vào đối tượng User
+                }
+                return u; // Trả về đối tượng để Server Handler kiểm tra quyền
             }
         } catch (SQLException ex) {
             System.out.println("Dang nhap khong thanh cong");
         }
-    return null;    
+        return null;    
     }
+
     public User findByUsername(String username){
         String query = "SELECT * FROM user WHERE username = ?";
         try(Connection connect = getConnect()){
@@ -122,5 +130,50 @@ public class UserDAO extends BaseDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // THÊM VÀO CUỐI FILE UserDAO.java
+    public java.util.ArrayList<User> getAllUsers() {
+        ArrayList<User> list = new ArrayList<>();
+        String query = "SELECT * FROM user";
+        
+        try (Connection connect = getConnect();
+             PreparedStatement st = connect.prepareStatement(query);
+             ResultSet rs = st.executeQuery()) {
+             
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String uname = rs.getString("username");
+                String pass = rs.getString("password");
+                String role = rs.getString("role");
+                String status = rs.getString("status"); // 👉 ĐỌC CỘT STATUS
+                
+                User u = null;
+                if ("ADMIN".equals(role)) u = new Admin(uname, pass, id);
+                else if ("SELLER".equals(role)) u = new Seller(uname, pass, id);
+                else u = new Bidder(uname, pass, id);
+                
+                if (u != null) {
+                    u.setStatus(status); // 👉 ĐỔ VÀO OBJECT USER
+                    list.add(u);
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("Lỗi khi lấy danh sách user: " + ex.getMessage());
+        }
+        return list;
+    }
+
+    public boolean updateUserStatus(int userId, String newStatus) {
+        String query = "UPDATE user SET status = ? WHERE id = ?";
+        try (Connection connection = getConnect();
+             PreparedStatement pr = connection.prepareStatement(query)) {
+            pr.setString(1, newStatus);
+            pr.setInt(2, userId);
+            return pr.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

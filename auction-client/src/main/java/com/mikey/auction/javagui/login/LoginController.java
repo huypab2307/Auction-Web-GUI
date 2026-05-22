@@ -22,6 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -48,6 +49,15 @@ public class LoginController implements SocketListener {
                     status.setText("Đã kết nối server");
                     loginButton.setDisable(false);
                 });
+
+                password.setOnKeyPressed(event -> {
+                    // Nếu phím vừa gõ là phím ENTER
+                    if (event.getCode() == KeyCode.ENTER) {
+                        // Tự động kích hoạt (bóp cò) nút Đăng nhập
+                        loginButton.fire(); 
+                    }
+                });
+                
             } catch (IOException e) {
                 Platform.runLater(() -> {
                     status.setText("Không thể kết nối Server! Vui lòng kiểm tra lại...");
@@ -88,10 +98,18 @@ public class LoginController implements SocketListener {
                 // Đã lưu thông tin vào biến toàn cục trước khi chuyển trang
                 LoginController.currentUser = finalUser; 
                 
+// TÌM VÀ THAY THẾ KHỐI Platform.runLater BÊN TRONG NHÁNH "LOGIN_SUCCESS"
                 Platform.runLater(() -> {
                     try {
                         if (finalUser != null) {
-                            SceneChanger.getInstance().toBidder(finalUser);
+                            // 👉 CHỐT CHẶN BẺ LÁI ADMIN NẰM Ở ĐÂY
+                            if (finalUser.getRole() == com.mikey.auction.user.Role.ADMIN) {
+                                System.out.println("Tài khoản quyền lực! Đang mở cổng Admin...");
+                                SceneChanger.getInstance().toAdminDashboard(finalUser);
+                            } else {
+                                // Người dùng bình thường (BIDDER / SELLER) thì vào trang chủ Auction Hub
+                                SceneChanger.getInstance().toBidder(finalUser);
+                            }
                         }
                     } catch (Exception ex) {
                         System.err.println("Lỗi chuyển cảnh: " + ex.getMessage());
@@ -103,6 +121,19 @@ public class LoginController implements SocketListener {
                     username.clear();
                     password.clear();
                     applyErrorStyle("Sai tài khoản hoặc mật khẩu!");
+                    
+                    String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red";
+                    username.setStyle(errorStyle);
+                    password.setStyle(errorStyle);
+                });
+            } else if ("BANNED".equals(action)) {
+                Platform.runLater(() -> {
+                    loginButton.setDisable(false); 
+                    username.clear();
+                    password.clear();
+                    
+                    // Hiện chữ đỏ cảnh báo cực kỳ nghiêm túc
+                    applyErrorStyle("Tài khoản của bạn đã bị Admin khóa quyền truy cập!");
                     
                     String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red";
                     username.setStyle(errorStyle);

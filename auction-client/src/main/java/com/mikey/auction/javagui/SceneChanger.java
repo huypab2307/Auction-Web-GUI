@@ -165,4 +165,18 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
         void prepare(FXMLLoader loader) throws IOException;
     }
 
+    // THÊM HÀM NÀY VÀO TRONG SceneChanger.java
+    public void toAdminDashboard(User user) {
+        // Đường dẫn trỏ tới thư mục admin/admin_dashboard.fxml
+        navigate("admin/admin_dashboard.fxml", "Hệ thống Quản trị - Admin: " + user.getUsername(), loader -> {
+            
+            // Tạm thời comment lại, sau này bạn tạo AdminController thì mở ra
+            // AdminController controller = loader.getController();
+            // controller.setUser(user);
+            
+            mainStage.setResizable(true);
+            mainStage.setMaximized(true); // Giao diện Admin nên cho Full màn hình
+        });
+    }
+
 }

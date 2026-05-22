@@ -1,0 +1,199 @@
+/* =========================================
+   MÀU NỀN TỔNG THỂ & FONT CHỮ
+   ========================================= */
+.root {
+    -fx-background-color: #F4F7FC;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* =========================================
+   SIDEBAR (MENU BÊN TRÁI)
+   ========================================= */
+.sidebar {
+    -fx-background-color: #1E1E2D;
+    -fx-padding: 30 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 2, 0);
+}
+
+.logo-text {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-alignment: center;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Các nút trong Sidebar */
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #A1A5B7;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 12 20;
+    -fx-pref-width: 220px;
+    -fx-cursor: hand;
+    -fx-background-radius: 8px;
+    -fx-transition: -fx-background-color 0.3s;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #2B2B40;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* Trạng thái nút đang được chọn */
+.active-btn {
+    -fx-background-color: #2B2B40;
+    -fx-text-fill: #38EF7D;
+}
+
+/* =========================================
+   HEADER (THANH ĐIỀU HƯỚNG TRÊN CÙNG)
+   ========================================= */
+.header {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 0 35;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 8, 0, 0, 3);
+}
+
+.status-text {
+    -fx-text-fill: #7E8299;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.search-box {
+    -fx-background-color: #F4F7FC;
+    -fx-background-radius: 20px;
+    -fx-padding: 8 18;
+    -fx-pref-width: 280px;
+    -fx-border-color: transparent;
+}
+
+.search-box:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #0072FF;
+    -fx-border-radius: 20px;
+}
+
+.icon-btn {
+    -fx-font-size: 18px;
+    -fx-cursor: hand;
+}
+
+.user-profile {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3F4254;
+    -fx-cursor: hand;
+}
+
+/* =========================================
+   NỘI DUNG CHÍNH (MAIN CONTENT)
+   ========================================= */
+.main-content {
+    -fx-padding: 30;
+}
+
+.page-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #181C32;
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3F4254;
+    -fx-padding: 10 0 5 0;
+}
+
+/* =========================================
+   THẺ THỐNG KÊ (CARDS)
+   ========================================= */
+.card {
+    -fx-background-radius: 12px;
+    -fx-padding: 25 30;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 5);
+}
+
+.card-blue { 
+    -fx-background-color: linear-gradient(to bottom right, #00C6FF, #0072FF); 
+}
+
+.card-green { 
+    -fx-background-color: linear-gradient(to bottom right, #11998E, #38EF7D); 
+}
+
+.card-orange { 
+    -fx-background-color: linear-gradient(to bottom right, #FF9966, #FF5E62); 
+}
+
+.card-title {
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 10 0;
+}
+
+.card-value {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 32px;
+    -fx-font-weight: 900;
+}
+
+/* =========================================
+   BẢNG DỮ LIỆU (TABLEVIEW)
+   ========================================= */
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #E4E6EF;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.03), 10, 0, 0, 3);
+}
+
+/* Background của thanh tiêu đề cột */
+.table-view .column-header-background {
+    -fx-background-color: #F4F7FC;
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+/* Từng cột trên tiêu đề */
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 12 0 12 0;
+}
+
+/* Chữ trong tiêu đề cột */
+.table-view .column-header .label {
+    -fx-text-fill: #7E8299;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 10;
+}
+
+/* Từng dòng dữ liệu trong bảng */
+.table-row-cell {
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #F4F7FC;
+    -fx-cell-size: 45px; /* Chiều cao mỗi dòng rộng rãi hơn */
+}
+
+/* Hiệu ứng khi di chuột qua dòng */
+.table-row-cell:hover {
+    -fx-background-color: #F9FAFD;
+}
+
+/* Hiệu ứng khi click chọn dòng */
+.table-row-cell:selected {
+    -fx-background-color: #EEF6FF;
+    -fx-text-background-color: #181C32;
+}
+
+/* Xóa viền focus mặc định của JavaFX */
+.table-view:focused {
+    -fx-background-color: transparent;
+}

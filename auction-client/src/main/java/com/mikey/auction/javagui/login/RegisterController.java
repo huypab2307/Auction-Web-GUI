@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import com.mikey.auction.database.UserDAO;
@@ -39,29 +40,30 @@ public class RegisterController {
 
     public void initialize(){
         registerButton.setDisable(true);
-      //  new Thread(() -> {
-           // while (true) { 
-              //  try {
-                    // Kết nối đến Server (đảm bảo Server chạy port 12345)
-                //    socket = new Socket("localhost", 12345);
-                 //   out = new PrintWriter(socket.getOutputStream(), true);
-                 //   in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    
-                 //   Platform.runLater(() -> {
-                 //       status.setText("Đã kết nối server");
-                 //       registerButton.setDisable(false);
-                 //   });
-                 //   break; 
-             //   } catch (IOException e) {
-             //       Platform.runLater(() -> status.setText("Không thể kết nối server, thử lại..."));
-             //       try {
-             //           Thread.sleep(3000); 
-             //       } catch (InterruptedException ie) {
-             //           Thread.currentThread().interrupt();
-             //       }
-             //   }
-         //   }
-      //  }).start();
+        new Thread(() -> {
+            try {
+                // Sử dụng kết nối tập trung từ SocketClient
+                SocketClient.getInstance().connect("localhost", 12345);
+                // Đăng ký nhận phản hồi tại đây
+                SocketClient.getInstance().setListener(this);
+                
+                Platform.runLater(() -> {
+                    status.setText("Đã kết nối server");
+                    registerButton.setDisable(false);
+                });
+
+                password.setOnKeyPressed(event -> {
+                    // Nếu phím vừa gõ là phím ENTER
+                    if (event.getCode() == KeyCode.ENTER) {
+                        // Tự động kích hoạt (bóp cò) nút Đăng nhập
+                        registerButton.fire(); 
+                    }
+                });
+
+            } catch (IOException e) {
+                Platform.runLater(() -> status.setText("Không thể kết nối server, thử lại..."));
+            }
+        }).start();
     }
     @FXML
     public void onHandleRegister(ActionEvent e) throws IOException {
@@ -92,6 +94,37 @@ public class RegisterController {
         }
 
 
+    /**
+     * Hứng phản hồi từ Server trả về sau khi gửi lệnh REGISTER.
+     */
+    @Override
+    public void onResponseReceived(String category, String action, String jsonData) {
+        if ("AUTH".equals(category)) {
+            Platform.runLater(() -> {
+                if ("SUCCESS".equals(action)) {
+                    status.setText("đăng ký thành công!!");
+                    status.setVisible(true);
+                    status.setTextFill(Paint.valueOf("green"));
+                    username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
+                    password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
+                    
+                    // Đợi 4 giây rồi quay lại màn hình Login
+                    PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
+                    pause.setOnFinished(event -> backToLogin());
+                    pause.play();
+                } else {
+                    registerButton.setDisable(false);
+                    status.setText("tên đăng nhập tồn tại");
+                    status.setVisible(true);
+                    status.setTextFill(Paint.valueOf("red"));
+                    username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
+                    password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
+                    username.clear();
+                    password.clear();
+                }
+            });
+        }
+    }
 
     }
     @FXML

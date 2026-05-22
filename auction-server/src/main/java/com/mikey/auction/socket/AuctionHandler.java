@@ -10,11 +10,14 @@ import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Role;
+import com.mikey.auction.user.User;
 import com.mikey.auction.manager.UserManager;
 
 // THÊM THƯ VIỆN GSON CHO NGÀY THÁNG
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
@@ -131,6 +134,46 @@ public class AuctionHandler {
                 case "HISTORY_DAILY":
                     int dailyAucId = Integer.parseInt(parts[2].trim());
                     result = AuctionDAO.getInstance().getBidHistoryByDate(dailyAucId);
+                    break;
+
+                // TÌM ĐẾN KHỐI SWITCH XỬ LÝ LỆNH "USER" TRÊN SERVER VÀ THÊM VÀO:
+                // SỬA CASE NÀY TRONG AuctionHandler.java:
+                case "GET_ALL_USERS":
+                    ArrayList<User> allUsers = UserDAO.getInstance().getAllUsers();
+                    
+                    // Phải trả về mác AUCTION để Client nhận diện đúng cửa
+                    out.println("AUCTION|GET_ALL_USERS|" + gson.toJson(allUsers));
+                    out.flush();
+                    break;
+
+                // THÊM VÀO TRONG KHỐI SWITCH CỦA AuctionHandler.java
+                case "BAN_USER":
+                    int userIdToBan = Integer.parseInt(parts[2].trim());
+                    boolean isSuccess = UserDAO.getInstance().updateUserStatus(userIdToBan, "BANNED");
+                    
+                    if (isSuccess) {
+                        // Broadcast hét lên cho toàn hệ thống biết tài khoản này đã bị trảm
+                        String broadcastMsg = "AUCTION|BAN_USER_SUCCESS|" + userIdToBan;
+                        AuctionServer.broadcast(broadcastMsg);
+                    }
+                    break;
+
+                // THÊM VÀO TRONG KHỐI SWITCH CỦA AuctionHandler.java
+                case "UNBAN_USER":
+                    int userIdToUnban = Integer.parseInt(parts[2].trim());
+                    // Gọi hàm UPDATE cột status thành ACTIVE dưới Database
+                    boolean isUnbanSuccess = UserDAO.getInstance().updateUserStatus(userIdToUnban, "ACTIVE");
+                    
+                    if (isUnbanSuccess) {
+                        // Cầm loa phát thanh Broadcast báo cho toàn bộ các Client đang mở biết để cập nhật UI
+                        String broadcastMsg = "AUCTION|UNBAN_USER_SUCCESS|" + userIdToUnban;
+                        AuctionServer.broadcast(broadcastMsg);
+                    }
+                    break;
+
+                // 👉 THÊM VÀO ĐỂ XỬ LÝ LỆNH LẤY TOÀN BỘ LỊCH SỬ CHO ADMIN
+                case "GET_ALL_BID_HISTORY":
+                    result = AuctionDAO.getInstance().getAllSystemBidHistory();
                     break;
             }
 
