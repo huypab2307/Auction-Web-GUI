@@ -9,7 +9,7 @@
 
     <Label text="Sản phẩm đã thắng" style="-fx-font-size: 14; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
 
-    <Label fx:id="winsValue" text="12"
+    <Label fx:id="winsValue" text="Đang tính..."
            style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #28C76F;" />
 
     <Label text="Vừa thắng 1 món đồ cổ" style="-fx-font-size: 11; -fx-text-fill: #7f8c8d;" />

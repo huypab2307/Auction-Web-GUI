@@ -3,16 +3,16 @@ package com.mikey.auction.dto;
 public class AutoBidInfo {
     private int userId;
     private int auctionId;
-    private double maxPrice;
+    private double maxAmount;
 
-    // Constructor
-    public AutoBidInfo(int userId, int auctionId, double maxPrice) {
+    public AutoBidInfo() {}
+
+    public AutoBidInfo(int userId, int auctionId, double maxAmount) {
         this.userId = userId;
         this.auctionId = auctionId;
-        this.maxPrice = maxPrice;
+        this.maxAmount = maxAmount;
     }
 
-    // Thêm Getter/Setter cho id và curPrice nếu AuctionManagerTest cần dùng
     public int getUserId() {
         return userId;
     }
@@ -21,10 +21,10 @@ public class AutoBidInfo {
         return auctionId;
     }
 
-    public double getMaxPrice() {
-        return maxPrice;
+    public double getMaxAmount() {
+        return maxAmount;
     }
 
     public void setId(int id) { this.auctionId = id; }
-    public void setCurPrice(double price) { this.maxPrice = price; }
+    public void setCurPrice(double price) { this.maxAmount = price; }
 }

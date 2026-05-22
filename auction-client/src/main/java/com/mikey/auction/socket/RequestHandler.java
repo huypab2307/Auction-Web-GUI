@@ -122,7 +122,8 @@ public class RequestHandler {
     }
 
     public void requestFindItem(ItemType type, int itemId) {
-        send("ITEM|FIND|" + type.name() + "|" + itemId);
+        String typeStr = (type != null) ? type.name() : "UNKNOWN";
+        send("ITEM|FIND|" + typeStr + "|" + itemId);
     }
 
     // Thêm vào RequestHandler.java

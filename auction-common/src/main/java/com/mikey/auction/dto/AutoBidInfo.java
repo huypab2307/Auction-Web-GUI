@@ -7,6 +7,8 @@ public class AutoBidInfo implements Serializable {
     private int auctionId;
     private double maxAmount;
 
+    public AutoBidInfo() {}
+
     public AutoBidInfo(int userId, int auctionId, double maxAmount) {
         this.userId = userId;
         this.auctionId = auctionId;
