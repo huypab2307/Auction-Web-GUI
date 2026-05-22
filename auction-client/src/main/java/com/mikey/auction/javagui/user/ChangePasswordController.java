@@ -1,10 +1,10 @@
 package com.mikey.auction.javagui.user;
 
 import com.mikey.auction.javagui.SceneChanger;
-import com.mikey.auction.user.User;
 import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.socket.SocketClient;
 import com.mikey.auction.socket.SocketListener;
+import com.mikey.auction.user.User;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -50,7 +50,7 @@ public class ChangePasswordController implements SocketListener {
             // Bắt buộc dùng Platform.runLater khi hiển thị Alert/UI
             Platform.runLater(() -> {
                 // Server của chúng ta trả về "SUCCESS" nếu đổi thành công
-                if ("SUCCESS".equals(jsonData)) {
+                if ("true".equals(jsonData)) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Đổi mật khẩu thành công!");
                     alert.showAndWait();
                     // Quay lại màn hình cài đặt

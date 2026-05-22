@@ -1,14 +1,15 @@
 package com.mikey.auction.javagui.user;
 
+import java.io.IOException;
+
 import com.mikey.auction.user.User;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class UserController {
     public TextField usernameField;
@@ -27,11 +28,11 @@ public class UserController {
     }
 
     public void handleChangePassword(ActionEvent actionEvent) throws IOException {
-        navigate("/change_password.fxml");
+        navigate("change_password.fxml");
     }
 
     public void handleDeleteAccount(ActionEvent actionEvent) throws IOException {
-        navigate("/delete_confirm.fxml");
+        navigate("delete_confirm.fxml");
     }
 
     public void cancelHandle(ActionEvent actionEvent) {
