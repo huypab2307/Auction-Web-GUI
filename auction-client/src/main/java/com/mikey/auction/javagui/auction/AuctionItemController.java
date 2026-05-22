@@ -158,22 +158,29 @@ public class AuctionItemController implements SearchListener, SocketListener {
         } catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
-    public void updateDynamicInfo() {
+public void updateDynamicInfo() {
         curPrice.setText(auctionInfo.getCurPrice() + "đ");
         curBidder.setText(auctionInfo.getLastBidderName() != null ? "người giữ giá: " + auctionInfo.getLastBidderName() : "Chưa có người ra giá");
         
-        // 👉 NÂNG CẤP: Nếu đang xem chế độ Ngày thì ra lệnh tải lại biểu đồ ngày, không tự chấm điểm lượt
         if (isDailyMode) {
             RequestHandler.getInstance().requestBidHistoryDaily(auctionInfo.getId());
             return; 
         }
         
-        // Đoạn code if (priceSeries != null) xử lý chấm điểm lượt cũ của bạn giữ nguyên phía dưới...
         if (priceSeries != null) {
             String uname = auctionInfo.getLastBidderName() != null ? auctionInfo.getLastBidderName() : "Ẩn danh";
             double amt = auctionInfo.getCurPrice();
             
-            // XÓA BỎ đoạn code if (priceSeries.getData().size() > 15) đi để giữ full 100% lịch sử!
+            // 👉 CHỐT CHẶN CHỐNG NHÂN ĐÔI ĐIỂM (DOUBLE COUNTING)
+            if (!priceSeries.getData().isEmpty()) {
+                // Lấy mức giá của dấu chấm cuối cùng đang hiển thị trên đồ thị
+                double lastDrawnPrice = priceSeries.getData().get(priceSeries.getData().size() - 1).getYValue().doubleValue();
+                
+                // Nếu giá mới truyền đến y hệt giá vừa vẽ -> Đây là lệnh vọng đúp từ Server, không vẽ nữa!
+                if (amt <= lastDrawnPrice) {
+                    return; 
+                }
+            }
             
             XYChart.Data<Number, Number> newDataPoint = new XYChart.Data<>(bidCounter++, amt);
             
@@ -359,6 +366,9 @@ public class AuctionItemController implements SearchListener, SocketListener {
                             
                             xAxis.setTickUnit(1); // Ép mỗi khoảng cách là 1 đơn vị ngày
                             xAxis.setMinorTickVisible(false); // Tắt các vạch kẻ phụ cho sạch sẽ
+                            xAxis.setAutoRanging(false);
+                            xAxis.setLowerBound(0.5);
+                            xAxis.setUpperBound(dateLabels.size() + 0.5);
                         }
                     });
 
@@ -490,8 +500,10 @@ public class AuctionItemController implements SearchListener, SocketListener {
         btnDailyView.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #4a5568; -fx-background-radius: 5; -fx-font-weight: bold;");
         xAxis.setLabel("Thứ tự lượt đấu giá");
         
-        // 👉 BỔ SUNG DÒNG NÀY: Reset trục X về chế độ hiện Số bình thường
         xAxis.setTickLabelFormatter(null); 
+        
+        // 👉 TRẢ LẠI TÍNH NĂNG TỰ ĐỘNG GIÃN CÁCH CHO CHẾ ĐỘ CHI TIẾT
+        xAxis.setAutoRanging(true); 
         
         RequestHandler.getInstance().requestBidHistory(auctionInfo.getId());
     }

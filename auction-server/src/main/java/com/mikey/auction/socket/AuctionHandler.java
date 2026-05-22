@@ -135,8 +135,15 @@ public class AuctionHandler {
             }
 
             if (result != null) {
+                // 1. Dòng này là Server trả lời riêng cho máy vừa bấm Đấu giá
                 out.println("AUCTION|" + action + "|" + gson.toJson(result));
                 out.flush();
+                
+                // 2. 👉 FIX LỖI ĐỒNG BỘ: Nếu action là PLACEBID, phải HÉT LÊN cho các máy khác biết!
+                if ("PLACEBID".equals(action)) {
+                    String broadcastMsg = "AUCTION|UPDATE_PRICE|" + gson.toJson(result);
+                    AuctionServer.broadcast(broadcastMsg);
+                }
             }
         } catch (Exception e) {
             out.println("AUCTION|ERROR|" + e.getMessage());
