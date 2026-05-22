@@ -33,6 +33,7 @@ public class SocketClient {
         }
     }
 
+    // ✅ Code chuẩn (Sửa lại thành thế này, mọi Controller đều dùng được):
     public void setListener(SocketListener listener) {
         this.currentListener = listener;
     }

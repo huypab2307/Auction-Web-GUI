@@ -303,8 +303,8 @@ public class AuctionDAO extends BaseDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, info.getUserId());
             ps.setInt(2, info.getAuctionId());
-            ps.setDouble(3, info.getMaxPrice()); // Lấy số tiền từ DTO
-            ps.setDouble(4, info.getMaxPrice());
+            ps.setDouble(3, info.getMaxAmount()); // Lấy số tiền từ DTO
+            ps.setDouble(4, info.getMaxAmount());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

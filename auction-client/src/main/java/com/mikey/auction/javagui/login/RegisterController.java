@@ -20,11 +20,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
 import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
 
 
 
-public class RegisterController {
+public class RegisterController implements SocketListener {
     @FXML
     private TextField username;
     @FXML
@@ -92,6 +96,7 @@ public class RegisterController {
             username.clear();
             password.clear();
         }
+    }
 
 
     /**
@@ -126,7 +131,6 @@ public class RegisterController {
         }
     }
 
-    }
     @FXML
     public void onKeyReleased(){
         String text1 = username.getText();
