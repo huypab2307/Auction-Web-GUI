@@ -14,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -43,6 +44,15 @@ public class RegisterController implements SocketListener {
                     status.setText("Đã kết nối server");
                     registerButton.setDisable(false);
                 });
+
+                password.setOnKeyPressed(event -> {
+                    // Nếu phím vừa gõ là phím ENTER
+                    if (event.getCode() == KeyCode.ENTER) {
+                        // Tự động kích hoạt (bóp cò) nút Đăng nhập
+                        registerButton.fire(); 
+                    }
+                });
+
             } catch (IOException e) {
                 Platform.runLater(() -> status.setText("Không thể kết nối server, thử lại..."));
             }
@@ -85,7 +95,7 @@ public class RegisterController implements SocketListener {
                     password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
                     
                     // Đợi 4 giây rồi quay lại màn hình Login
-                    PauseTransition pause = new PauseTransition(Duration.seconds(4));
+                    PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                     pause.setOnFinished(event -> backToLogin());
                     pause.play();
                 } else {

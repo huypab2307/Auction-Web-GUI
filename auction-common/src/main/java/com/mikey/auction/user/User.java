@@ -8,6 +8,7 @@ public abstract class User {
     protected String password;
     protected int id;
     protected Role role;
+    protected String status = "Hoạt động";
 
     public User(String username, String password, int id, Role role) {
         this.username = username;
@@ -25,6 +26,10 @@ public abstract class User {
     }
     public int getId(){
         return id;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public Role getRole(){return role;}

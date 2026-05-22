@@ -6,6 +6,7 @@ import com.mikey.auction.user.Seller;
 import com.mikey.auction.user.User;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class UserDAO extends BaseDAO {
     private static final UserDAO user = new UserDAO();
@@ -122,5 +123,39 @@ public class UserDAO extends BaseDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // THÊM VÀO CUỐI FILE UserDAO.java
+    public java.util.ArrayList<User> getAllUsers() {
+        ArrayList<User> list = new ArrayList<>();
+        String query = "SELECT * FROM user";
+        
+        try (Connection connect = getConnect();
+             PreparedStatement st = connect.prepareStatement(query);
+             ResultSet rs = st.executeQuery()) {
+             
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String uname = rs.getString("username");
+                String pass = rs.getString("password");
+                String role = rs.getString("role");
+                
+                User u = null;
+                if ("ADMIN".equals(role)) {
+                    u = new Admin(uname, pass, id);
+                } else if ("SELLER".equals(role)) {
+                    u = new Seller(uname, pass, id);
+                } else {
+                    u = new Bidder(uname, pass, id);
+                }
+                
+                if (u != null) {
+                    list.add(u);
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("Lỗi khi lấy danh sách user: " + ex.getMessage());
+        }
+        return list;
     }
 }

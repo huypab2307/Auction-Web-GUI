@@ -158,5 +158,11 @@ public class RequestHandler {
         send("AUCTION|HISTORY_DAILY|" + auctionId);
     }
 
+// SỬA LẠI HÀM NÀY:
+    public void requestAllUsers() {
+        // Đổi từ USER thành AUCTION để bắt Server đưa lệnh vào AuctionHandler
+        send("AUCTION|GET_ALL_USERS"); 
+    }
+
     
 }

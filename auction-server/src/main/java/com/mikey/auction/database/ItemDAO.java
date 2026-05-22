@@ -2,6 +2,10 @@ package com.mikey.auction.database;
 
 import com.mikey.auction.database.BaseDAO;
 import com.mikey.auction.items.Item;
+import com.mikey.auction.user.Admin;
+import com.mikey.auction.user.Bidder;
+import com.mikey.auction.user.Seller;
+import com.mikey.auction.user.User;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -50,5 +54,39 @@ public abstract class ItemDAO extends BaseDAO {
         } catch (SQLException e) {
             throw new SQLException("Không thể truy vấn items: " + e.getMessage(), e);
         }
+    }
+
+    // THÊM VÀO CUỐI FILE UserDAO.java
+    public java.util.ArrayList<User> getAllUsers() {
+        java.util.ArrayList<User> list = new java.util.ArrayList<>();
+        String query = "SELECT * FROM user";
+        
+        try (Connection connect = getConnect();
+             PreparedStatement st = connect.prepareStatement(query);
+             ResultSet rs = st.executeQuery()) {
+             
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String uname = rs.getString("username");
+                String pass = rs.getString("password");
+                String role = rs.getString("role");
+                
+                User u = null;
+                if ("ADMIN".equals(role)) {
+                    u = new Admin(uname, pass, id);
+                } else if ("SELLER".equals(role)) {
+                    u = new Seller(uname, pass, id);
+                } else {
+                    u = new Bidder(uname, pass, id);
+                }
+                
+                if (u != null) {
+                    list.add(u);
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("Lỗi khi lấy danh sách user: " + ex.getMessage());
+        }
+        return list;
     }
 }
