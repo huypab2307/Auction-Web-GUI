@@ -1,5 +1,10 @@
 package com.mikey.auction.manager;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.NotificationDAO;
@@ -8,11 +13,6 @@ import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.Item;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Role;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 
 public class AuctionManager {
@@ -63,7 +63,14 @@ public class AuctionManager {
 
             // Bắn thông báo qua cổng phụ cho các máy KHÁC đang cùng xem
             NotificationManager.getInstance().notiAll(freshAuctionInfo, bidder);
+
+            // PHÁT SÓNG CHO TẤT CẢ CÁC MÁY KHÁC ĐỂ CẬP NHẬT GIÁ
+com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+    .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+    .create();
+com.mikey.auction.socket.AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + gson.toJson(freshAuctionInfo));
             
+
             // 👉 QUAN TRỌNG: Trả về đối tượng mới tinh cho CHÍNH MÁY vừa bấm nút
             return freshAuctionInfo;
             

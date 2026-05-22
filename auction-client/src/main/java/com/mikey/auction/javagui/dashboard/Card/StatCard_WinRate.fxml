@@ -9,7 +9,7 @@
 
     <Label text="Tỷ lệ thắng" style="-fx-font-size: 14; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
 
-    <Label fx:id="winRateValue" text="85%"
+    <Label fx:id="winRateValue" text="0%"
            style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #9F44D3;" />
 
     <Label text="Hiệu suất đấu giá: Tuyệt vời" style="-fx-font-size: 11; -fx-text-fill: #8e44ad;" />

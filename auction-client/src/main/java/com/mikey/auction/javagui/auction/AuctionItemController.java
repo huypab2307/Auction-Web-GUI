@@ -67,6 +67,7 @@ public class AuctionItemController implements SearchListener, SocketListener {
     @FXML private TilePane attributeBox;
     @FXML private TopBarController topBarController;
     @FXML private Button bidButton;
+    @FXML private Button autoBidButton;
     @FXML private Pane pane;
 
 // Đổi toàn bộ String thành Number
@@ -134,7 +135,10 @@ public class AuctionItemController implements SearchListener, SocketListener {
             
             if (user != null && user.getUsername().equals(auctionInfo.getSellerUsername())) {
                 bidButton.setVisible(false);
-                bidButton.setManaged(false); 
+                bidButton.setManaged(false);
+                autoBidButton.setVisible(false);
+                autoBidButton.setManaged(false);
+                
                 return;
             } else {
                 bidButton.setVisible(true);

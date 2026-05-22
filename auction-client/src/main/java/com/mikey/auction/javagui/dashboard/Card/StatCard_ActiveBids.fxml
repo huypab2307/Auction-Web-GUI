@@ -9,7 +9,7 @@
 
     <Label text="Đang đấu giá" style="-fx-font-size: 14; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
 
-    <Label fx:id="activeBidsValue" text="08"
+    <Label fx:id="activeBidsValue" text="Đang tính..."
            style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #FF9F43;" />
 
     <Label text="3 phiên sắp kết thúc" style="-fx-font-size: 11; -fx-text-fill: #e67e22;" />
