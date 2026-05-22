@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.mikey.auction.auction.Auction;
@@ -45,7 +44,7 @@ public class AuctionTimeoutSchedulerTest {
         Auction actualAuction = AuctionManager.getInstance().findAuction(latestInfo.getId());
 
         // 4. Khẳng định: Phiên đấu giá phải được đánh dấu là đã kết thúc và giá cuối cùng là 550,000 VND
-        assertTrue(actualAuction.isFinished(), "Phiên đấu giá phải được đánh dấu là đã kết thúc sau khi quá hạn");
+        assertEquals("CLOSED", actualAuction.getStatus(), "Phiên đấu giá phải được đánh dấu là đã kết thúc sau khi quá hạn");
         assertEquals(550000, actualAuction.getCurPrice(), "Giá cuối cùng của phiên đấu giá phải là 550,000 VND sau khi hết giờ");
     }
 }
