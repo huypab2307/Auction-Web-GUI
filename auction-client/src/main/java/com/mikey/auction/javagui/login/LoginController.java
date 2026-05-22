@@ -126,6 +126,19 @@ public class LoginController implements SocketListener {
                     username.setStyle(errorStyle);
                     password.setStyle(errorStyle);
                 });
+            } else if ("BANNED".equals(action)) {
+                Platform.runLater(() -> {
+                    loginButton.setDisable(false); 
+                    username.clear();
+                    password.clear();
+                    
+                    // Hiện chữ đỏ cảnh báo cực kỳ nghiêm túc
+                    applyErrorStyle("Tài khoản của bạn đã bị Admin khóa quyền truy cập!");
+                    
+                    String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red";
+                    username.setStyle(errorStyle);
+                    password.setStyle(errorStyle);
+                });
             }
         }
     }

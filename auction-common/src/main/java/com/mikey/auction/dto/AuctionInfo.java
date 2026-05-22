@@ -17,7 +17,21 @@ public class AuctionInfo {
     private LocalDateTime endTime;
     private LocalDateTime startTime;
     private ItemSummary itemInfo;
+    private String itemName;   // Để chứa tên sản phẩm
+    private String sellerName; // Để chứa tên người bán
 
+    public String getItemName() {
+        return itemName;
+    }
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+    public String getSellerName() {
+        return sellerName;
+    }
+    public void setSellerName(String sellerName) {
+        this.sellerName = sellerName;
+    }
     public void setId(int id) {
         this.id = id;
     }

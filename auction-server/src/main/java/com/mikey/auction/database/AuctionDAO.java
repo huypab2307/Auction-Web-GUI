@@ -514,4 +514,22 @@ public class AuctionDAO extends BaseDAO {
         }
         return history;
     }
+
+    // 👉 THÊM HÀM NÀY VÀO AUCTIONDAO BÊN SERVER
+    public java.util.ArrayList<com.mikey.auction.dto.BidHistory> getAllSystemBidHistory() {
+        java.util.ArrayList<com.mikey.auction.dto.BidHistory> list = new java.util.ArrayList<>();
+        String sql = "SELECT b.id, b.auctionId, u.username, b.bidAmount, b.createdAt " +
+                     "FROM bidTransactions b JOIN user u ON b.userId = u.id ORDER BY b.createdAt DESC";
+        try (java.sql.Connection conn = getConnect();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new com.mikey.auction.dto.BidHistory(
+                    rs.getInt("id"), rs.getInt("auctionId"), rs.getString("username"),
+                    rs.getDouble("bidAmount"), rs.getObject("createdAt", java.time.LocalDateTime.class)
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 }

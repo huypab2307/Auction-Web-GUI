@@ -97,6 +97,7 @@
                                 <columns>
                                     <TableColumn fx:id="colItemAucId" prefWidth="100.0" text="Mã Phiên" />
                                     <TableColumn fx:id="colItemTitle" prefWidth="280.0" text="Tên Sản Phẩm" />
+                                    <TableColumn fx:id="colItemType" prefWidth="150.0" text="Loại Sản Phẩm" />
                                     <TableColumn fx:id="colItemSeller" prefWidth="150.0" text="Người Đăng Bán" />
                                     <TableColumn fx:id="colItemStartPrice" prefWidth="160.0" text="Giá Khởi Điểm" />
                                     <TableColumn fx:id="colItemEndTime" prefWidth="210.0" text="Thời Gian Hết Hạn" />

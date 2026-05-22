@@ -25,19 +25,27 @@ public class LoginHandlers {
                 String username = parts[1].trim();
                 String password = parts[2].trim();
 
+                // Bước 1 đã làm: Hàm login giờ sẽ trả về user kể cả khi bị khóa (để lấy status)
                 User user = UserDAO.getInstance().login(username, password);
 
                 if (user != null) {
-                    out.println("SUCCESS");
-                    out.println(gson.toJson(user)); 
-                    System.out.println("[LOGIN SUCCESS] User: " + username);
+                    // 👉 BƯỚC 2 CHÍNH LÀ ĐÂY: Chốt chặn kiểm tra trạng thái khóa
+                    if ("BANNED".equals(user.getStatus())) {
+                        out.println("AUTH|BANNED|Account is banned"); 
+                        System.out.println("[LOGIN BLOCKED - BANNED] User: " + username);
+                    } else {
+                        // Trạng thái ACTIVE -> Cho phép đăng nhập, trả về chuẩn AUTH|LOGIN_SUCCESS|json
+                        out.println("AUTH|LOGIN_SUCCESS|" + gson.toJson(user)); 
+                        System.out.println("[LOGIN SUCCESS] User: " + username);
+                    }
                 } else {
-                    out.println("FAIL");
+                    // Sai tài khoản hoặc mật khẩu thật sự (UserDAO trả về null)
+                    out.println("AUTH|FAIL|Wrong credentials");
                     System.out.println("[LOGIN FAIL] User: " + username);
                 }
             }
         } catch (Exception e) {
-            out.println("ERROR");
+            out.println("AUTH|ERROR|Server exception");
             e.printStackTrace();
         }
         out.flush();

@@ -1,9 +1,15 @@
 package com.mikey.auction.javagui.admin;
 
+import java.time.LocalDateTime;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+
+import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.socket.SocketClient;
 import com.mikey.auction.socket.SocketListener;
 import com.mikey.auction.user.User;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +26,11 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.util.*;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.reflect.TypeToken;
 
 public class AdminController implements SocketListener {
 
@@ -48,30 +59,34 @@ public class AdminController implements SocketListener {
     @FXML private VBox viewUsers;
     @FXML private VBox viewSettings;
 
-    // TAB 1: Bảng danh sách vật phẩm đấu giá mặc định
-    @FXML private TableView<?> auctionTable;
-    @FXML private TableColumn<?, ?> colId;
-    @FXML private TableColumn<?, ?> colItemName;
-    @FXML private TableColumn<?, ?> colCurrentBid;
-    @FXML private TableColumn<?, ?> colBidder;
-    @FXML private TableColumn<?, ?> colStatus;
+    // TAB 1: Bảng danh sách vật phẩm đấu giá mặc định (Dashboard)
+    @FXML private TableView<AuctionInfo> auctionTable;
+    @FXML private TableColumn<AuctionInfo, Integer> colId;
+    @FXML private TableColumn<AuctionInfo, String> colItemName;
+    @FXML private TableColumn<AuctionInfo, Double> colCurrentBid;
+    @FXML private TableColumn<AuctionInfo, String> colBidder;
+    @FXML private TableColumn<AuctionInfo, String> colStatus;
 
     // TAB 2: Các trường bổ sung của quản lý vật phẩm chi tiết
-    @FXML private TableView<?> itemTable;
-    @FXML private TableColumn<?, ?> colItemAucId;
-    @FXML private TableColumn<?, ?> colItemTitle;
-    @FXML private TableColumn<?, ?> colItemSeller;
-    @FXML private TableColumn<?, ?> colItemStartPrice;
-    @FXML private TableColumn<?, ?> colItemEndTime;
+    @FXML private TableView<AuctionInfo> itemTable;
+    @FXML private TableColumn<AuctionInfo, Integer> colItemAucId;
+    @FXML private TableColumn<AuctionInfo, String> colItemTitle;
+    @FXML private TableColumn<AuctionInfo, String> colItemSeller;
+    @FXML private TableColumn<AuctionInfo, Double> colItemStartPrice;
+    @FXML private TableColumn<AuctionInfo, LocalDateTime> colItemEndTime;
+    @FXML private TableColumn<AuctionInfo, String> colItemType;
     @FXML private TextField searchItemField;
 
-    // TAB 3: Bảng theo dõi lịch sử đặt cược dòng tiền toàn cục
-    @FXML private TableView<?> bidHistoryTable;
-    @FXML private TableColumn<?, ?> colHistBidId;
-    @FXML private TableColumn<?, ?> colHistAucId;
-    @FXML private TableColumn<?, ?> colHistBidder;
-    @FXML private TableColumn<?, ?> colHistAmount;
-    @FXML private TableColumn<?, ?> colHistTime;
+// TAB 3: Bảng theo dõi lịch sử đặt cược dòng tiền toàn cục
+    @FXML private TableView<com.mikey.auction.dto.BidHistory> bidHistoryTable;
+    @FXML private TableColumn<com.mikey.auction.dto.BidHistory, Integer> colHistBidId;
+    @FXML private TableColumn<com.mikey.auction.dto.BidHistory, Integer> colHistAucId;
+    @FXML private TableColumn<com.mikey.auction.dto.BidHistory, String> colHistBidder;
+    @FXML private TableColumn<com.mikey.auction.dto.BidHistory, Double> colHistAmount;
+    @FXML private TableColumn<com.mikey.auction.dto.BidHistory, LocalDateTime> colHistTime;
+
+    
+
 
     // TAB 4: Quản lý chi tiết tài khoản khách hàng
 // TAB 4: Quản lý chi tiết tài khoản khách hàng
@@ -93,6 +108,8 @@ public class AdminController implements SocketListener {
     
     // Thêm danh sách chứa dữ liệu đổ vào bảng
     private ObservableList<User> userListData = FXCollections.observableArrayList();
+    private ObservableList<AuctionInfo> itemListData = FXCollections.observableArrayList();
+    private ObservableList<com.mikey.auction.dto.BidHistory> bidHistoryData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -104,39 +121,193 @@ public class AdminController implements SocketListener {
         setupTable();
     }
 
-    private void setupTable() {
-        // 1. Chỉ định cột nào lấy dữ liệu từ biến nào trong class User
-        colUserIdx.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colUserUsername.setCellValueFactory(new PropertyValueFactory<>("username"));
-        colUserRole.setCellValueFactory(new PropertyValueFactory<>("role"));
-        colUserStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        // 2. Ma thuật tạo Nút Bấm trực tiếp trong ô TableView
+private void setupTable() {
+    java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,###"); // Định dạng có dấu phẩy
+// 1. Map cột cho bảng Client (đã ổn)
+    colUserIdx.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colUserUsername.setCellValueFactory(new PropertyValueFactory<>("username"));
+    colUserRole.setCellValueFactory(new PropertyValueFactory<>("role"));
+    colUserStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+    userTable.setItems(userListData);
+
+    // 2. Map cột cho bảng Vật phẩm (TAB 2)
+    colItemAucId.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colItemStartPrice.setCellValueFactory(new PropertyValueFactory<>("curPrice"));
+    colItemEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+
+    // ==========================================
+    // 👉 5. CẤU HÌNH BẢNG LỊCH SỬ ĐẶT GIÁ (TAB 3)
+    // ==========================================
+    colHistBidId.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colHistAucId.setCellValueFactory(new PropertyValueFactory<>("auctionId"));
+    colHistBidder.setCellValueFactory(new PropertyValueFactory<>("bidderUsername"));
+    colHistAmount.setCellValueFactory(new PropertyValueFactory<>("bidAmount"));
+    colHistTime.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
+
+    // Định dạng tiền tệ cho cột Số tiền cược (Giống với TAB 1 và TAB 2)
+    colHistAmount.setCellFactory(tc -> new TableCell<com.mikey.auction.dto.BidHistory, Double>() {
+        @Override
+        protected void updateItem(Double amount, boolean empty) {
+            super.updateItem(amount, empty);
+            if (empty || amount == null) {
+                setText(null);
+            } else {
+                setText(formatter.format(amount) + " đ");
+            }
+        }
+    });
+
+    // Định dạng ngày tháng cho cột Thời gian nhận gói
+    colHistTime.setCellFactory(tc -> new TableCell<com.mikey.auction.dto.BidHistory, LocalDateTime>() {
+        @Override
+        protected void updateItem(LocalDateTime time, boolean empty) {
+            super.updateItem(time, empty);
+            if (empty || time == null) {
+                setText(null);
+            } else {
+                setText(time.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+            }
+        }
+    });
+
+    // Đổ danh sách dữ liệu vào bảng
+    bidHistoryTable.setItems(bidHistoryData);
+
+    
+
+    // Sử dụng Lambda để bóc dữ liệu từ đối tượng lồng nhau:
+    // Lấy 'title' từ itemInfo bên trong AuctionInfo
+    colItemTitle.setCellValueFactory(cellData -> {
+        if (cellData.getValue().getItemInfo() != null) {
+            return new javafx.beans.property.SimpleStringProperty(cellData.getValue().getItemInfo().getTitle());
+        }
+        return new javafx.beans.property.SimpleStringProperty("N/A");
+    });
+
+    // Lấy 'sellerUsername' từ AuctionInfo
+    colItemSeller.setCellValueFactory(cellData -> {
+        String seller = cellData.getValue().getSellerUsername();
+        return new javafx.beans.property.SimpleStringProperty(seller != null ? seller : "N/A");
+    });
+
+    // 2. Cột Kiểu sản phẩm (Bóc từ itemInfo -> itemType)
+    colItemType.setCellValueFactory(cellData -> 
+        new javafx.beans.property.SimpleStringProperty(
+            (cellData.getValue().getItemInfo() != null && cellData.getValue().getItemInfo().getItemType() != null) 
+            ? cellData.getValue().getItemInfo().getItemType().toString() : "N/A"
+        )
+    );
+
+    // 3. Cột Client đặt giá (LastBidderName)
+    colBidder.setCellValueFactory(cellData -> 
+        new javafx.beans.property.SimpleStringProperty(
+            cellData.getValue().getLastBidderName() != null ? cellData.getValue().getLastBidderName() : "Chưa có"
+        )
+    );
+    
+    itemTable.setItems(itemListData);
+    auctionTable.setItems(itemListData);
+
+    // 3. Map cột cho bảng Dashboard (TAB 1)
+    colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colCurrentBid.setCellValueFactory(new PropertyValueFactory<>("curPrice"));
+    colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        // ==========================================
+        // 👉 4. KHẮC PHỤC LỖI HIỂN THỊ SỐ E (Định dạng Tiền tệ)
+        // ==========================================
+
+        // Format ép hiển thị tiền cho cột Giá ở TAB 2
+        colItemStartPrice.setCellFactory(tc -> new TableCell<AuctionInfo, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
+                } else {
+                    setText(formatter.format(price) + " đ"); // Thêm chữ 'đ' cực kỳ trực quan
+                }
+            }
+        });
+
+        colItemEndTime.setCellFactory(tc -> new TableCell<AuctionInfo, LocalDateTime>() {
+            @Override
+            protected void updateItem(LocalDateTime time, boolean empty) {
+                super.updateItem(time, empty);
+                if (empty || time == null) {
+                    setText(null);
+                } else {
+                    // Định dạng lại ngày giờ cho đẹp mắt
+                    setText(time.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                }
+            }
+        });
+
+        // Format ép hiển thị tiền cho cột Giá ở TAB 1 (Tổng quan)
+        colCurrentBid.setCellFactory(tc -> new TableCell<AuctionInfo, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
+                } else {
+                    setText(formatter.format(price) + " đ");
+                }
+            }
+        });
+
+        colItemName.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getItemInfo() != null) {
+                return new javafx.beans.property.SimpleStringProperty(cellData.getValue().getItemInfo().getTitle());
+            }
+            return new javafx.beans.property.SimpleStringProperty("N/A");
+        });
+        
+        // 2. Thuật toán sinh nút bấm động (Khóa / Mở Khóa) tùy theo trạng thái hàng dữ liệu
         Callback<TableColumn<User, Void>, TableCell<User, Void>> cellFactory = new Callback<>() {
             @Override
-            public javafx.scene.control.TableCell<User, Void> call(final TableColumn<User, Void> param) {
-                return new javafx.scene.control.TableCell<>() {
-                    private final Button btnBan = new Button("Khóa (Ban)");
+            public TableCell<User, Void> call(final TableColumn<User, Void> param) {
+                return new TableCell<>() {
+                    private final Button btnToggle = new Button();
                     {
-                        btnBan.setStyle("-fx-background-color: #FF5E62; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-background-radius: 5;");
-                        btnBan.setOnAction((ActionEvent event) -> {
+                        btnToggle.setOnAction((ActionEvent event) -> {
                             User data = getTableView().getItems().get(getIndex());
-                            System.out.println("Đang gửi lệnh khóa tài khoản ID: " + data.getId());
-                            // Mở comment dòng dưới khi có lệnh ở RequestHandler:
-                            // RequestHandler.getInstance().requestBanUser(data.getId());
+                            
+                            // Tự động kiểm tra trạng thái hiện tại để rẽ nhánh lệnh Socket
+                            if ("BANNED".equals(data.getStatus())) {
+                                System.out.println("Đang gửi lệnh mở khóa tài khoản ID: " + data.getId());
+                                RequestHandler.getInstance().requestUnbanUser(data.getId()); 
+                            } else {
+                                System.out.println("Đang gửi lệnh khóa tài khoản ID: " + data.getId());
+                                RequestHandler.getInstance().requestBanUser(data.getId()); 
+                            }
                         });
                     }
                     @Override
                     public void updateItem(Void item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (empty) { setGraphic(null); } 
-                        else { setGraphic(btnBan); }
+                        if (empty) { 
+                            setGraphic(null); 
+                        } else { 
+                            User data = getTableView().getItems().get(getIndex());
+                            
+                            // Thay đổi màu sắc và chữ hiển thị của nút dựa vào thuộc tính status của User
+                            if ("BANNED".equals(data.getStatus())) {
+                                btnToggle.setText("Mở Khóa");
+                                btnToggle.setStyle("-fx-background-color: #38EF7D; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-background-radius: 5; -fx-pref-width: 100;");
+                            } else {
+                                btnToggle.setText("Khóa (Ban)");
+                                btnToggle.setStyle("-fx-background-color: #FF5E62; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-background-radius: 5; -fx-pref-width: 100;");
+                            }
+                            setGraphic(btnToggle); 
+                        }
                     }
                 };
             }
         };
         colUserAction.setCellFactory(cellFactory);
         
-        // Liên kết dữ liệu với bảng
+        // Liên kết dữ liệu danh sách động với bảng hiển thị
         userTable.setItems(userListData);
     }
 
@@ -176,16 +347,19 @@ public class AdminController implements SocketListener {
     @FXML
     void showDashboard(ActionEvent event) {
         navigateToTab(viewDashboard, btnDashboard);
+        RequestHandler.getInstance().requestAllAuctions();
     }
 
     @FXML
     void showAuctionItems(ActionEvent event) {
         navigateToTab(viewAuctionItems, btnAuctionItems);
+        RequestHandler.getInstance().requestAllAuctions();
     }
 
     @FXML
     void showBiddingHistory(ActionEvent event) {
         navigateToTab(viewBiddingHistory, btnBiddingHistory);
+        RequestHandler.getInstance().requestAllBidHistory();
     }
 
     @FXML
@@ -241,20 +415,97 @@ public class AdminController implements SocketListener {
                             int id = obj.get("id").getAsInt();
                             String un = obj.get("username").getAsString();
                             String pw = obj.get("password").getAsString();
-                            String roleStr = obj.get("role").getAsString();
+
+                            String roleStr = obj.has("role") && !obj.get("role").isJsonNull() ? obj.get("role").getAsString() : "BIDDER";
+                            String statusStr = obj.has("status") && !obj.get("status").isJsonNull() ? obj.get("status").getAsString() : "ACTIVE"; // 👉 THÊM DÒNG NÀY
                             
-                            // Tự tay phân loại đối tượng để tránh lỗi Abstract Class
-                            if ("ADMIN".equals(roleStr)) {
-                                users.add(new com.mikey.auction.user.Admin(un, pw, id));
-                            } else if ("SELLER".equals(roleStr)) {
-                                users.add(new com.mikey.auction.user.Seller(un, pw, id));
-                            } else {
-                                users.add(new com.mikey.auction.user.Bidder(un, pw, id));
+                            User u = null;
+                            if ("ADMIN".equals(roleStr)) u = new com.mikey.auction.user.Admin(un, pw, id);
+                            else if ("SELLER".equals(roleStr)) u = new com.mikey.auction.user.Seller(un, pw, id);
+                            else u = new com.mikey.auction.user.Bidder(un, pw, id);
+                            
+                            if (u != null) {
+                                u.setStatus(statusStr); // 👉 THÊM DÒNG NÀY để hiện đúng ACTIVE/BANNED khi load bảng
+                                users.add(u);
                             }
                         }
                         
                         userListData.clear();
                         userListData.addAll(users);
+                    }
+                }
+
+                // 👉 THÊM NHÁNH NÀY VÀO TRONG HÀM onResponseReceived ĐỂ XỬ LÝ REAL-TIME
+                if ("AUCTION".equals(category) && "BAN_USER_SUCCESS".equals(action)) {
+                    int bannedUserId = Integer.parseInt(jsonData.trim());
+                    Platform.runLater(() -> {
+                        for (User u : userListData) {
+                            if (u.getId() == bannedUserId) {
+                                u.setStatus("BANNED");
+                                userTable.refresh(); // Lệnh ma thuật ép JavaFX vẽ lại dòng chữ BANNED ngay tức thì
+                                break;
+                            }
+                        }
+                    });
+                }
+
+                // 👉 CHÈN THÊM NHÁNH NÀY VÀO TRONG HÀM onResponseReceived ĐỂ ĐỒNG BỘ REAL-TIME MỞ KHÓA
+                if ("AUCTION".equals(category) && "UNBAN_USER_SUCCESS".equals(action)) {
+                    int unbannedUserId = Integer.parseInt(jsonData.trim());
+                    Platform.runLater(() -> {
+                        for (User u : userListData) {
+                            if (u.getId() == unbannedUserId) {
+                                u.setStatus("ACTIVE");
+                                userTable.refresh(); // Ép bảng vẽ lại giao diện dòng này ngay lập tức
+                                break;
+                            }
+                        }
+                    });
+                }
+
+                // 👉 DÁN THÊM NHÁNH NÀY NGAY DƯỚI NHÁNH UNBAN_USER_SUCCESS
+                if ("AUCTION".equals(category) && "All".equals(action)) {
+                    System.out.println("📦 DỮ LIỆU VẬT PHẨM TỪ SERVER: " + jsonData);
+                    if (jsonData != null && !jsonData.equals("null")) {
+                        
+                        // Khởi tạo Gson có khả năng đọc hiểu ngày tháng (LocalDateTime)
+                        Gson gsonObj = new GsonBuilder()
+                            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> 
+                                LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                            .create();
+                            
+                        // Định nghĩa kiểu dữ liệu là ArrayList<AuctionInfo>
+                        Type listType = new TypeToken<ArrayList<AuctionInfo>>(){}.getType();
+                        
+                        // Dịch JSON thành danh sách Object
+                        ArrayList<AuctionInfo> items = gsonObj.fromJson(jsonData, listType);
+                        
+                        // Đẩy lên giao diện JavaFX
+                        Platform.runLater(() -> {
+                            itemListData.clear();
+                            itemListData.addAll(items);
+                        });
+                    }
+                }
+
+                // 👉 NHÁNH NHẬN DỮ LIỆU LỊCH SỬ ĐẶT GIÁ CHO TAB 3
+                if ("AUCTION".equals(category) && "GET_ALL_BID_HISTORY".equals(action)) {
+                    if (jsonData != null && !jsonData.equals("null")) {
+                        // Khởi tạo Gson đọc được ngày tháng
+                        Gson gsonObj = new GsonBuilder()
+                            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> 
+                                LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                            .create();
+                            
+                        // Định nghĩa kiểu dữ liệu danh sách BidHistory
+                        Type listType = new TypeToken<ArrayList<com.mikey.auction.dto.BidHistory>>(){}.getType();
+                        ArrayList<com.mikey.auction.dto.BidHistory> historyList = gsonObj.fromJson(jsonData, listType);
+                        
+                        // Đẩy lên giao diện JavaFX
+                        Platform.runLater(() -> {
+                            bidHistoryData.clear();
+                            bidHistoryData.addAll(historyList);
+                        });
                     }
                 }
             } catch (Exception e) {
