@@ -1,17 +1,16 @@
 package com.mikey.auction.socket;
 
-import com.mikey.auction.dto.AuctionInfo;
-import com.mikey.auction.items.ItemType;
 import java.io.PrintWriter;
-
-// THÊM BỘ CÔNG CỤ XỬ LÝ NGÀY THÁNG
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
+import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.items.ItemType;
 
 public class RequestHandler {
     private static RequestHandler instance;
@@ -178,5 +177,7 @@ public class RequestHandler {
         send("AUCTION|GET_ALL_BID_HISTORY");
     }
 
-    
+    public void requestRecentActivities(int userId) {
+        send("AUCTION|HISTORY|" + userId); 
+    } 
 }

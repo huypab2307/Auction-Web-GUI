@@ -64,6 +64,7 @@ public class DashBoardController implements SocketListener {
         // Gửi 2 yêu cầu lên Server
         RequestHandler.getInstance().requestUserAuctions(user.getId());
         RequestHandler.getInstance().requestDashboardStats(user.getId());
+        RequestHandler.getInstance().requestRecentActivities(user.getId());
     }
 
     // Hàm hỗ trợ tìm kiếm Label an toàn trong trường hợp dùng FXML rời (<fx:include>)
@@ -130,10 +131,24 @@ public class DashBoardController implements SocketListener {
                 });
             }
         }
+        else if ("AUCTION".equals(category) && "PLACEBID".equals(action)) {
+        // Giả sử jsonData gửi về là một chuỗi chữ thuần túy từ Server, ví dụ: "Bạn đã trả giá thành công mặt hàng #102"
+        // Nếu là chuỗi thuần túy (không phải JSON phức tạp), ta dùng luôn hoặc xóa dấu ngoặc kép nếu có
+        String message = jsonData.replace("\"", ""); 
+        
+        // Gọi hàm để đẩy ngay lên giao diện
+        this.addSingleActivity(message);
     }
-public void loadRecentActivities(List<String> activities) {
+    
+        // 🔥 NHÁNH BỔ SUNG 2: Khi Server báo Theo dõi (Follow) thành công
+        else if ("NOTIFICATION".equals(category) && "FOLLOW".equals(action)) {
+        String message = jsonData.replace("\"", "");
+        this.addSingleActivity(message);
+    }
+    }
+    public void loadRecentActivities(List<String> activities) {
     // Ép chạy trên luồng UI của JavaFX để tránh lỗi văng app khi nhận dữ liệu từ Socket
-    Platform.runLater(() -> {
+        Platform.runLater(() -> {
         // 1. Xóa sạch các hoạt động cũ trước đó
         activityList.getChildren().clear();
         activityList.setSpacing(10); // Khoảng cách giữa các dòng hoạt động
@@ -174,6 +189,50 @@ public void loadRecentActivities(List<String> activities) {
             // Nhét icon và nội dung vào dòng, rồi nhét dòng đó vào hộp tổng
             activityRow.getChildren().addAll(icon, content);
             activityList.getChildren().add(activityRow);
+        }
+    });
+}
+    public void addSingleActivity(String activityText) {
+        if (activityText == null || activityText.trim().isEmpty()) return;
+        // Ép chạy trên luồng UI của JavaFX để tránh lỗi văng app
+        Platform.runLater(() -> {
+        // 1. Kiểm tra nếu đang hiển thị dòng chữ mờ "Chưa có hoạt động nào gần đây.", xóa nó đi trước
+        if (!activityList.getChildren().isEmpty() && activityList.getChildren().get(0) instanceof Label) {
+            Label firstChild = (Label) activityList.getChildren().get(0);
+            if ("Chưa có hoạt động nào gần đây.".equals(firstChild.getText())) {
+                activityList.getChildren().clear();
+            }
+        }
+
+        // 2. Tạo giao diện dòng hoạt động mới (HBox chứa Icon + Chữ)
+        HBox activityRow = new HBox();
+        activityRow.setAlignment(Pos.CENTER_LEFT);
+        activityRow.setSpacing(12);
+        activityRow.setPadding(new Insets(8, 12, 8, 12));
+        
+        // Hiệu ứng hover đồng bộ với các dòng khác
+        activityRow.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 6;");
+        activityRow.setOnMouseEntered(e -> activityRow.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 6;"));
+        activityRow.setOnMouseExited(e -> activityRow.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 6;"));
+
+        // Tạo icon dấu chấm tròn màu tím Cosmic
+        Label icon = new Label("•"); 
+        icon.setTextFill(Color.web("#6366f1")); 
+        icon.setFont(Font.font("System", 20));
+
+        // Tạo Label chứa nội dung hoạt động
+        Label content = new Label(activityText);
+        content.setTextFill(Color.web("#334155")); 
+        content.setFont(Font.font("System", 14));
+
+        activityRow.getChildren().addAll(icon, content);
+
+        // 3. CHÈN VÀO VỊ TRÍ ĐẦU TIÊN (Chỉ số 0) để hoạt động mới nhất luôn nằm trên cùng
+        activityList.getChildren().add(0, activityRow);
+
+        // Giới hạn tối đa hiển thị 8-10 hoạt động cho đỡ chật màn hình
+        if (activityList.getChildren().size() > 10) {
+            activityList.getChildren().remove(activityList.getChildren().size() - 1);
         }
     });
 }
