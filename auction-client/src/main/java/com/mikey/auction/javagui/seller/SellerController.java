@@ -247,11 +247,13 @@ public class SellerController implements SocketListener {
         // Biến itemData bạn đã khai báo và fill ở dòng 159-166 rồi đấy!
         updateData.setExtraData(itemData); 
 
-        // 4. GỬI QUA SOCKET
-        RequestHandler.getInstance().requestCreateAuction(updateData);
+   if (this.currentEditingId == -1) {
+            // CHẾ ĐỘ THÊM MỚI
+            System.out.println("Gửi yêu cầu TẠO MỚI phiên đấu giá lên Server...");
+            RequestHandler.getInstance().requestCreateAuction(updateData);
+        }
 
         showCongratulationEffect(2.5);
-        System.out.println("Đã gửi yêu cầu cập nhật cho ID: " + currentEditingId);
 
     } catch (Exception ex) {
         System.err.println("Lỗi khi đóng gói dữ liệu: " + ex.getMessage());
@@ -833,6 +835,10 @@ private void setTextFieldError(TextField field, Label label, String message) {
         price.setText(String.valueOf(info.getCurPrice()));
         stepPrice.setText(String.valueOf(info.getBidStep()));
         itemDescription.setText(info.getItemInfo().getDescription());
+
+        finalPrice.setText(String.valueOf(info.getCurPrice()));
+
+
         if (info.getStartTime() != null) {
             startTime.setValue(info.getStartTime().toLocalDate());
         }
@@ -863,6 +869,9 @@ private void setTextFieldError(TextField field, Label label, String message) {
         itemInfo.setDisable(false); // Mở khóa khung chi tiết
         type.setDisable(true);
 
+        finalPrice.setDisable(false);
+
+
         if (info.getStatus() == AuctionStatus.OPEN) {
             boolean hasBids = (info.getLastBidderName() != null && !info.getLastBidderName().isEmpty()); 
 
@@ -874,6 +883,9 @@ private void setTextFieldError(TextField field, Label label, String message) {
                 type.setDisable(true);
                 itemInfo.setDisable(true); // KHÓA TOÀN BỘ Ô NHẬP NGHỆ SĨ, KÍCH THƯỚC...
                 
+                finalPrice.setDisable(true);
+
+
                 price.setTooltip(new Tooltip("Đã có người đấu giá, chỉ được phép cập nhật thêm mô tả!"));
                 submit.setText("Cập nhật mô tả");
             } else {

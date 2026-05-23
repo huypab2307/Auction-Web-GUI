@@ -13,10 +13,10 @@
             <children>
                 <VBox HBox.hgrow="ALWAYS">
                     <children>
-                        <Label text="Sản phẩm của tôi" textFill="#1A202C">
+                        <Label text="Sản phẩm của tôi" textFill="#0066ff">
                             <font><Font name="System Bold" size="28.0" /></font>
                         </Label>
-                        <Label text="Quản lý và theo dõi các phiên đấu giá bạn đã đăng." textFill="#718096" />
+                        <Label text="Quản lý và theo dõi các phiên đấu giá bạn đã đăng." textFill="#0066ff" />
                     </children>
                 </VBox>
             </children>
