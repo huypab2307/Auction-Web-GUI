@@ -1,10 +1,6 @@
 package com.mikey.auction.javagui.login;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -22,7 +18,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.socket.SocketClient;
 import com.mikey.auction.socket.SocketListener;
 
@@ -37,10 +33,6 @@ public class RegisterController implements SocketListener {
     private Button registerButton;
     @FXML
     private Label status;
-
-    private Socket socket;
-    private PrintWriter out;
-    private BufferedReader in;
 
     public void initialize(){
         registerButton.setDisable(true);
@@ -73,29 +65,9 @@ public class RegisterController implements SocketListener {
     public void onHandleRegister(ActionEvent e) throws IOException {
         String text1 = username.getText();
         String text2 = password.getText();
-        //out.println("REGISTER|" + text1 + "|" + text2);
-        //String response = in.readLine();
-        //boolean success = "SUCCESS".equals(response);
-        boolean success = UserDAO.getInstance().register(text1, text2);
-        if (success){
-            status.setText("đăng ký thành công!!");
-            status.setTextFill(Paint.valueOf("green"));
-            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
-            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
-            PauseTransition pause = new PauseTransition(Duration.seconds(4));
-            pause.setOnFinished(event -> {
-                backToLogin(); 
-            });
-            pause.play();
-        }else{
-            registerButton.setDisable(true);
-            status.setText("tên đăng nhập tồn tại");
-            status.setTextFill(Paint.valueOf("red"));
-            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
-            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
-            username.clear();
-            password.clear();
-        }
+        status.setText("Đang xử lý...");
+        registerButton.setDisable(true);
+        RequestHandler.getInstance().requestRegister(text1, text2);
     }
 
 

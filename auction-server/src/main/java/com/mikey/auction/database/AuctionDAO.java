@@ -43,8 +43,13 @@ public class AuctionDAO extends BaseDAO {
         LocalDateTime startTime = rs.getObject("startTime", LocalDateTime.class);
         LocalDateTime endTime = rs.getObject("endTime", LocalDateTime.class);
         ItemType itemType = ItemType.valueOf(rs.getString("type").toUpperCase());
-
-        AuctionStatus status = calculateStatus(startTime, endTime);
+        String dbStatus = rs.getString("status");
+        AuctionStatus status;
+        if ("CANCELED".equals(dbStatus)) {
+            status = AuctionStatus.CANCELED; // Tôn trọng trạng thái Hủy từ Admin/Seller
+        } else {
+            status = calculateStatus(startTime, endTime); // Nếu bình thường thì mới tính theo thời gian
+        }
 
         ItemSummary itemInfo = new ItemSummary(itemId, itemName, description, itemType, imagePath);
         return new AuctionInfo(itemInfo, id, sellerName, lastBidder, curPrice, status, startTime, endTime, priceStep);
@@ -200,15 +205,44 @@ public class AuctionDAO extends BaseDAO {
         }
     }
 
-    public boolean deleteAuction(int itemId) {
-        String sql = "DELETE FROM items WHERE id = ?"; 
-        try (Connection conn = getConnect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, itemId);
-            return pstmt.executeUpdate() > 0;
-        } catch (java.sql.SQLException e) {
+// 👉 HÀM 1: DÀNH CHO ADMIN (Giữ nguyên chữ deleteAuction và 1 tham số như cũ)
+    // Code cũ của bạn gọi hàm này sẽ KHÔNG BỊ BÁO LỖI, không cần sửa gì thêm!
+    public boolean deleteAuction(int auctionId) {
+        String sql = "UPDATE auctions SET status = 'CANCELED' WHERE id = ?";
+        try (Connection conn = getConnect(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, auctionId);
+            if (ps.executeUpdate() > 0) {
+                System.out.println("✅ [ADMIN] Đã hủy thành công phiên đấu giá ID: " + auctionId);
+                return true;
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
+    }
+
+    // 👉 HÀM 2: DÀNH CHO SELLER (Cũng tên là deleteAuction nhưng có thêm ID người bán)
+    // Sau này làm chức năng cho Seller, bạn chỉ cần truyền thêm sellerId vào là nó tự chạy hàm này.
+    public boolean deleteAuction(int auctionId, int sellerId) {
+        String sql = "UPDATE auctions SET status = 'CANCELED' WHERE id = ? AND sellerId = ? AND lastBidderId IS NULL";
+        try (Connection conn = getConnect(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, auctionId);
+            ps.setInt(2, sellerId);
+            
+            if (ps.executeUpdate() > 0) {
+                System.out.println("✅ [SELLER] Đã tự hủy thành công phiên đấu giá ID: " + auctionId);
+                return true;
+            } else {
+                System.out.println("❌ [SELLER] Hủy thất bại: Sai quyền hoặc đã có người đặt giá!");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean updateAuction(AuctionInfo info) {
@@ -531,5 +565,88 @@ public class AuctionDAO extends BaseDAO {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
+    }
+
+    // =========================================================================
+    // 🔥 SIÊU THUẬT TOÁN ĐẤU GIÁ: CHỐNG LOST UPDATE & CHỐNG BẮN TỈA (ANTI-SNIPING)
+    // =========================================================================
+    public boolean placeBid(int auctionId, int userId) {
+        // 1. KHÓA LUỒNG THEO ID (Concurrency Control)
+        // Những người đấu giá CÙNG 1 sản phẩm sẽ phải xếp hàng.
+        // Những sản phẩm khác nhau vẫn đấu giá song song mượt mà!
+        synchronized (String.valueOf(auctionId).intern()) {
+            
+            try (java.sql.Connection conn = getConnect()) {
+                // 2. TẮT AUTO COMMIT ĐỂ BẢO VỆ GIAO DỊCH (Transaction)
+                conn.setAutoCommit(false); 
+
+                try {
+                    // 3. SELECT ... FOR UPDATE: Bắt các luồng đến sau phải đứng chờ luồng trước chạy xong
+                    String sqlCheck = "SELECT curPrice, priceStep, endTime, status FROM auctions WHERE id = ? FOR UPDATE";
+                    try (java.sql.PreparedStatement psCheck = conn.prepareStatement(sqlCheck)) {
+                        psCheck.setInt(1, auctionId);
+                        try (java.sql.ResultSet rs = psCheck.executeQuery()) {
+                            if (rs.next()) {
+                                double currentPrice = rs.getDouble("curPrice");
+                                double stepPrice = rs.getDouble("priceStep");
+                                java.time.LocalDateTime endTime = rs.getObject("endTime", java.time.LocalDateTime.class);
+                                String status = rs.getString("status");
+
+                                // Rào cản 1: Phiên không mở hoặc đã hết hạn
+                                if (!"OPEN".equals(status) || java.time.LocalDateTime.now().isAfter(endTime)) {
+                                    conn.rollback(); 
+                                    return false;
+                                }
+                                
+                                // Rào cản 2: Tính toán chính xác giá thầu tiếp theo ngay tại thời điểm Server đọc Database
+                                double newBidAmount = currentPrice + stepPrice;
+
+                                // 4. THUẬT TOÁN ANTI-SNIPING (Gia hạn thời gian)
+                                java.time.LocalDateTime now = java.time.LocalDateTime.now();
+                                long secondsLeft = java.time.Duration.between(now, endTime).getSeconds();
+                                java.time.LocalDateTime newEndTime = endTime;
+
+                                // Nếu bị "bắn tỉa" ở 30 giây cuối -> Phạt gia hạn thêm 60 giây
+                                if (secondsLeft <= 30 && secondsLeft > 0) {
+                                    newEndTime = now.plusSeconds(60);
+                                    System.out.println("⏰ ANTI-SNIPING KÍCH HOẠT! Phiên #" + auctionId + " bị bắn tỉa, gia hạn đến: " + newEndTime);
+                                }
+
+                                // 5. Cập nhật bảng auctions (Giá mới, Người giữ giá mới, Thời gian mới)
+                                String sqlUpdate = "UPDATE auctions SET curPrice = ?, lastBidderId = ?, endTime = ? WHERE id = ?";
+                                try (java.sql.PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate)) {
+                                    psUpdate.setDouble(1, newBidAmount);
+                                    psUpdate.setInt(2, userId);
+                                    psUpdate.setTimestamp(3, java.sql.Timestamp.valueOf(newEndTime));
+                                    psUpdate.setInt(4, auctionId);
+                                    psUpdate.executeUpdate();
+                                }
+
+                                // 6. Ghi log lịch sử giao dịch (BidTransactions)
+                                String sqlHistory = "INSERT INTO bidTransactions (userId, auctionId, bidAmount) VALUES (?, ?, ?)";
+                                try (java.sql.PreparedStatement psHistory = conn.prepareStatement(sqlHistory)) {
+                                    psHistory.setInt(1, userId);
+                                    psHistory.setInt(2, auctionId);
+                                    psHistory.setDouble(3, newBidAmount);
+                                    psHistory.executeUpdate();
+                                }
+
+                                // MỌI THỨ AN TOÀN TUYỆT ĐỐI -> LƯU VÀO DATABASE
+                                conn.commit();
+                                return true;
+                            }
+                        }
+                    }
+                } catch (java.sql.SQLException e) {
+                    conn.rollback(); // Có biến là hoàn tác lại toàn bộ, không sợ sai lệch data
+                    e.printStackTrace();
+                } finally {
+                    conn.setAutoCommit(true); // Trả lại cơ chế mặc định
+                }
+            } catch (java.sql.SQLException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
     }
 }

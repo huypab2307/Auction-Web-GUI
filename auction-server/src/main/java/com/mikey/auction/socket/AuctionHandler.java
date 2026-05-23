@@ -92,19 +92,66 @@ public class AuctionHandler {
                         }
                     }
                     break;
+                    
                 case "PLACEBID":
                     int auctionId = Integer.parseInt(parts[2].trim());
                     int uId = Integer.parseInt(parts[3].trim());
-                    AuctionInfo auctionInfo = AuctionDAO.getInstance().searchAuctionById(auctionId);
-                    Bidder bidder = (Bidder) UserManager.getInstance().createUser(Role.BIDDER, UserDAO.getInstance().findById(uId));
-                    result = AuctionManager.getInstance().placeBid(bidder, auctionInfo, auctionInfo.getCurPrice());
+                    
+                    // 1. Chạy siêu thuật toán Đấu giá an toàn
+                    boolean success = AuctionDAO.getInstance().placeBid(auctionId, uId);
+                    
+                    if (success) {
+                        // 2. Nếu đặt thành công, kích hoạt các Đại gia (Auto-Bid) vào đọ tiền ngay lập tức!
+                        AuctionDAO.getInstance().triggerAutoBids(auctionId);
+                        
+                        // 3. Lấy thông tin phiên đấu giá MỚI NHẤT (Đã bao gồm cả việc Auto-Bid đẩy giá lên nếu có) 
+                        // để gửi về cho Client
+                        result = AuctionDAO.getInstance().searchAuctionById(auctionId);
+                    } else {
+                        // Trả về false. Client của bạn sẽ tự động hiện thông báo "Thao tác thất bại! Có thể giá đã bị thay đổi."
+                        result = false; 
+                    }
                     break;
 
                 case "DELETE":
+                    // 1. Kiểm tra an toàn: Đảm bảo gói tin có đủ 5 phần (AUCTION|DELETE|id|userId|role)
+                    if (parts.length < 5) {
+                        result = "ERROR_FORMAT";
+                        System.err.println("❌ Lỗi: Gói tin DELETE thiếu tham số phân quyền!");
+                        break;
+                    }
+
+                    // 2. Bóc tách dữ liệu
                     int idToDelete = Integer.parseInt(parts[2].trim());
-                    // Bạn cần triển khai hàm deleteAuction trong AuctionDAO để chạy lệnh SQL: 
-                    // "DELETE FROM auctions WHERE id = ?"
-                    result = AuctionDAO.getInstance().deleteAuction(idToDelete); 
+                    int requesterId = Integer.parseInt(parts[3].trim());
+                    String currentRole = parts[4].trim().toUpperCase(); // "ADMIN" hoặc "SELLER"
+
+                    // 3. Gọi DAO thực thi logic hủy mềm (Soft Delete)
+                    // 3. Gọi DAO thực thi logic hủy mềm (Soft Delete)
+                    boolean isDeleted = false;
+                    
+                    // Rẽ nhánh gọi đúng hàm deleteAuction tùy theo quyền
+                    if ("ADMIN".equals(currentRole)) {
+                        // Admin thì gọi hàm 1 tham số
+                        isDeleted = AuctionDAO.getInstance().deleteAuction(idToDelete);
+                    } else if ("SELLER".equals(currentRole)) {
+                        // Seller thì gọi hàm 2 tham số (để check chính chủ)
+                        isDeleted = AuctionDAO.getInstance().deleteAuction(idToDelete, requesterId);
+                    }
+                    
+                    // 4. Xử lý kết quả trả về
+                    if (isDeleted) {
+                        result = "SUCCESS";
+                        // Phát loa thông báo cho toàn bộ Client đang online cập nhật UI ngay lập tức
+                        AuctionServer.broadcast("AUCTION|UPDATE_STATUS|" + idToDelete + "|CANCELED");
+                    } else {
+                        // Trả về mã lỗi chi tiết hơn thay vì ERROR chung chung
+                        if ("SELLER".equals(currentRole)) {
+                            result = "ERROR_SELLER_DENIED"; // Lỗi do không chính chủ hoặc đã có người đặt giá
+                        } else {
+                            result = "ERROR_SYSTEM";
+                        }
+                    }
                     break;
 
                 case "AUTOBID":

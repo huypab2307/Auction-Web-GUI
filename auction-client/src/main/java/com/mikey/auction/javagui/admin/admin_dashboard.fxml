@@ -11,6 +11,12 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ComboBox?>
 
 <BorderPane stylesheets="@../style/Admin.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.admin.AdminController">
     
@@ -42,48 +48,80 @@
        
                     <TextField fx:id="searchField" promptText="Tìm kiếm mã phiên..." styleClass="search-box" />
                     <Label styleClass="icon-btn" text="🔔" />
-                    <Label styleClass="user-profile" text="👤 Admin Quản Trị" />
+                    <HBox alignment="CENTER" spacing="15">
+                        <Label styleClass="user-profile" text="👤 Admin Quản Trị" />
+                        <Button mnemonicParsing="false" onAction="#handleLogout" text="🚪 Đăng xuất" 
+                                style="-fx-background-color: transparent; -fx-text-fill: #FF416C; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-color: #FF416C; -fx-border-radius: 5; -fx-padding: 5 10;" />
+                    </HBox>
                 </HBox>
             </top>
             
             <center>
                 <StackPane fx:id="contentStack">
                     <children>
-                        
-                        <VBox fx:id="viewDashboard" spacing="25" styleClass="main-content" visible="true">
-                            <Label styleClass="page-title" text="Thống kê Phiên đấu giá" />
-                      
-                            <HBox spacing="25">
-                                <VBox styleClass="card, card-blue" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="card-title" text="Phiên đang diễn ra" />
-                                    <Label fx:id="lblActiveAuctions" styleClass="card-value" text="24" />
+                        <ScrollPane fx:id="viewDashboard" fitToWidth="true" style="-fx-background-color: transparent; -fx-padding: 0;" visible="true">
+                            <content>
+                                <VBox spacing="20" styleClass="main-content">
+                                    <Label styleClass="page-title" text="Thống kê Phiên đấu giá" />
+
+                                    <HBox spacing="25">
+                                        <VBox styleClass="card, card-blue" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="card-title" text="Phiên đang diễn ra" />
+                                            <Label fx:id="lblActiveAuctions" styleClass="card-value" text="24" />
+                                        </VBox>
+                                        <VBox styleClass="card, card-green" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="card-title" text="Tổng giá trị giao dịch" />
+                                            <Label fx:id="lblTotalVolume" styleClass="card-value" text="1,250,000,000 đ" />
+                                        </VBox>
+                                        <VBox styleClass="card, card-orange" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="card-title" text="Lượt trả giá mới" />
+                                            <Label fx:id="lblNewBids" styleClass="card-value" text="342" />
+                                        </VBox>
+                                    </HBox>
+
+                                    <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10 20 0 20;">
+                                        <ComboBox fx:id="cbTimeFilter" prefWidth="180" promptText="Lọc thời gian" style="-fx-background-color: white; -fx-border-color: #E4E6EF; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 2; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                                    </HBox>
+
+                                    <HBox spacing="20.0" VBox.vgrow="ALWAYS" alignment="CENTER" style="-fx-padding: 10 20 20 20;">
+                                        <children>
+                                            <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 8);" HBox.hgrow="ALWAYS" alignment="CENTER" prefWidth="400.0">
+                                                <children>
+                                                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #181C32;" text="📊 Tỉ Trọng Ngành Hàng Đăng Bán" />
+                                                    <PieChart fx:id="categoryPieChart" prefHeight="280.0" labelsVisible="false" legendVisible="true" legendSide="BOTTOM" />
+                                                </children>
+                                            </VBox>
+
+                                            <VBox style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 8);" HBox.hgrow="ALWAYS" alignment="CENTER" prefWidth="500.0">
+                                                <children>
+                                                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #181C32;" text="🔥 Top 5 Phiên Đấu Giá Cao Nhất" />
+                                                    <BarChart fx:id="topAuctionsBarChart" prefHeight="280.0" legendVisible="false" categoryGap="20" barGap="5">
+                                                        <xAxis> <CategoryAxis fx:id="barXAxis" label="Mã Phiên" /> </xAxis>
+                                                        <yAxis> <NumberAxis fx:id="barYAxis" label="Giá Hiện Tại (Triệu VNĐ)" /> </yAxis>
+                                                    </BarChart>
+                                                </children>
+                                            </VBox>
+                                        </children>
+                                    </HBox>
+
+                                    <VBox spacing="10" VBox.vgrow="ALWAYS">
+                                        <Label styleClass="section-title" text="Danh sách vật phẩm đang đấu" />
+                                        <TableView fx:id="auctionTable" VBox.vgrow="ALWAYS">
+                                            <columns>
+                                                <TableColumn fx:id="colId" prefWidth="80.0" text="Mã Phiên" />
+                                                <TableColumn fx:id="colItemName" prefWidth="250.0" text="Tên Vật Phẩm" />
+                                                <TableColumn fx:id="colCurrentBid" prefWidth="180.0" text="Giá Cao Nhất Hiện Tại" />
+                                                <TableColumn fx:id="colBidder" prefWidth="150.0" text="Client Đặt Giá" />
+                                                <TableColumn fx:id="colStatus" prefWidth="120.0" text="Trạng Thái" />
+                                            </columns>
+                                            <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                            </columnResizePolicy>
+                                        </TableView>
+                                    </VBox>
                                 </VBox>
-                                <VBox styleClass="card, card-green" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="card-title" text="Tổng giá trị giao dịch" />
-                                    <Label fx:id="lblTotalVolume" styleClass="card-value" text="1,250,000,000 đ" />
-                                </VBox>
-                                <VBox styleClass="card, card-orange" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="card-title" text="Lượt trả giá mới" />
-                                    <Label fx:id="lblNewBids" styleClass="card-value" text="342" />
-                                </VBox>
-                            </HBox>
-           
-                            <VBox spacing="10" VBox.vgrow="ALWAYS">
-                                <Label styleClass="section-title" text="Danh sách vật phẩm đang đấu" />
-                                <TableView fx:id="auctionTable" VBox.vgrow="ALWAYS">
-                                    <columns>
-                                        <TableColumn fx:id="colId" prefWidth="80.0" text="Mã Phiên" />
-                                        <TableColumn fx:id="colItemName" prefWidth="250.0" text="Tên Vật Phẩm" />
-                                        <TableColumn fx:id="colCurrentBid" prefWidth="180.0" text="Giá Cao Nhất Hiện Tại" />
-                                        <TableColumn fx:id="colBidder" prefWidth="150.0" text="Client Đặt Giá" />
-                                        <TableColumn fx:id="colStatus" prefWidth="120.0" text="Trạng Thái" />
-                                    </columns>
-                                    <columnResizePolicy>
-                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                    </columnResizePolicy>
-                                </TableView>
-                            </VBox>
-                        </VBox>
+                            </content>
+                        </ScrollPane>
 
                         <VBox fx:id="viewAuctionItems" spacing="20" styleClass="main-content" visible="false">
                             <Label styleClass="page-title" text="Hệ thống quản lý vật phẩm" />
@@ -101,6 +139,7 @@
                                     <TableColumn fx:id="colItemSeller" prefWidth="150.0" text="Người Đăng Bán" />
                                     <TableColumn fx:id="colItemStartPrice" prefWidth="160.0" text="Giá Khởi Điểm" />
                                     <TableColumn fx:id="colItemEndTime" prefWidth="210.0" text="Thời Gian Hết Hạn" />
+                                    <TableColumn fx:id="colItemAction" prefWidth="120.0" text="Hành Động" />
                                 </columns>
                                 <columnResizePolicy>
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -110,6 +149,13 @@
 
                         <VBox fx:id="viewBiddingHistory" spacing="20" styleClass="main-content" visible="false">
                             <Label styleClass="page-title" text="Toàn bộ lịch sử đặt giá hệ thống" />
+                            
+                            <HBox alignment="CENTER_LEFT" spacing="15">
+                                <children>
+                                    <TextField fx:id="searchBidField" promptText="Tìm mã phiên hoặc tên client..." styleClass="search-box" prefWidth="300" />
+                                    <Button mnemonicParsing="false" onAction="#handleSearchBid" style="-fx-background-color: #0072FF; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;" text="Lọc dữ liệu" />
+                                </children>
+                            </HBox>
                             <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS">
                                 <columns>
                                     <TableColumn fx:id="colHistBidId" prefWidth="120.0" text="Mã Giao Dịch" />

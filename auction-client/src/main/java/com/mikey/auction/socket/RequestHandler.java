@@ -126,11 +126,6 @@ public class RequestHandler {
         send("ITEM|FIND|" + typeStr + "|" + itemId);
     }
 
-    // Thêm vào RequestHandler.java
-    public void requestDeleteAuction(int auctionId) {
-        send("AUCTION|DELETE|" + auctionId);
-    }
-
 // Hàm gửi yêu cầu cài đặt Auto Bid lên Server
     public void requestSetAutoBid(com.mikey.auction.dto.AutoBidInfo autoInfo) {
         try {
@@ -176,6 +171,20 @@ public class RequestHandler {
 // SỬA LẠI HÀM NÀY CHO CHUẨN VỚI KIẾN TRÚC CỦA BẠN:
     public void requestAllBidHistory() {
         send("AUCTION|GET_ALL_BID_HISTORY");
+    }
+
+// ==========================================
+    // NHÓM LỆNH XÓA/HỦY PHIÊN ĐẤU GIÁ (ĐÃ ĐỒNG BỘ 5 PARTS VỚI SERVER)
+    // ==========================================
+    
+    // 1. Dành riêng cho Admin
+    public void requestDeleteAuctionAdmin(int auctionId, int adminId) {
+        send("AUCTION|DELETE|" + auctionId + "|" + adminId + "|ADMIN");
+    }
+
+    // 2. Dành riêng cho Seller
+    public void requestDeleteAuctionSeller(int auctionId, int sellerId) {
+        send("AUCTION|DELETE|" + auctionId + "|" + sellerId + "|SELLER");
     }
 
     

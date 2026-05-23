@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.socket.SocketClient;
 import com.mikey.auction.socket.SocketListener;
@@ -15,8 +16,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -53,7 +60,7 @@ public class AdminController implements SocketListener {
 
     // Cấu trúc phân phối chuyển đổi view động
     @FXML private StackPane contentStack;
-    @FXML private VBox viewDashboard;
+    @FXML private ScrollPane viewDashboard;
     @FXML private VBox viewAuctionItems;
     @FXML private VBox viewBiddingHistory;
     @FXML private VBox viewUsers;
@@ -74,6 +81,7 @@ public class AdminController implements SocketListener {
     @FXML private TableColumn<AuctionInfo, String> colItemSeller;
     @FXML private TableColumn<AuctionInfo, Double> colItemStartPrice;
     @FXML private TableColumn<AuctionInfo, LocalDateTime> colItemEndTime;
+    @FXML private TableColumn<AuctionInfo, Void> colItemAction;
     @FXML private TableColumn<AuctionInfo, String> colItemType;
     @FXML private TextField searchItemField;
 
@@ -84,6 +92,7 @@ public class AdminController implements SocketListener {
     @FXML private TableColumn<com.mikey.auction.dto.BidHistory, String> colHistBidder;
     @FXML private TableColumn<com.mikey.auction.dto.BidHistory, Double> colHistAmount;
     @FXML private TableColumn<com.mikey.auction.dto.BidHistory, LocalDateTime> colHistTime;
+    @FXML private TextField searchBidField;
 
     
 
@@ -111,14 +120,30 @@ public class AdminController implements SocketListener {
     private ObservableList<AuctionInfo> itemListData = FXCollections.observableArrayList();
     private ObservableList<com.mikey.auction.dto.BidHistory> bidHistoryData = FXCollections.observableArrayList();
 
+    // Thành phần biểu đồ phân tích mới
+    @FXML private PieChart categoryPieChart;
+    @FXML private BarChart<String, Number> topAuctionsBarChart;
+    @FXML private CategoryAxis barXAxis;
+    @FXML private NumberAxis barYAxis;
+    @FXML private ComboBox<String> cbTimeFilter;
+
     @FXML
     public void initialize() {
         SocketClient.getInstance().setListener(this);
         serverStatusIndicator.setStyle("-fx-fill: #38EF7D;");
         serverStatusLabel.setText("Server: Hệ thống vận hành mượt mà");
-        
-        // 👉 GỌI HÀM CÀI ĐẶT BẢNG NGAY KHI MỞ APP
         setupTable();
+        // 👉 THÊM DÒNG NÀY ĐỂ AUTO-LOAD DỮ LIỆU KHI VỪA MỞ APP:
+        RequestHandler.getInstance().requestAllAuctions();
+
+        // Khởi tạo ComboBox Lọc dữ liệu
+        if (cbTimeFilter != null) {
+            cbTimeFilter.setItems(FXCollections.observableArrayList("Tất cả thời gian", "Hôm nay", "7 ngày qua"));
+            cbTimeFilter.getSelectionModel().selectFirst();
+            cbTimeFilter.setOnAction(e -> applyChartFilter());
+        }
+
+        RequestHandler.getInstance().requestAllBidHistory();
     }
 
 private void setupTable() {
@@ -134,6 +159,67 @@ private void setupTable() {
     colItemAucId.setCellValueFactory(new PropertyValueFactory<>("id"));
     colItemStartPrice.setCellValueFactory(new PropertyValueFactory<>("curPrice"));
     colItemEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+
+    // 2. Map cột cho bảng Vật phẩm (TAB 2)
+    colItemAucId.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colItemStartPrice.setCellValueFactory(new PropertyValueFactory<>("curPrice"));
+    colItemEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+
+    // =========================================================
+    // 👉 DÁN THÊM TOÀN BỘ KHỐI CODE TẠO NÚT XÓA NÀY VÀO ĐÂY
+    // =========================================================
+    // Ép JavaFX nhận diện cột để tránh lỗi trống
+    colItemAction.setCellValueFactory(param -> new javafx.beans.property.SimpleObjectProperty<>(null));
+    
+    Callback<TableColumn<AuctionInfo, Void>, TableCell<AuctionInfo, Void>> cellActionFactory = param -> new TableCell<>() {
+        private final Button btnDelete = new Button("Xóa (Hủy)");
+        {
+            btnDelete.setStyle("-fx-background-color: #FF416C; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-background-radius: 5;");
+            btnDelete.setOnAction(event -> {
+                AuctionInfo data = getTableView().getItems().get(getIndex());
+                
+                // Lấy ID của Admin hiện tại (nếu chưa có thì mặc định là 0 để lót đường)
+                int adminId = (currentAdmin != null) ? currentAdmin.getId() : 0;
+                
+                System.out.println("Admin (ID: " + adminId + ") ra lệnh XÓA phiên đấu giá ID: " + data.getId());
+                
+                // 👉 GỌI ĐÚNG HÀM DÀNH CHO ADMIN
+                RequestHandler.getInstance().requestDeleteAuctionAdmin(data.getId(), adminId);
+                
+                RequestHandler.getInstance().requestAllAuctions();
+            });
+        }
+        
+        @Override
+        protected void updateItem(Void item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || getTableView() == null || getTableView().getItems() == null || 
+                getIndex() < 0 || getIndex() >= getTableView().getItems().size()) {
+                setGraphic(null);
+            } else {
+                AuctionInfo data = getTableView().getItems().get(getIndex());
+                if (data == null) {
+                    setGraphic(null);
+                    return;
+            }
+                
+                // 👉 BỔ SUNG LOGIC ĐỔI MÀU NÚT BẤM
+                if (data.getStatus() == com.mikey.auction.auction.AuctionStatus.CANCELED) {
+                    btnDelete.setText("Đã Hủy");
+                    btnDelete.setStyle("-fx-background-color: #A1A5B7; -fx-text-fill: white; -fx-background-radius: 5;");
+                    btnDelete.setDisable(true); // Khóa nút lại, không cho bấm nữa
+                } else {
+                    btnDelete.setText("Xóa (Hủy)");
+                    btnDelete.setStyle("-fx-background-color: #FF416C; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-background-radius: 5;");
+                    btnDelete.setDisable(false); // Bật lại nút
+                }
+                
+                setGraphic(btnDelete);
+            }
+        }
+    };
+    colItemAction.setCellFactory(cellActionFactory);
+    // =========================================================
 
     // ==========================================
     // 👉 5. CẤU HÌNH BẢNG LỊCH SỬ ĐẶT GIÁ (TAB 3)
@@ -286,10 +372,15 @@ private void setupTable() {
                     @Override
                     public void updateItem(Void item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (empty) { 
+                        if (empty || getTableView() == null || getTableView().getItems() == null || 
+                            getIndex() < 0 || getIndex() >= getTableView().getItems().size()) { 
                             setGraphic(null); 
                         } else { 
                             User data = getTableView().getItems().get(getIndex());
+                            if (data == null) {
+                                setGraphic(null);
+                                return;
+                            }
                             
                             // Thay đổi màu sắc và chữ hiển thị của nút dựa vào thuộc tính status của User
                             if ("BANNED".equals(data.getStatus())) {
@@ -320,25 +411,21 @@ private void setupTable() {
      * Thuật toán xương sống xử lý hoán đổi ẩn hiện các tab phân hệ quản trị
      * và quản lý danh sách class active-btn tự động từ file CSS
      */
-    private void navigateToTab(VBox targetView, Button targetButton) {
-        // 1. Ẩn toàn bộ các VBox layout con trong StackPane ngầm
+    private void navigateToTab(javafx.scene.Node targetView, Button targetButton) {
         viewDashboard.setVisible(false);
         viewAuctionItems.setVisible(false);
         viewBiddingHistory.setVisible(false);
         viewUsers.setVisible(false);
         viewSettings.setVisible(false);
 
-        // 2. Kích hoạt hiện thị luồng tab tương ứng được nhấn
         targetView.setVisible(true);
 
-        // 3. Xóa sạch class đánh dấu 'active-btn' khỏi tất cả các nút điều hướng sidebar
         btnDashboard.getStyleClass().remove("active-btn");
         btnAuctionItems.getStyleClass().remove("active-btn");
         btnBiddingHistory.getStyleClass().remove("active-btn");
         btnUsers.getStyleClass().remove("active-btn");
         btnSettings.getStyleClass().remove("active-btn");
 
-        // 4. Bơm nạp class 'active-btn' vào đúng nút bấm hiện tại để đổi màu chữ xanh mượt
         if (!targetButton.getStyleClass().contains("active-btn")) {
             targetButton.getStyleClass().add("active-btn");
         }
@@ -374,17 +461,6 @@ private void setupTable() {
         navigateToTab(viewSettings, btnSettings);
     }
 
-    @FXML
-    void handleSearchItem(ActionEvent event) {
-        String filterName = searchItemField.getText().trim();
-        System.out.println("Lọc danh sách hàng hóa theo từ khóa: " + filterName);
-    }
-
-    @FXML
-    void handleSearchUser(ActionEvent event) {
-        String targetUser = searchUserField.getText().trim();
-        System.out.println("Tìm kiếm tài khoản Client: " + targetUser);
-    }
 
     @FXML
     void handleSaveSettings(ActionEvent event) {
@@ -484,6 +560,9 @@ private void setupTable() {
                         Platform.runLater(() -> {
                             itemListData.clear();
                             itemListData.addAll(items);
+                            applyChartFilter();
+                            updateOverviewCards();
+                            handleSearchItem(null);
                         });
                     }
                 }
@@ -505,6 +584,29 @@ private void setupTable() {
                         Platform.runLater(() -> {
                             bidHistoryData.clear();
                             bidHistoryData.addAll(historyList);
+                            updateOverviewCards();
+                            handleSearchBid(null);
+                        });
+                    }
+                }
+
+                // 👉 THÊM NHÁNH NÀY ĐỂ REAL-TIME ĐỔI MÀU GIAO DIỆN KHI XÓA
+                if ("AUCTION".equals(category) && "UPDATE_STATUS".equals(action)) {
+                    // Dữ liệu Server trả về dạng: id|CANCELED
+                    String[] updateData = jsonData.split("\\|");
+                    if (updateData.length == 2) {
+                        int aucId = Integer.parseInt(updateData[0]);
+                        String newStatus = updateData[1];
+                        
+                        Platform.runLater(() -> {
+                            for (AuctionInfo info : itemListData) {
+                                if (info.getId() == aucId) {
+                                    info.setStatus(com.mikey.auction.auction.AuctionStatus.valueOf(newStatus));
+                                    itemTable.refresh(); // Ép bảng vẽ lại giao diện
+                                    break;
+                                }
+                            }
+                            updateOverviewCards();
                         });
                     }
                 }
@@ -512,5 +614,265 @@ private void setupTable() {
                 e.printStackTrace();
             }
         });
+    }
+
+    @FXML
+    void handleLogout(ActionEvent event) {
+        System.out.println("Admin đăng xuất!");
+        // Gọi SceneChanger để quay về màn hình Login
+        SceneChanger.getInstance().toLogin(); 
+    }
+
+    private void updateAnalyticsCharts(java.util.List<AuctionInfo> list) {
+        if (list == null || list.isEmpty() || topAuctionsBarChart == null || categoryPieChart == null) return;
+
+        topAuctionsBarChart.setAnimated(false);
+        categoryPieChart.setAnimated(false);
+
+        // --- XỬ LÝ BIỂU ĐỒ TRÒN (PIE CHART) ---
+        int artsCount = 0, electronicsCount = 0, vehicleCount = 0;
+        for (AuctionInfo info : list) {
+            if (info.getItemInfo() != null && info.getItemInfo().getItemType() != null) {
+                switch (info.getItemInfo().getItemType()) {
+                    case ARTS -> artsCount++;
+                    case ELECTRONICS -> electronicsCount++;
+                    case VEHICLE -> vehicleCount++;
+                }
+            }
+        }
+        
+        categoryPieChart.getData().clear();
+        if (artsCount > 0) categoryPieChart.getData().add(new javafx.scene.chart.PieChart.Data("Nghệ thuật", artsCount));
+        if (electronicsCount > 0) categoryPieChart.getData().add(new javafx.scene.chart.PieChart.Data("Điện tử", electronicsCount));
+        if (vehicleCount > 0) categoryPieChart.getData().add(new javafx.scene.chart.PieChart.Data("Xe cộ", vehicleCount));
+
+        // --- XỬ LÝ BIỂU ĐỒ CỘT (BAR CHART) ---
+        java.util.List<AuctionInfo> sortedList = new java.util.ArrayList<>(list);
+        sortedList.sort((a, b) -> Double.compare(b.getCurPrice(), a.getCurPrice()));
+
+        topAuctionsBarChart.getData().clear();
+        javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
+
+        String[] gradientColors = {
+            "-fx-background-color: linear-gradient(to top, #00c6ff, #0072ff);",
+            "-fx-background-color: linear-gradient(to top, #f77062, #fe5196);",
+            "-fx-background-color: linear-gradient(to top, #11998e, #38ef7d);",
+            "-fx-background-color: linear-gradient(to top, #f2994a, #f2c94c);",
+            "-fx-background-color: linear-gradient(to top, #8e2de2, #4a00e0);" 
+        };
+
+        int limit = Math.min(5, sortedList.size());
+        for (int i = 0; i < limit; i++) {
+            AuctionInfo info = sortedList.get(i);
+            // Đã xóa chữ "P.", chỉ lấy mã ID nguyên bản theo ý bạn
+            String labelX = String.valueOf(info.getId()); 
+            
+            // Chia triệu VNĐ
+            double priceInMillion = Math.round((info.getCurPrice() / 1000000.0) * 10.0) / 10.0;
+            series.getData().add(new javafx.scene.chart.XYChart.Data<>(labelX, priceInMillion));
+        }
+
+        topAuctionsBarChart.getData().add(series);
+        barYAxis.setForceZeroInRange(false);
+
+        // --- RENDER GIAO DIỆN & TÍCH HỢP SỰ KIỆN CLICK ---
+        Platform.runLater(() -> {
+            java.text.DecimalFormat df = new java.text.DecimalFormat("#,### đ");
+            
+            // 1. ÉP MÀU CHO BIỂU ĐỒ TRÒN VÀ CHÚ THÍCH (FIX LỖI LỆCH MÀU)
+            String[] pieColors = {"#FF5E62", "#38EF7D", "#00C6FF"}; 
+            int pIdx = 0;
+            for (javafx.scene.chart.PieChart.Data data : categoryPieChart.getData()) {
+                javafx.scene.Node node = data.getNode();
+                if (node != null) {
+                    node.setStyle("-fx-pie-color: " + pieColors[pIdx % pieColors.length] + ";");
+                    
+                    javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(data.getName() + "\nSố lượng: " + (int)data.getPieValue() + " sản phẩm");
+                    tooltip.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+                    tooltip.setShowDelay(javafx.util.Duration.millis(0));
+                    tooltip.setHideDelay(javafx.util.Duration.millis(0));
+                    javafx.scene.control.Tooltip.install(node, tooltip);
+                    pIdx++;
+                }
+            }
+            
+            // Ép JavaFX cập nhật Layout ngay lập tức để bóc tách node Legend
+            categoryPieChart.applyCss();
+            categoryPieChart.layout();
+            
+            int lIdx = 0;
+            for (javafx.scene.Node legendNode : categoryPieChart.lookupAll(".chart-legend-item-symbol")) {
+                // Chỉ giữ lại màu gốc, xóa lớp màu trắng đè lên
+                legendNode.setStyle("-fx-background-color: " + pieColors[lIdx % pieColors.length] + ";");
+                lIdx++;
+            }
+
+            // 2. TÔ MÀU VÀ GẮN SỰ KIỆN CLICK CHO BAR CHART
+            for (int i = 0; i < series.getData().size(); i++) {
+                javafx.scene.chart.XYChart.Data<String, Number> dataNode = series.getData().get(i);
+                javafx.scene.Node node = dataNode.getNode();
+                AuctionInfo originalInfo = sortedList.get(i);
+                
+                if (node != null) {
+                    node.setStyle(gradientColors[i % gradientColors.length] + " -fx-background-radius: 6 6 0 0; -fx-cursor: hand;");
+                    
+                    javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip("Mã Phiên: " + dataNode.getXValue() + "\nGiá trị: " + df.format(originalInfo.getCurPrice()) + "\n(Click để xem chi tiết)");
+                    tooltip.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+                    tooltip.setShowDelay(javafx.util.Duration.millis(0));
+                    tooltip.setHideDelay(javafx.util.Duration.millis(0));
+                    javafx.scene.control.Tooltip.install(node, tooltip);
+                    
+                    // SỰ KIỆN CLICK ĐỂ CHUYỂN TAB VÀ TÌM KIẾM
+                    node.setOnMouseClicked(event -> {
+                        System.out.println("Mở chi tiết vật phẩm ID: " + originalInfo.getId());
+                        // Chuyển sang Tab Quản lý vật phẩm
+                        navigateToTab(viewAuctionItems, btnAuctionItems);
+                        // Tự động điền mã ID vào thanh tìm kiếm và gọi hàm lọc
+                        if (searchItemField != null) {
+                            searchItemField.setText(String.valueOf(originalInfo.getId()));
+                            handleSearchItem(null);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void applyChartFilter() {
+        if (cbTimeFilter == null || cbTimeFilter.getValue() == null) {
+            updateAnalyticsCharts(itemListData);
+            return;
+        }
+        
+        String selection = cbTimeFilter.getValue();
+        java.util.List<AuctionInfo> filtered = new java.util.ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        
+        for (AuctionInfo item : itemListData) {
+            if ("Hôm nay".equals(selection)) {
+                if (item.getEndTime() != null && item.getEndTime().toLocalDate().equals(now.toLocalDate())) {
+                    filtered.add(item);
+                }
+            } else if ("7 ngày qua".equals(selection)) {
+                if (item.getEndTime() != null && item.getEndTime().isAfter(now.minusDays(7))) {
+                    filtered.add(item);
+                }
+            } else {
+                filtered.add(item); // "Tất cả thời gian"
+            }
+        }
+        updateAnalyticsCharts(filtered);
+    }
+
+    private void updateOverviewCards() {
+        if (lblActiveAuctions == null || lblTotalVolume == null || lblNewBids == null) return;
+
+        long activeCount = 0;
+        double totalVolume = 0;
+        
+        for (AuctionInfo item : itemListData) {
+            // 👉 1. SỬA LỖI TRẠNG THÁI: Trong DB của bạn là OPEN chứ không phải ONGOING
+            if (item.getStatus() != null && item.getStatus() == com.mikey.auction.auction.AuctionStatus.OPEN) {
+                activeCount++;
+            }
+            
+            // 👉 2. TỔNG GIÁ TRỊ GIAO DỊCH: Chỉ cộng tiền của các phiên ĐÃ CÓ người trả giá 
+            // (Tránh việc cộng nhầm giá khởi điểm của các phiên trống)
+            if (item.getLastBidderName() != null && !item.getLastBidderName().isEmpty()) {
+                totalVolume += item.getCurPrice(); 
+            }
+        }
+
+        // 👉 3. LƯỢT TRẢ GIÁ MỚI: Bằng chính số lượng bản ghi trong bảng bidTransactions
+        int totalBids = bidHistoryData.size();
+
+        final long finalActiveCount = activeCount;
+        final double finalTotalVolume = totalVolume;
+        
+        // Đẩy số liệu thật lên giao diện JavaFX
+        Platform.runLater(() -> {
+            java.text.DecimalFormat formatter = new java.text.DecimalFormat("#,### đ");
+            lblActiveAuctions.setText(String.valueOf(finalActiveCount));
+            lblTotalVolume.setText(formatter.format(finalTotalVolume));
+            lblNewBids.setText(String.valueOf(totalBids));
+        });
+    }
+
+    @FXML
+    void handleSearchItem(ActionEvent event) {
+        if (searchItemField == null) return;
+        
+        String filterText = searchItemField.getText().trim().toLowerCase();
+        
+        if (filterText.isEmpty()) {
+            // Nếu ô tìm kiếm trống, trả lại toàn bộ dữ liệu gốc
+            itemTable.setItems(itemListData); 
+        } else {
+            // Bộ lọc thông minh: Quét theo cả Tên vật phẩm VÀ Mã phiên đấu giá
+            javafx.collections.ObservableList<AuctionInfo> filteredList = javafx.collections.FXCollections.observableArrayList();
+            
+            for (AuctionInfo info : itemListData) {
+                String title = (info.getItemInfo() != null && info.getItemInfo().getTitle() != null) ? info.getItemInfo().getTitle().toLowerCase() : "";
+                String idStr = String.valueOf(info.getId());
+                
+                if (title.contains(filterText) || idStr.contains(filterText)) {
+                    filteredList.add(info);
+                }
+            }
+            itemTable.setItems(filteredList);
+            itemTable.refresh();
+        }
+    }
+
+    @FXML
+    void handleSearchUser(ActionEvent event) {
+        if (searchUserField == null) return;
+        
+        String filterText = searchUserField.getText().trim().toLowerCase();
+        
+        if (filterText.isEmpty()) {
+            userTable.setItems(userListData); 
+        } else {
+            // Bộ lọc thông minh: Quét theo cả Username VÀ ID người dùng
+            javafx.collections.ObservableList<User> filteredList = javafx.collections.FXCollections.observableArrayList();
+            
+            for (User u : userListData) {
+                String username = (u.getUsername() != null) ? u.getUsername().toLowerCase() : "";
+                String idStr = String.valueOf(u.getId());
+                
+                if (username.contains(filterText) || idStr.contains(filterText)) {
+                    filteredList.add(u);
+                }
+            }
+            userTable.setItems(filteredList);
+            userTable.refresh();
+        }
+    }
+
+    @FXML
+    void handleSearchBid(ActionEvent event) {
+        if (searchBidField == null) return;
+        
+        String filterText = searchBidField.getText().trim().toLowerCase();
+        
+        if (filterText.isEmpty()) {
+            // Trả lại dữ liệu gốc nếu ô tìm kiếm trống
+            bidHistoryTable.setItems(bidHistoryData); 
+        } else {
+            javafx.collections.ObservableList<com.mikey.auction.dto.BidHistory> filteredList = javafx.collections.FXCollections.observableArrayList();
+            
+            for (com.mikey.auction.dto.BidHistory bid : bidHistoryData) {
+                // Quét Mã phiên và Tên người dùng
+                String aucIdStr = String.valueOf(bid.getAuctionId());
+                String bidderName = (bid.getBidderUsername() != null) ? bid.getBidderUsername().toLowerCase() : "";
+                
+                // Nếu 1 trong 2 cột có chứa từ khóa thì hốt vào danh sách
+                if (aucIdStr.contains(filterText) || bidderName.contains(filterText)) {
+                    filteredList.add(bid);
+                }
+            }
+            bidHistoryTable.setItems(filteredList);
+        }
+        bidHistoryTable.refresh(); // Ép giao diện vẽ lại ngay lập tức
     }
 }
