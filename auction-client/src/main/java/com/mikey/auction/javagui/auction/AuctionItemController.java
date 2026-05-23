@@ -116,7 +116,7 @@ public class AuctionItemController implements SearchListener, SocketListener {
             title.setText(itemSummary.getTitle());
             description.setText(itemSummary.getDescription());
             sellerName.setText("Người bán: " + auctionInfo.getSellerUsername());
-            bidStep.setText("• Bước giá: " + auctionInfo.getBidStep() + "đ");
+            bidStep.setText("• Bước giá: " + String.format("%,.0f đ", auctionInfo.getBidStep()));
             startTime.setText(auctionInfo.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             type.setText("Loại: " + itemSummary.getItemType().name());
 
@@ -162,10 +162,13 @@ public class AuctionItemController implements SearchListener, SocketListener {
         } catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
-public void updateDynamicInfo() {
-        curPrice.setText(auctionInfo.getCurPrice() + "đ");
-        curBidder.setText(auctionInfo.getLastBidderName() != null ? "người giữ giá: " + auctionInfo.getLastBidderName() : "Chưa có người ra giá");
+    public void updateDynamicInfo() {
+        // Xóa dòng cũ: curPrice.setText(auctionInfo.getCurPrice() + "đ");
         
+        // Dán dòng mới này vào (Định dạng có dấu phẩy phân cách hàng nghìn):
+        curPrice.setText(String.format("%,.0f đ", auctionInfo.getCurPrice()));
+        
+        curBidder.setText(auctionInfo.getLastBidderName() != null ? "Người giữ giá: " + auctionInfo.getLastBidderName() : "Chưa có người ra giá");
         if (isDailyMode) {
             RequestHandler.getInstance().requestBidHistoryDaily(auctionInfo.getId());
             return; 
@@ -240,9 +243,13 @@ public void updateDynamicInfo() {
                         else if (currentType == ItemType.ELECTRONICS) specificInfo = gson.fromJson(jsonData, Electronics.class).getSpecificInfo();
 
                         if (specificInfo != null) {
-                            attributeBox.getChildren().clear();
-                            specificInfo.forEach((lbl, val) -> attributeBox.getChildren().add(new Label(lbl + ": " + val)));
-                        }
+                        attributeBox.getChildren().clear();
+                        specificInfo.forEach((lbl, val) -> {
+                            Label attrLabel = new Label(lbl + ": " + val);
+                            attrLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #4a5568; -fx-padding: 5 20 5 0; -fx-font-weight: bold;");
+                            attributeBox.getChildren().add(attrLabel);
+                        });
+                    }
                     }
                 } else if ("NOTIFICATION".equals(category) && "CHECK".equals(action)) {
                     boolean isSubscribed = gson.fromJson(jsonData, Boolean.class);

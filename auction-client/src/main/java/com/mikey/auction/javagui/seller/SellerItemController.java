@@ -105,9 +105,12 @@ public class SellerItemController {
 
         if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             
-            // 👉 ĐÃ SỬA: Gọi đúng hàm xóa đấu giá thay vì xóa tài khoản
             System.out.println("Gửi yêu cầu xóa vĩnh viễn ID: " + auctionInfo.getId());
-            RequestHandler.getInstance().requestDeleteAuction(auctionInfo.getId()); 
+            
+            // 👉 GỌI ĐÚNG HÀM DÀNH CHO SELLER (truyền thêm biến userId của Seller vào)
+            RequestHandler.getInstance().requestDeleteAuctionSeller(auctionInfo.getId(), this.userId); 
+
+            // Hiệu ứng biến mất trên UI...
 
             // Hiệu ứng biến mất trên UI (giữ nguyên)
             Node cardRoot = ((Node) event.getSource()).getParent().getParent();
