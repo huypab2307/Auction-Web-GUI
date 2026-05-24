@@ -132,19 +132,18 @@ public class DashBoardController implements SocketListener {
             }
         }
         else if ("AUCTION".equals(category) && "PLACEBID".equals(action)) {
-        // Giả sử jsonData gửi về là một chuỗi chữ thuần túy từ Server, ví dụ: "Bạn đã trả giá thành công mặt hàng #102"
-        // Nếu là chuỗi thuần túy (không phải JSON phức tạp), ta dùng luôn hoặc xóa dấu ngoặc kép nếu có
-        String message = jsonData.replace("\"", ""); 
+            // Dùng Gson giải mã chuỗi chuẩn nguyên bản (Tránh lỗi ký tự đặc biệt)
+            String message = gson.fromJson(jsonData, String.class); 
+            // Gọi hàm để đẩy ngay lên giao diện
+            this.addSingleActivity(message);
+        }
         
-        // Gọi hàm để đẩy ngay lên giao diện
-        this.addSingleActivity(message);
-    }
-    
         // 🔥 NHÁNH BỔ SUNG 2: Khi Server báo Theo dõi (Follow) thành công
         else if ("NOTIFICATION".equals(category) && "FOLLOW".equals(action)) {
-        String message = jsonData.replace("\"", "");
-        this.addSingleActivity(message);
-    }
+            // Dùng Gson giải mã chuỗi chuẩn nguyên bản
+            String message = gson.fromJson(jsonData, String.class);
+            this.addSingleActivity(message);
+        }
     }
     public void loadRecentActivities(List<String> activities) {
     // Ép chạy trên luồng UI của JavaFX để tránh lỗi văng app khi nhận dữ liệu từ Socket
@@ -193,46 +192,61 @@ public class DashBoardController implements SocketListener {
     });
 }
     public void addSingleActivity(String activityText) {
-        if (activityText == null || activityText.trim().isEmpty()) return;
-        // Ép chạy trên luồng UI của JavaFX để tránh lỗi văng app
-        Platform.runLater(() -> {
-        // 1. Kiểm tra nếu đang hiển thị dòng chữ mờ "Chưa có hoạt động nào gần đây.", xóa nó đi trước
-        if (!activityList.getChildren().isEmpty() && activityList.getChildren().get(0) instanceof Label) {
-            Label firstChild = (Label) activityList.getChildren().get(0);
-            if ("Chưa có hoạt động nào gần đây.".equals(firstChild.getText())) {
-                activityList.getChildren().clear();
+    // 1. Kiểm tra dữ liệu đầu vào dữ dội hơn để tránh chuỗi rỗng
+    if (activityText == null || activityText.trim().isEmpty() || "null".equalsIgnoreCase(activityText.trim())) {
+        return;
+    }
+    
+    // Ép chạy trên luồng UI của JavaFX để tránh lỗi văng app
+    Platform.runLater(() -> {
+        try {
+            // 2. Xóa dòng chữ mờ "Chưa có hoạt động nào gần đây." một cách an toàn
+            if (!activityList.getChildren().isEmpty()) {
+                javafx.scene.Node firstChild = activityList.getChildren().get(0);
+                
+                // Nếu phần tử đầu tiên là một Label (chính là dòng chữ mờ ban đầu) thì xóa sạch
+                if (firstChild instanceof Label) {
+                    Label labelPlaceholder = (Label) firstChild;
+                    if ("Chưa có hoạt động nào gần đây.".equals(labelPlaceholder.getText())) {
+                        activityList.getChildren().clear();
+                    }
+                }
             }
-        }
 
-        // 2. Tạo giao diện dòng hoạt động mới (HBox chứa Icon + Chữ)
-        HBox activityRow = new HBox();
-        activityRow.setAlignment(Pos.CENTER_LEFT);
-        activityRow.setSpacing(12);
-        activityRow.setPadding(new Insets(8, 12, 8, 12));
-        
-        // Hiệu ứng hover đồng bộ với các dòng khác
-        activityRow.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 6;");
-        activityRow.setOnMouseEntered(e -> activityRow.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 6;"));
-        activityRow.setOnMouseExited(e -> activityRow.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 6;"));
+            // 3. Tạo giao diện dòng hoạt động mới (HBox chứa Icon + Chữ)
+            HBox activityRow = new HBox();
+            activityRow.setAlignment(Pos.CENTER_LEFT);
+            activityRow.setSpacing(12);
+            activityRow.setPadding(new Insets(8, 12, 8, 12));
+            
+            // Hiệu ứng hover đồng bộ với các dòng khác
+            activityRow.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 6;");
+            activityRow.setOnMouseEntered(e -> activityRow.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 6;"));
+            activityRow.setOnMouseExited(e -> activityRow.setStyle("-fx-background-color: #f8fafc; -fx-background-radius: 6;"));
 
-        // Tạo icon dấu chấm tròn màu tím Cosmic
-        Label icon = new Label("•"); 
-        icon.setTextFill(Color.web("#6366f1")); 
-        icon.setFont(Font.font("System", 20));
+            // Tạo icon dấu chấm tròn màu tím Cosmic
+            Label icon = new Label("•"); 
+            icon.setTextFill(Color.web("#6366f1")); 
+            icon.setFont(Font.font("System", 20));
 
-        // Tạo Label chứa nội dung hoạt động
-        Label content = new Label(activityText);
-        content.setTextFill(Color.web("#334155")); 
-        content.setFont(Font.font("System", 14));
+            // Tạo Label chứa nội dung hoạt động
+            Label content = new Label(activityText);
+            content.setTextFill(Color.web("#334155")); 
+            content.setFont(Font.font("System", 14));
+            content.setWrapText(true); // Tự động xuống dòng nếu text quá dài không lo bị che mất
 
-        activityRow.getChildren().addAll(icon, content);
+            activityRow.getChildren().addAll(icon, content);
 
-        // 3. CHÈN VÀO VỊ TRÍ ĐẦU TIÊN (Chỉ số 0) để hoạt động mới nhất luôn nằm trên cùng
-        activityList.getChildren().add(0, activityRow);
+            // 4. CHÈN VÀO VỊ TRÍ ĐẦU TIÊN (Chỉ số 0) để hoạt động mới nhất luôn nằm trên cùng
+            activityList.getChildren().add(0, activityRow);
 
-        // Giới hạn tối đa hiển thị 8-10 hoạt động cho đỡ chật màn hình
-        if (activityList.getChildren().size() > 10) {
-            activityList.getChildren().remove(activityList.getChildren().size() - 1);
+            // 5. Giới hạn tối đa hiển thị 10 hoạt động cho đỡ chật màn hình
+            while (activityList.getChildren().size() > 10) {
+                activityList.getChildren().remove(activityList.getChildren().size() - 1);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi khi render addSingleActivity: " + e.getMessage());
+            e.printStackTrace();
         }
     });
 }

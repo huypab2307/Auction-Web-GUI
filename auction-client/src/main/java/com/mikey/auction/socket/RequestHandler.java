@@ -191,5 +191,7 @@ public class RequestHandler {
         send("AUCTION|DELETE|" + auctionId + "|" + sellerId + "|SELLER");
     }
 
-    
+    public void requestRecentActivities(int userId) {
+        send("AUCTION|HISTORY|"+ userId);
+    }
 }
