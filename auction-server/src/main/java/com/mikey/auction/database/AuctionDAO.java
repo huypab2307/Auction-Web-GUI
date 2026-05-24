@@ -1,17 +1,21 @@
 package com.mikey.auction.database;
 
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Map;
+
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
 import com.mikey.auction.items.ItemType;
-
-
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Map;
 
 
 public class AuctionDAO extends BaseDAO {
@@ -567,6 +571,16 @@ public class AuctionDAO extends BaseDAO {
         return list;
     }
 
+    public boolean closeSingleAuction(int auctionId) {
+    String sql = "UPDATE auctions SET status = 'CLOSED' WHERE id = ? AND status = 'OPEN'";
+    try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, auctionId);
+        return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi đóng phiên đấu giá đơn lẻ: " + e.getMessage());
+        return false;
+    }
+}
     // =========================================================================
     // 🔥 SIÊU THUẬT TOÁN ĐẤU GIÁ: CHỐNG LOST UPDATE & CHỐNG BẮN TỈA (ANTI-SNIPING)
     // =========================================================================

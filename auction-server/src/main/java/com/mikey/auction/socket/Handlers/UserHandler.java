@@ -1,15 +1,15 @@
 package com.mikey.auction.socket.Handlers;
 
 import java.io.PrintWriter;
-import com.mikey.auction.database.UserDAO;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
+import com.mikey.auction.database.UserDAO;
 
 public class UserHandler {
     private static final Gson gson = new GsonBuilder()
@@ -19,7 +19,7 @@ public class UserHandler {
 
     public static void handleUser(String message, PrintWriter out) {
         try {
-            String[] parts = message.split("\\|");
+            String[] parts = message.split("\\|", 5);
             if (parts.length < 2) return;
 
             String action = parts[1].trim();
@@ -39,6 +39,18 @@ public class UserHandler {
                     break;
                 case "DELETE_ACCOUNT":
                     result = true;
+                    break;
+                    
+                case "UPDATE_AVATAR":
+                    if (parts.length < 4) {
+                        result = "FAIL";
+                        break;
+                    }
+                    int id = Integer.parseInt(parts[2].trim());
+                    String base64String = parts[3];
+
+                    boolean isAvatarUpdated = UserDAO.getInstance().updateAvatar(id, base64String);
+                    result = isAvatarUpdated ? "SUCCESS" : "FAIL";
                     break;
             }
 

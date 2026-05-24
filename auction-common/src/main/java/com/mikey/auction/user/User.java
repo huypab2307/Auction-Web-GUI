@@ -10,6 +10,17 @@ public abstract class User {
     protected Role role;
     // 👉 THÊM BIẾN TRẠNG THÁI NÀY
     protected String status; 
+    protected String avatar; // 👉 THÊM BIẾN LƯU ẢNH DẠNG BASE64
+
+     // THÊM GETTER / SETTER CHO ẢNH
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
 
     // Cập nhật lại Constructor gốc của bạn
     public User(String username, String password, int id, Role role) {
@@ -18,6 +29,7 @@ public abstract class User {
         this.id = id;
         this.role = role;
         this.status = "ACTIVE"; // Mặc định khi tạo mới là ACTIVE
+    
     }
 
     public String getUsername() { 

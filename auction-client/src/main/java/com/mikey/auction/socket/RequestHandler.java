@@ -172,6 +172,11 @@ public class RequestHandler {
         send("AUCTION|GET_ALL_BID_HISTORY");
     }
 
+    public void requestUpdateAvatar(int userId, String base64Image) {
+    // Cấu trúc gói tin: CATEGORY | ACTION | ID | DATA_ẢNH
+    String message = "USER|UPDATE_AVATAR|" + userId + "|" + base64Image;
+        send(message); 
+}
 // ==========================================
     // NHÓM LỆNH XÓA/HỦY PHIÊN ĐẤU GIÁ (ĐÃ ĐỒNG BỘ 5 PARTS VỚI SERVER)
     // ==========================================

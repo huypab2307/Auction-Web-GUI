@@ -1,19 +1,6 @@
 package com.mikey.auction.socket;
 
 import java.io.PrintWriter;
-import com.mikey.auction.database.AuctionDAO;
-import com.mikey.auction.database.UserDAO;
-import com.mikey.auction.dto.AuctionInfo;
-import com.mikey.auction.items.Item;
-import com.mikey.auction.items.ItemType;
-import com.mikey.auction.manager.AuctionManager;
-import com.mikey.auction.manager.ItemManager;
-import com.mikey.auction.user.Bidder;
-import com.mikey.auction.user.Role;
-import com.mikey.auction.user.User;
-import com.mikey.auction.manager.UserManager;
-
-// THÊM THƯ VIỆN GSON CHO NGÀY THÁNG
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -23,6 +10,17 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
+import com.mikey.auction.database.AuctionDAO;
+import com.mikey.auction.database.UserDAO;
+import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.items.Item;
+import com.mikey.auction.items.ItemType;
+import com.mikey.auction.manager.AuctionManager;
+import com.mikey.auction.manager.ItemManager;
+import com.mikey.auction.manager.UserManager;
+import com.mikey.auction.user.Bidder;
+import com.mikey.auction.user.Role;
+import com.mikey.auction.user.User;
 
 public class AuctionHandler {
     // ĐÃ FIX LỖI GSON CRASH APP
@@ -64,6 +62,11 @@ public class AuctionHandler {
                     if (p.getId() > 0) {
                         // Gọi hàm update trong Manager
                         result = AuctionManager.getInstance().updateAuction(p);
+
+                        // 👉 ĐÃ THÊM: Nếu cập nhật thành công, đồng bộ lại bộ đếm ngược thời gian kết thúc mới
+                   if (Boolean.TRUE.equals(result)) {
+                        com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleAuctionClose(p);
+               }
                     } else {
                         // 3. Nếu ID <= 0 thì TẠO MỚI
                         java.sql.Connection conn = null;

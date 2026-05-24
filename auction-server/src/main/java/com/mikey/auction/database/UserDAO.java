@@ -1,15 +1,32 @@
 package com.mikey.auction.database;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Base64;
+
 import com.mikey.auction.user.Admin;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Seller;
 import com.mikey.auction.user.User;
 
-import java.sql.*;
-import java.util.ArrayList;
-
 public class UserDAO extends BaseDAO {
     private static final UserDAO user = new UserDAO();
+    private static final String AVATARS_DIR = "avatars";
+
+    static {
+        File dir = new File(AVATARS_DIR);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+    }
+
     private UserDAO(){}
     public static UserDAO getInstance(){
         return user;
@@ -36,7 +53,25 @@ public class UserDAO extends BaseDAO {
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
             while(rs.next()){
-                return UserDAO.getInstance().login(rs.getString("username"),rs.getString("password"));
+                User u = null;
+                String role = rs.getString("role");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                String status = rs.getString("status");
+
+                if ("ADMIN".equals(role)) {
+                    u = new Admin(username, password, id);
+                } else if ("SELLER".equals(role)) {
+                    u = new Seller(username, password, id);
+                } else {
+                    u = new Bidder(username, password, id);
+                }
+
+                if (u != null) {
+                    u.setStatus(status);
+                    u.setAvatar(loadAvatar(id));
+                }
+                return u;
             }
         } catch (SQLException ex) {
             System.out.println("add khong thanh cong");
@@ -51,12 +86,12 @@ public class UserDAO extends BaseDAO {
             st.setString(1, username);
             st.setString(2, password);
             ResultSet rs = st.executeQuery();
-            if (rs.next()) { 
-                String role = rs.getString("role"); 
+            if (rs.next()) {
+                String role = rs.getString("role");
                 int id = rs.getInt("id");
                 String user = rs.getString("username");
                 String pass = rs.getString("password");
-                String status = rs.getString("status"); // 👉 Đọc thêm cột status từ Database
+                String status = rs.getString("status");
 
                 User u = null;
                 if ("ADMIN".equals(role)) {
@@ -68,14 +103,15 @@ public class UserDAO extends BaseDAO {
                 }
 
                 if (u != null) {
-                    u.setStatus(status); // 👉 Gán trạng thái vào đối tượng User
+                    u.setStatus(status);
+                    u.setAvatar(loadAvatar(id));
                 }
-                return u; // Trả về đối tượng để Server Handler kiểm tra quyền
+                return u;
             }
         } catch (SQLException ex) {
             System.out.println("Dang nhap khong thanh cong");
         }
-        return null;    
+        return null;
     }
 
     public User findByUsername(String username){
@@ -85,7 +121,14 @@ public class UserDAO extends BaseDAO {
             st.setString(1, username);
             ResultSet rs = st.executeQuery();
             if(rs.next()){
-                return new Bidder(rs.getString("username"), rs.getString("password"), rs.getInt("id"));
+                int id = rs.getInt("id");
+                String password = rs.getString("password");
+                String status = rs.getString("status");
+
+                User u = new Bidder(username, password, id);
+                u.setStatus(status);
+                u.setAvatar(loadAvatar(id));
+                return u;
             }
         } catch (SQLException ex) {
             System.out.println("Lỗi tìm user: " + ex.getMessage());
@@ -136,25 +179,26 @@ public class UserDAO extends BaseDAO {
     public java.util.ArrayList<User> getAllUsers() {
         ArrayList<User> list = new ArrayList<>();
         String query = "SELECT * FROM user";
-        
+
         try (Connection connect = getConnect();
              PreparedStatement st = connect.prepareStatement(query);
              ResultSet rs = st.executeQuery()) {
-             
+
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String uname = rs.getString("username");
                 String pass = rs.getString("password");
                 String role = rs.getString("role");
-                String status = rs.getString("status"); // 👉 ĐỌC CỘT STATUS
-                
+                String status = rs.getString("status");
+
                 User u = null;
                 if ("ADMIN".equals(role)) u = new Admin(uname, pass, id);
                 else if ("SELLER".equals(role)) u = new Seller(uname, pass, id);
                 else u = new Bidder(uname, pass, id);
-                
+
                 if (u != null) {
-                    u.setStatus(status); // 👉 ĐỔ VÀO OBJECT USER
+                    u.setStatus(status);
+                    u.setAvatar(loadAvatar(id));
                     list.add(u);
                 }
             }
@@ -175,5 +219,32 @@ public class UserDAO extends BaseDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean updateAvatar(int userId, String base64Image) {
+        try {
+            File avatarFile = new File(AVATARS_DIR + "/avatar_" + userId + ".png");
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            try (FileOutputStream fos = new FileOutputStream(avatarFile)) {
+                fos.write(imageBytes);
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private String loadAvatar(int userId) {
+        try {
+            File avatarFile = new File(AVATARS_DIR + "/avatar_" + userId + ".png");
+            if (avatarFile.exists()) {
+                byte[] fileContent = Files.readAllBytes(avatarFile.toPath());
+                return Base64.getEncoder().encodeToString(fileContent);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
