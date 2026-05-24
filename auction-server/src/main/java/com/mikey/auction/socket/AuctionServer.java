@@ -8,8 +8,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +17,10 @@ import java.util.concurrent.Executors;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.manager.NotificationManager;
-import com.mikey.auction.socket.Handlers.*;
+import com.mikey.auction.socket.Handlers.ItemHandler;
+import com.mikey.auction.socket.Handlers.LoginHandlers;
+import com.mikey.auction.socket.Handlers.RegisterHandlers;
+import com.mikey.auction.socket.Handlers.UserHandler;
 import com.mikey.auction.user.Bidder;
 
 public class AuctionServer {
@@ -40,44 +41,29 @@ public class AuctionServer {
     }
 
     public static void main(String[] args) {
-        int port = 12345;
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("========================================");
-            System.out.println("AUCTION SERVER is started on port: " + port);
-            System.out.println("Waiting for clients...");
-            System.out.println("========================================");
+    int port = 12345;
+    try (ServerSocket serverSocket = new ServerSocket(port)) {
+        System.out.println("========================================");
+        System.out.println("AUCTION SERVER is started on port: " + port);
+        System.out.println("Waiting for clients...");
+        System.out.println("========================================");
 
-            startAuctionTimer(); 
+        // 👉 KÍCH HOẠT HỆ THỐNG LẬP LỊCH TỰ ĐỘNG KHÔI PHỤC KHI KHỞI ĐỘNG SERVER
+        com.mikey.auction.manager.AuctionScheduler.getInstance().loadActiveAuctionsOnStartup();
 
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("[NEW CONNECTION] " + clientSocket.getInetAddress());
-                threadPool.execute(new ClientHandler(clientSocket));
-            }
-        } catch (IOException e) {
-            System.err.println("Server Error: " + e.getMessage());
-        } finally {
-            threadPool.shutdown();
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("[NEW CONNECTION] " + clientSocket.getInetAddress());
+            threadPool.execute(new ClientHandler(clientSocket)); //
         }
+    } catch (IOException e) {
+        System.err.println("Server Error: " + e.getMessage()); //
+    } finally {
+        threadPool.shutdown(); //
+        // Đóng an toàn luồng đếm ngược khi Server sập
+        com.mikey.auction.manager.AuctionScheduler.getInstance().shutdown();
     }
-
-    public static void startAuctionTimer() {
-        new Thread(() -> {
-            while (true) {
-                try {
-                    ArrayList<AuctionInfo> auctions = AuctionDAO.getInstance().getAllAuctions();
-                    LocalDateTime now = LocalDateTime.now();
-
-                    for (AuctionInfo a : auctions) {
-                        // Thêm logic cập nhật trạng thái nếu cần
-                    }
-                    Thread.sleep(60000); // Tối ưu: Kiểm tra 1 phút/lần thay vì 1 giây/lần
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
+}
 }
 
 class ClientHandler implements Runnable {
