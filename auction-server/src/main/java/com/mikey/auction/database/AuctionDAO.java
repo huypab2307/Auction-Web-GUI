@@ -467,14 +467,17 @@ public class AuctionDAO extends BaseDAO {
             }
 
             // 5. Sản phẩm đang theo dõi (Yêu thích)
-            String sqlFollow = "SELECT COUNT(*) FROM subscriptions WHERE userId = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) {
-                ps.setInt(1, userId);
-                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setFollowingCount(rs.getInt(1)); }
-            } catch (Exception e) {
-                // Tạm bỏ qua lỗi subscriptions table
-                stats.setFollowingCount(0);
-            }
+            // 5. Sản phẩm đang theo dõi (Yêu thích) - ĐÃ SỬA LỖI TRÙNG BIẾN CONN
+String sqlFollow = "SELECT COUNT(*) FROM notificationList WHERE userId = ?";
+try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) { // Sử dụng trực tiếp biến conn có sẵn của hàm
+    ps.setInt(1, userId);
+    try (ResultSet rs = ps.executeQuery()) { 
+        if (rs.next()) stats.setFollowingCount(rs.getInt(1)); 
+    }
+} catch (Exception e) {
+    System.err.println("Lỗi đồng bộ đếm người theo dõi: " + e.getMessage());
+    stats.setFollowingCount(0);
+}
 
             // 6. Sản phẩm người này đã bán thành công
             String sqlSold = "SELECT COUNT(*) FROM auctions WHERE sellerId = ? AND status = 'CLOSED' AND lastBidderId IS NOT NULL";
