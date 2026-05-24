@@ -1,7 +1,6 @@
 package com.mikey.auction.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +22,6 @@ public class DatabaseCrashRecoveryTest {
         
         // Giả sử trước khi sập giá hiện tại là 1,000,000 VND
         assertEquals(1000000, recoveredAuction.getCurPrice(), "Giá hiện tại của phiên đấu giá phải được giữ nguyên");
-        assertFalse(recoveredAuction.isFinished(), "Phiên đấu giá chưa hết hạn trước khi sập thì sau khi restart vẫn phải tiếp tục chạy");
+        assertEquals("OPEN",recoveredAuction.getStatus(), "Phiên đấu giá chưa hết hạn trước khi sập thì sau khi restart vẫn phải tiếp tục chạy");
     }
 }
