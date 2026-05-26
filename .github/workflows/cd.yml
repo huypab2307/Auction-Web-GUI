@@ -1,0 +1,36 @@
+name: Continuous Deployment (CD)
+
+on:
+  push:
+    tags: [ "v*.*.*" ] # Chỉ chạy khi tạo tag mới (ví dụ: v1.0.0)
+
+jobs:
+  deploy-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write           # Bắt buộc phải có quyền này để Actions có quyền tạo bản Release
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+
+    # Đóng gói toàn bộ các mô-đun thành file .jar
+    - name: Package Application
+      run: mvn clean package -DskipTests
+
+    # Tự động gom sạch file .jar ở các thư mục con và đưa lên GitHub Release
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: "**/*.jar" 
+        name: Release ${{ github.ref_name }}
+        tag_name: ${{ github.ref }}
+        draft: false
+        prerelease: false
