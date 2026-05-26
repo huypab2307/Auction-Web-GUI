@@ -1,18 +1,21 @@
-import com.mikey.auction.database.AuctionDAO;
-import com.mikey.auction.dto.AuctionInfo;
-import org.junit.jupiter.api.Test;
-
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.mikey.auction.database.AuctionDAO;
+import com.mikey.auction.dto.AuctionInfo;
 
 public class AuctionServerTest {
 
@@ -30,9 +33,17 @@ public class AuctionServerTest {
     @Test
     public void testAuctionInfoDTO() {
         // Kiểm tra việc gán và lấy dữ liệu của Object Data Transfer (DTO)
-        AuctionInfo info = new AuctionInfo();
-        info.setId(99);
-        info.setCurPrice(500000.0);
+        AuctionInfo info = new AuctionInfo(
+            null,          // itemInfo (để null nếu chưa test phần này)
+            99,            // id
+            "sellerTest",  // sellerUsername
+            "bidderTest",  // lastBidderName
+            500000.0,      // curPrice
+            null,          // status (AuctionStatus)
+            null,          // startTime
+            null,          // endTime
+            0.0            // bidStep
+        );
 
         assertEquals(99, info.getId());
         assertEquals(500000.0, info.getCurPrice());
