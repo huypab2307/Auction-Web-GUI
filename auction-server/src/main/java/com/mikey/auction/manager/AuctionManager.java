@@ -5,12 +5,17 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.database.NotificationDAO;
 import com.mikey.auction.database.UserDAO;
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.dto.AutoBidInfo;
 import com.mikey.auction.items.Item;
+import com.mikey.auction.socket.AuctionServer;
 import com.mikey.auction.user.Bidder;
 import com.mikey.auction.user.Role;
 
@@ -65,10 +70,10 @@ public class AuctionManager {
             NotificationManager.getInstance().notiAll(freshAuctionInfo, bidder);
 
             // PHÁT SÓNG CHO TẤT CẢ CÁC MÁY KHÁC ĐỂ CẬP NHẬT GIÁ
-com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
-    .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-    .create();
-com.mikey.auction.socket.AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + gson.toJson(freshAuctionInfo));
+            Gson gson = new com.google.gson.GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .create();
+            AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + gson.toJson(freshAuctionInfo));
             
 
             // 👉 QUAN TRỌNG: Trả về đối tượng mới tinh cho CHÍNH MÁY vừa bấm nút
@@ -115,10 +120,12 @@ com.mikey.auction.socket.AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + gson.
     }
 
 // 👉 ĐÃ SỬA: Đổi kiểu trả về thành AuctionInfo để trả nguyên cục dữ liệu chứa giá mới cho Client
-    public AuctionInfo registerAutoBid(com.mikey.auction.dto.AutoBidInfo info) {
+    public AuctionInfo registerAutoBid(AutoBidInfo info) {
+        //Lưu mức giá tối đa mà người dùng muốn đặt, cùng với ID phiên đấu và ID người dùng
         boolean success = AuctionDAO.getInstance().registerAutoBid(info);
         if (success) {
             AuctionDAO.getInstance().triggerAutoBids(info.getAuctionId());
+            // lấy lên bản ghi mới nhất sau khi đã kích hoạt auto bid để trả về cho máy vừa cài đặt
             AuctionInfo freshInfo = AuctionDAO.getInstance().searchAuctionById(info.getAuctionId());
             if (freshInfo != null) {
                 try {

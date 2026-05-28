@@ -14,6 +14,7 @@ import java.util.Map;
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.dto.AutoBidInfo;
 import com.mikey.auction.dto.ItemSummary;
 import com.mikey.auction.items.ItemType;
 
@@ -82,11 +83,15 @@ public class AuctionDAO extends BaseDAO {
 
 
     public ArrayList<AuctionInfo> getAllAuctions() {
-        return executeQueryAndGetList(BASE_SELECT_QUERY);
+        // Chỉ lấy những phiên đang OPEN (Đang mở) hoặc PENDING (Sắp mở)
+        // Lọc sạch bách những thằng CANCELED và CLOSED
+        String sql = BASE_SELECT_QUERY + " WHERE a.status = 'OPEN' OR a.status = 'PENDING'";
+        return executeQueryAndGetList(sql);
     }
 
     public ArrayList<AuctionInfo> getAuctionsType(ItemType type) {
-        String sql = BASE_SELECT_QUERY + " WHERE i.type = ?";
+        // Tương tự cho hàm lấy theo danh mục
+        String sql = BASE_SELECT_QUERY + " WHERE i.type = ? AND (a.status = 'OPEN' OR a.status = 'PENDING')";
         return executeQueryAndGetList(sql, type.name());
     }
 
@@ -333,7 +338,7 @@ public class AuctionDAO extends BaseDAO {
     }
     
     // 1. Hàm lưu cài đặt của người dùng vào bảng autoBidding
-    public boolean registerAutoBid(com.mikey.auction.dto.AutoBidInfo info) {
+    public boolean registerAutoBid(AutoBidInfo info) {
         // ON DUPLICATE KEY UPDATE: Nếu họ cài rồi mà muốn đổi giá Max, nó sẽ tự update chứ không sinh ra 2 dòng
         String sql = "INSERT INTO autoBidding (userId, auctionId, maxPrice) VALUES (?, ?, ?) " +
                      "ON DUPLICATE KEY UPDATE maxPrice = ?";

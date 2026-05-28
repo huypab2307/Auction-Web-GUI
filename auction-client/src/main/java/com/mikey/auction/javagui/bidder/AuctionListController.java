@@ -85,5 +85,14 @@ public class AuctionListController implements SocketListener {
                 }
             });
         }
+        else if ("AUCTION".equals(category) && "UPDATE_STATUS".equals(action)) {
+        
+        // CÁCH THIÊN TÀI: Không cần tự xóa thẻ UI bằng tay cho mệt. 
+        // Bắt RequestHandler gửi lệnh xin lại danh sách mới nhất từ Server!
+        // Khi Server gửi lại danh sách mới (đã mất cái bị xóa), Nhánh 1 sẽ tự động chạy và vẽ lại UI sạch sẽ.
+        RequestHandler.getInstance().requestAllAuctions();
+        }
     }
+
+    
 }

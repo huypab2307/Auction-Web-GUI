@@ -73,6 +73,8 @@ public class NotificationDAO extends BaseDAO {
             }
             pr.executeBatch();
             return true;
+        } catch (SQLException e) {
+            throw new SQLException("Gửi thông báo thất bại.", e);
         }
     }
     public ArrayList<Integer> findNotificationList(Connection connection,int auctionId, int userId) throws SQLException{

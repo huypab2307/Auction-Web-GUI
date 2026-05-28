@@ -105,6 +105,12 @@
                                                     </children>
                                                 </HBox>
                                                 <Label fx:id="datetime" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="⏱ Thời gian:" />
+                                                <VBox alignment="CENTER" spacing="5.0" style="-fx-background-color: #fff0f0; -fx-border-color: #ffcdd2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12;">
+                                                    <children>
+                                                        <Label text="🔥 THỜI GIAN CÒN LẠI" style="-fx-text-fill: #d32f2f; -fx-font-size: 13px; -fx-font-weight: bold; -fx-opacity: 0.8;" />
+                                                        <Label fx:id="lblCountdown" text="Đang đồng bộ..." style="-fx-text-fill: #d32f2f; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Consolas', monospace;" />
+                                                    </children>
+                                                </VBox>
                                                 <Button fx:id="bidButton" maxWidth="Infinity" onAction="#onBidHandle" prefHeight="50.0" style="-fx-background-color: #2575fc; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16; -fx-background-radius: 5;" text="ĐẶT GIÁ NGAY" />
                                                 <Button fx:id="autoBidButton" maxWidth="Infinity" onAction="#onAutoBidHandle" prefHeight="45.0"
                                                         style="-fx-background-color: transparent; -fx-border-color: #2575fc; -fx-border-width: 1; -fx-text-fill: #2575fc; -fx-font-weight: bold; -fx-cursor: hand;"

@@ -83,6 +83,8 @@ public class AuctionItemController implements SearchListener, SocketListener {
     @FXML private Button btnDailyView;
     @FXML private NumberAxis xAxis;
     
+    @FXML private Label lblCountdown;
+    private javafx.animation.Timeline countdownTimeline; // Biến giữ nhịp đồng hồ
     private boolean isDailyMode = false; // Biến ghi nhớ chế độ xem hiện tại
     
     // ĐÃ FIX LỖI GSON CRASH APP
@@ -138,8 +140,7 @@ public class AuctionItemController implements SearchListener, SocketListener {
                 bidButton.setManaged(false);
                 autoBidButton.setVisible(false);
                 autoBidButton.setManaged(false);
-                
-                return;
+            
             } else {
                 bidButton.setVisible(true);
                 bidButton.setManaged(true);
@@ -159,6 +160,10 @@ public class AuctionItemController implements SearchListener, SocketListener {
 
             // KÉO XUỐNG CUỐI HÀM renderStaticInfo(), XÓA ĐOẠN CODE KHỞI TẠO BIỂU ĐỒ CŨ VÀ THAY BẰNG DÒNG NÀY:
             RequestHandler.getInstance().requestBidHistory(auctionInfo.getId());
+
+            if (this.auctionInfo != null) {
+                startCountdown(this.auctionInfo);
+            }
         } catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
@@ -272,6 +277,10 @@ public class AuctionItemController implements SearchListener, SocketListener {
                             // 2. Ép các Label (nhãn) trên màn hình đổi số lập tức!
                             updateDynamicInfo(); 
                             showCongratulationEffect(2.5);
+
+                        if (this.auctionInfo != null) {
+                            startCountdown(this.auctionInfo);
+                        }                
                             
                         } catch (Exception e) {
                             // Dự phòng nếu lỗi mạng, ép tải lại toàn bộ thông qua ID sản phẩm
@@ -286,6 +295,8 @@ public class AuctionItemController implements SearchListener, SocketListener {
                     if (jsonData != null && !jsonData.equals("null")) {
                         this.auctionInfo = gson.fromJson(jsonData, AuctionInfo.class);
                         updateDynamicInfo(); 
+
+                    startCountdown(this.auctionInfo);
                     }
 
                 } else if ("AUCTION".equals(category) && "UPDATE_PRICE".equals(action)) {
@@ -298,6 +309,9 @@ public class AuctionItemController implements SearchListener, SocketListener {
                             if (this.auctionInfo != null && this.auctionInfo.getId() == incomingInfo.getId()) {
                                 this.auctionInfo = incomingInfo; // Lấy giá trị mới
                                 updateDynamicInfo();             // Ép giao diện nhảy số tiền
+                                if (this.auctionInfo.getEndTime() != null) {
+                                    startCountdown(this.auctionInfo);
+                                }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -439,6 +453,27 @@ public class AuctionItemController implements SearchListener, SocketListener {
                         }
                     });
                 }
+
+                                // TRONG HÀM onResponseReceived CỦA AuctionItemController
+                else if ("AUCTION".equals(category) && "CLOSED_NOTIFY".equals(action)) {
+                    // 1. Nhận thông tin phiên đã đóng từ Server
+                    AuctionInfo closedInfo = gson.fromJson(jsonData, AuctionInfo.class);
+                    
+                    // 2. Kiểm tra xem có đúng phiên đang xem không
+                    if (this.auctionInfo != null && this.auctionInfo.getId() == closedInfo.getId()) {
+                        Platform.runLater(() -> {
+                            // 3. Cập nhật lại đối tượng thông tin để UI render lại trạng thái CLOSED
+                            this.auctionInfo = closedInfo;
+                            
+                            // 4. Gọi lại hàm hiển thị (Hàm này bạn đã có sẵn để cập nhật UI)
+                            updateDynamicInfo(); // Hàm này phải cập nhật cả Label trạng thái và gọi startCountdown()
+                            
+                            // 5. Nếu startCountdown() vẫn còn đang chạy, nó sẽ tự xử lý logic NHÁNH 1 (CLOSED) 
+                            // để đổi màu hộp thành xám và khóa nút đấu giá.
+                            startCountdown(this.auctionInfo); 
+                        });
+                    }
+                }
             } catch (Exception e) { e.printStackTrace(); }
         });
     }
@@ -526,5 +561,84 @@ public class AuctionItemController implements SearchListener, SocketListener {
         btnTickView.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #4a5568; -fx-background-radius: 5; -fx-font-weight: bold;");
         xAxis.setLabel("Thứ tự ngày đấu giá");
         RequestHandler.getInstance().requestBidHistoryDaily(auctionInfo.getId());
+    }
+
+    private void startCountdown(com.mikey.auction.dto.AuctionInfo info) {
+        if (countdownTimeline != null) countdownTimeline.stop();
+
+        // 1. Bắt lấy cái Hộp và cái Label Tiêu đề bên trong FXML để đổi màu
+        javafx.scene.layout.VBox parentBox = (javafx.scene.layout.VBox) lblCountdown.getParent();
+        javafx.scene.control.Label headerLabel = (javafx.scene.control.Label) parentBox.getChildren().get(0);
+        
+        com.mikey.auction.auction.AuctionStatus status = info.getStatus();
+
+        // ==========================================
+        // NHÁNH 1: ĐÃ KẾT THÚC HOẶC BỊ HỦY (KHÔNG ĐẾM NGƯỢC NỮA)
+        // ==========================================
+        if (status == com.mikey.auction.auction.AuctionStatus.CLOSED || status == com.mikey.auction.auction.AuctionStatus.CANCELED) {
+            parentBox.setStyle("-fx-background-color: #F3F6F9; -fx-border-color: #E4E6EF; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12;");
+            headerLabel.setText("TRẠNG THÁI:");
+            headerLabel.setStyle("-fx-text-fill: #7E8299; -fx-font-size: 13px; -fx-font-weight: bold;");
+            
+            lblCountdown.setText(status == com.mikey.auction.auction.AuctionStatus.CLOSED ? "ĐÃ KẾT THÚC" : "🚫 ĐÃ HỦY");
+            lblCountdown.setStyle("-fx-text-fill: #7E8299; -fx-font-size: 22px; -fx-font-weight: bold;");
+            
+            if (bidButton != null) bidButton.setDisable(true);
+            if (autoBidButton != null) autoBidButton.setDisable(true);
+            return; // Dừng hàm luôn, không chạy Timeline đếm ngược
+        }
+
+        // ==========================================
+        // NHÁNH 2: PENDING HOẶC OPEN (BẬT ĐẾM NGƯỢC)
+        // ==========================================
+        java.time.LocalDateTime targetTime;
+        
+        if (status == com.mikey.auction.auction.AuctionStatus.PENDING) {
+            targetTime = info.getStartTime(); // PENDING thì đếm ngược đến lúc MỞ
+            parentBox.setStyle("-fx-background-color: #FDF6EC; -fx-border-color: #F3D19E; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12;");
+            headerLabel.setText("⏳ SẮP MỞ BÁN SAU:");
+            headerLabel.setStyle("-fx-text-fill: #E6A23C; -fx-font-size: 13px; -fx-font-weight: bold;");
+            lblCountdown.setStyle("-fx-text-fill: #E6A23C; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Consolas', monospace;");
+        } else {
+            targetTime = info.getEndTime(); // OPEN thì đếm ngược đến lúc ĐÓNG
+            parentBox.setStyle("-fx-background-color: #fff0f0; -fx-border-color: #ffcdd2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12;");
+            headerLabel.setText("🔥 KẾT THÚC TRONG:");
+            headerLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 13px; -fx-font-weight: bold;");
+            lblCountdown.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Consolas', monospace;");
+        }
+
+        Runnable updateTimerLogic = () -> {
+            java.time.Duration duration = java.time.Duration.between(java.time.LocalDateTime.now(), targetTime);
+
+            // Khi hết giờ đếm ngược (Mở bán thành công hoặc Đóng phiên)
+            if (duration.isNegative() || duration.isZero()) {
+                countdownTimeline.stop();
+                lblCountdown.setText("Đang tải dữ liệu...");
+                // Gửi lệnh lên Server xin thông tin mới nhất để tự động cập nhật UI sang trạng thái tiếp theo
+                com.mikey.auction.socket.RequestHandler.getInstance().requestSearchById(info.getId());
+                return;
+            }
+
+            long seconds = duration.getSeconds();
+            long d = seconds / 86400; seconds %= 86400;
+            long h = seconds / 3600;  seconds %= 3600;
+            long m = seconds / 60;
+            long s = seconds % 60;
+
+            StringBuilder timeString = new StringBuilder();
+            if (d > 0) timeString.append(d).append(" ngày ");
+            timeString.append(String.format("%02d:%02d:%02d", h, m, s));
+            lblCountdown.setText(timeString.toString());
+            
+            // Hiệu ứng chớp đỏ chỉ bật khi đang OPEN và còn dưới 60 giây
+            if (status == com.mikey.auction.auction.AuctionStatus.OPEN && d == 0 && h == 0 && m == 0 && s <= 60) {
+                lblCountdown.setStyle(s % 2 == 0 ? "-fx-text-fill: #FF0000; -fx-font-size: 26px; -fx-font-weight: bold;" : "-fx-text-fill: #d32f2f; -fx-font-size: 24px; -fx-font-weight: bold;");
+            }
+        };
+
+        updateTimerLogic.run(); // Chạy ngay lập tức (Zero-delay)
+        countdownTimeline = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), event -> updateTimerLogic.run()));
+        countdownTimeline.setCycleCount(javafx.animation.Timeline.INDEFINITE);
+        countdownTimeline.play();
     }
 }
