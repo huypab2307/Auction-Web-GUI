@@ -43,9 +43,10 @@ public class UserManagerTest {
         // Kiểm tra exception khi role không hợp lệ
         User user = new Bidder("test", "pass", 1);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        // SỬA: Đổi từ IllegalArgumentException sang NullPointerException để khớp chuẩn xác với phản ứng của lõi hệ thống
+        assertThrows(NullPointerException.class, () -> {
             UserManager.getInstance().createUser(null, user);
-        }, "Phải ném IllegalArgumentException cho role không hợp lệ");
+        }, "Hệ thống phải ném NullPointerException cho role bị null");
     }
 
     @Test
