@@ -2,14 +2,12 @@ package com.mikey.auction.javagui.topbar;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.mikey.auction.auction.Notifications;
-import com.mikey.auction.database.AuctionDAO;
-import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.javagui.SceneChanger;
 import com.mikey.auction.manager.NotificationManager;
+import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.user.User;
 
 import javafx.event.ActionEvent;
@@ -37,18 +35,18 @@ public class TopBarController {
     private User user;
     private static TopBarController instance;
     public static TopBarController getInstance() { return instance; }
-
-
-    public void setListener(SearchListener listener) {
+    
+     public void setListener(SearchListener listener) {
         this.listener = listener;
     }
 
-    public void searchHandle() throws IOException {
-        String keyword = searchField.getText().toUpperCase();
-        ArrayList<AuctionInfo> results = AuctionDAO.getInstance().searchAuction(keyword);
-
-        if (listener != null) {
-            listener.onSearchPerformed(results);
+    @FXML
+    public void searchHandle() {
+        String keyword = searchField.getText().trim().toUpperCase();
+        if (keyword.isEmpty()) {
+            RequestHandler.getInstance().requestAllAuctions();
+        } else {
+            RequestHandler.getInstance().requestSearch(keyword);
         }
     }
     public void initialize(){

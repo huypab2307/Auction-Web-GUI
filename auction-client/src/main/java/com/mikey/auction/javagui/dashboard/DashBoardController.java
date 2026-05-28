@@ -64,7 +64,7 @@ public class DashBoardController implements SocketListener {
         // Gửi 2 yêu cầu lên Server
         RequestHandler.getInstance().requestUserAuctions(user.getId());
         RequestHandler.getInstance().requestDashboardStats(user.getId());
-        //RequestHandler.getInstance().requestRecentActivities(user.getId());
+        RequestHandler.getInstance().requestRecentActivities(user.getId());
     }
 
     // Hàm hỗ trợ tìm kiếm Label an toàn trong trường hợp dùng FXML rời (<fx:include>)

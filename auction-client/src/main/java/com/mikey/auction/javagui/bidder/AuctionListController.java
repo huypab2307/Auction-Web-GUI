@@ -1,35 +1,35 @@
 package com.mikey.auction.javagui.bidder;
 
-import com.mikey.auction.dto.AuctionInfo;
-import com.mikey.auction.items.ItemType;
-import com.mikey.auction.user.User;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.layout.FlowPane;
-import javafx.application.Platform;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.lang.reflect.Type;
-
-// THƯ VIỆN SOCKET & GSON
-import com.mikey.auction.socket.RequestHandler;
-import com.mikey.auction.socket.SocketClient;
-import com.mikey.auction.socket.SocketListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.items.ItemType;
+import com.mikey.auction.socket.RequestHandler;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
+import com.mikey.auction.user.User;
+
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.layout.FlowPane;
 
 // Bổ sung implements SocketListener
 public class AuctionListController implements SocketListener {
     @FXML public FlowPane mainContainer;
     private User user;
+    private ItemType currentCategory;
     
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
@@ -39,6 +39,7 @@ public class AuctionListController implements SocketListener {
     public void setUser(User user) { this.user = user; }
 
     public void loadData(ItemType type) {
+        this.currentCategory = type;
         // Đăng ký nhận dữ liệu từ Server
         SocketClient.getInstance().setListener(this);
         
@@ -73,9 +74,13 @@ public class AuctionListController implements SocketListener {
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
         // Bạn nhớ chỉnh lại chữ "ALL" hoặc "TYPE" cho khớp với hành động Server gửi về nhé
-        if ("AUCTION".equals(category) && ("All".equals(action) || "TYPE".equals(action))) {
+        if ("AUCTION".equals(category) && ("All".equals(action) || "TYPE".equals(action) || "SEARCH".equals(action))) {
             Type listType = new TypeToken<ArrayList<AuctionInfo>>(){}.getType();
             ArrayList<AuctionInfo> list = gson.fromJson(jsonData, listType);
+            if ("SEARCH".equals(action) && list != null && this.currentCategory != null) {
+                // Xóa bỏ tất cả các sản phẩm có danh mục không khớp với Tab hiện tại
+                list.removeIf(auction -> auction.getItemInfo().getItemType() != this.currentCategory);
+            }
 
             Platform.runLater(() -> {
                 try {
@@ -90,7 +95,7 @@ public class AuctionListController implements SocketListener {
         // CÁCH THIÊN TÀI: Không cần tự xóa thẻ UI bằng tay cho mệt. 
         // Bắt RequestHandler gửi lệnh xin lại danh sách mới nhất từ Server!
         // Khi Server gửi lại danh sách mới (đã mất cái bị xóa), Nhánh 1 sẽ tự động chạy và vẽ lại UI sạch sẽ.
-        RequestHandler.getInstance().requestAllAuctions();
+        loadData(this.currentCategory);
         }
     }
 
