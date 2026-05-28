@@ -1,9 +1,10 @@
 package com.mikey.auction.cloudinary;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import java.io.File;
 import java.util.Map;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 public class CloudinaryService {
     private static final Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
@@ -22,4 +23,23 @@ public class CloudinaryService {
             return null;
         }
     }
+
+   public static String upload(File file, String username) {
+    try {
+        Map params = ObjectUtils.asMap(
+            "folder", "auction_avatars",       
+            "public_id", "avatar_" + username, 
+            "overwrite", true,                 
+            "invalidate", true,
+            // Thêm transformation để ép ảnh về hình vuông 400x400 và tự động tập trung vào khuôn mặt
+            "transformation", "w_400,h_400,c_fill,g_face" 
+        );
+        
+        Map uploadResult = cloudinary.uploader().upload(file, params);
+        return uploadResult.get("secure_url").toString();
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
 }
