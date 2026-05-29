@@ -18,94 +18,109 @@ import com.mikey.auction.socket.AuctionServer;
 public class AuctionScheduler {
     private static final AuctionScheduler instance = new AuctionScheduler();
     
-    // Khởi tạo ThreadPool với 4 luồng xử lý đồng thời cho các tác vụ đóng phiên
+    // Khởi tạo ThreadPool cho các báo thức
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
     
-    // Lưu trữ các Task đang chờ chạy để có thể hủy khi thời gian kết thúc thay đổi
-    private final ConcurrentHashMap<Integer, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+    // Quản lý báo thức Mở bán và Đóng phiên riêng biệt
+    private final ConcurrentHashMap<Integer, ScheduledFuture<?>> openTasks = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, ScheduledFuture<?>> closeTasks = new ConcurrentHashMap<>();
 
     private AuctionScheduler() {}
     public static AuctionScheduler getInstance() { return instance; }
 
     /**
-     * Lập lịch đếm ngược đóng phiên cho một Auction
+     * Hẹn giờ 1 lần duy nhất cho phiên đấu giá (Mở và Đóng)
      */
-    public void scheduleAuctionClose(AuctionInfo auction) {
-        // Hủy tác vụ cũ nếu phiên này từng được lập lịch trước đó (tránh trùng lặp khi update)
-        cancelScheduledClose(auction.getId());
-
+    public void scheduleAuction(AuctionInfo auction) {
+        cancelScheduledTasks(auction.getId()); // Hủy báo thức cũ nếu đây là lệnh cập nhật (Sửa giờ)
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime endTime = auction.getEndTime();
 
-        // Nếu đã quá giờ kết thúc, tiến hành đóng ngay lập tức
-        if (endTime.isBefore(now)) {
-            executeClosing(auction.getId());
-            return;
+        // 1. HẸN GIỜ MỞ BÁN (Nếu đang ở trạng thái PENDING)
+        if (auction.getStatus().toString().equals("PENDING")) {
+            if (auction.getStartTime().isBefore(now) || auction.getStartTime().isEqual(now)) {
+                executeOpening(auction.getId()); // Đã quá giờ mở -> Mở luôn
+            } else {
+                long delayOpen = Duration.between(now, auction.getStartTime()).toMillis();
+                System.out.println("[SCHEDULER] Đã hẹn giờ MỞ phiên ID " + auction.getId() + " sau " + (delayOpen/1000) + "s.");
+                ScheduledFuture<?> openTask = scheduler.schedule(() -> executeOpening(auction.getId()), delayOpen, TimeUnit.MILLISECONDS);
+                openTasks.put(auction.getId(), openTask);
+            }
         }
 
-        // Tính toán khoảng thời gian delay chính xác theo mili-giây
-        long delay = Duration.between(now, endTime).toMillis();
-        System.out.println("[SCHEDULER] Đã lên lịch đóng phiên ID " + auction.getId() + " sau " + (delay / 1000) + " giây.");
-
-        // Đưa vào ScheduledThreadPool để chờ thực thi
-        ScheduledFuture<?> futureTask = scheduler.schedule(() -> {
-            executeClosing(auction.getId());
-        }, delay, TimeUnit.MILLISECONDS);
-
-        scheduledTasks.put(auction.getId(), futureTask);
+        // 2. HẸN GIỜ ĐÓNG PHIÊN (Chỉ áp dụng nếu chưa đóng)
+        if (!auction.getStatus().toString().equals("CLOSED")) {
+            if (auction.getEndTime().isBefore(now) || auction.getEndTime().isEqual(now)) {
+                executeClosing(auction.getId()); // Đã quá giờ đóng -> Đóng luôn
+            } else {
+                long delayClose = Duration.between(now, auction.getEndTime()).toMillis();
+                System.out.println("[SCHEDULER] Đã hẹn giờ ĐÓNG phiên ID " + auction.getId() + " sau " + (delayClose/1000) + "s.");
+                ScheduledFuture<?> closeTask = scheduler.schedule(() -> executeClosing(auction.getId()), delayClose, TimeUnit.MILLISECONDS);
+                closeTasks.put(auction.getId(), closeTask);
+            }
+        }
     }
 
-    /**
-     * Logic thực hiện khóa phiên dưới DB và phát tín hiệu cho Client
-     */
+    private void executeOpening(int auctionId) {
+        try {
+            if (AuctionDAO.getInstance().openSingleAuction(auctionId)) {
+                System.out.println("[SCHEDULER] Đã MỞ BÁN phiên ID: " + auctionId);
+                broadcastUpdate("UPDATE_STATUS", auctionId);
+            }
+        } catch (Exception e) { e.printStackTrace(); } 
+        finally { openTasks.remove(auctionId); }
+    }
+
     private void executeClosing(int auctionId) {
         try {
-            System.out.println("[SCHEDULER] Hệ thống bắt đầu đóng phiên ID: " + auctionId);
-            boolean isClosed = AuctionDAO.getInstance().closeSingleAuction(auctionId);
-            
-            if (isClosed) {
-                AuctionInfo freshInfo = AuctionDAO.getInstance().searchAuctionById(auctionId);
-                if (freshInfo != null) {
-                    Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(LocalDateTime.class, (com.google.gson.JsonSerializer<LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                        .create();
-                    
-                    // Phát sóng cho toàn bộ Client đang kết nối Socket để cập nhật UI lập tức
-                    AuctionServer.broadcast("AUCTION|CLOSED_NOTIFY|" + gson.toJson(freshInfo));
-                }
+            if (AuctionDAO.getInstance().closeSingleAuction(auctionId)) {
+                System.out.println("[SCHEDULER] Đã ĐÓNG phiên ID: " + auctionId);
+                broadcastUpdate("CLOSED_NOTIFY", auctionId);
             }
-        } catch (Exception e) {
-            System.err.println("Lỗi thực thi đóng phiên ID " + auctionId + ": " + e.getMessage());
-        } finally {
-            scheduledTasks.remove(auctionId);
+        } catch (Exception e) { e.printStackTrace(); } 
+        finally { closeTasks.remove(auctionId); }
+    }
+
+    private void broadcastUpdate(String action, int auctionId) {
+        AuctionInfo freshInfo = AuctionDAO.getInstance().searchAuctionById(auctionId);
+        if (freshInfo != null) {
+            Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, (com.google.gson.JsonSerializer<LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                .create();
+            AuctionServer.broadcast("AUCTION|" + action + "|" + gson.toJson(freshInfo));
         }
     }
 
-    /**
-     * Hủy lịch trình đóng phiên
-     */
-    public void cancelScheduledClose(int auctionId) {
-        ScheduledFuture<?> task = scheduledTasks.remove(auctionId);
-        if (task != null && !task.isDone()) {
-            task.cancel(false);
-        }
+    public void cancelScheduledTasks(int auctionId) {
+        ScheduledFuture<?> oTask = openTasks.remove(auctionId);
+        if (oTask != null && !oTask.isDone()) oTask.cancel(false);
+        
+        ScheduledFuture<?> cTask = closeTasks.remove(auctionId);
+        if (cTask != null && !cTask.isDone()) cTask.cancel(false);
     }
 
     /**
-     * Quét và nạp lại tất cả các phiên đấu giá hợp lệ từ DB khi Server khởi động
+     * Chạy 1 lần duy nhất khi Bật Server (Để cài lại báo thức sau khi mất điện)
      */
     public void loadActiveAuctionsOnStartup() {
-        System.out.println("[SCHEDULER] Đang nạp lại lịch trình các phiên đấu giá từ Database...");
+        System.out.println("[SCHEDULER] Đang khởi động: Khôi phục đồng hồ báo thức từ Database...");
+        int count = 0;
         ArrayList<AuctionInfo> auctions = AuctionDAO.getInstance().getAllAuctions();
-        
         for (AuctionInfo a : auctions) {
-            if (a.getEndTime() != null && a.getEndTime().isAfter(LocalDateTime.now())) {
-                scheduleAuctionClose(a);
+            if (!a.getStatus().toString().equals("CLOSED")) {
+                scheduleAuction(a);
+                count++;
             }
         }
+        System.out.println("[SCHEDULER] Đã khôi phục báo thức cho " + count + " phiên đấu giá đang mở!");
     }
 
-    public void shutdown() {
-        scheduler.shutdown();
+    public void scheduleNewAuctions() {
+        ArrayList<AuctionInfo> auctions = AuctionDAO.getInstance().getAllAuctions();
+        for (AuctionInfo a : auctions) {
+            // Nếu phát hiện phiên nào chưa có chìa khóa trong danh sách báo thức -> Cài báo thức ngay lập tức!
+            if (!openTasks.containsKey(a.getId()) && !closeTasks.containsKey(a.getId())) {
+                scheduleAuction(a);
+            }
+        }
     }
 }

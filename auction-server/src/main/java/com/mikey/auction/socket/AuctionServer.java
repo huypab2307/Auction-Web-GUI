@@ -60,8 +60,7 @@ public class AuctionServer {
         System.err.println("Server Error: " + e.getMessage()); //
     } finally {
         threadPool.shutdown(); //
-        // Đóng an toàn luồng đếm ngược khi Server sập
-        com.mikey.auction.manager.AuctionScheduler.getInstance().shutdown();
+        
     }
 }
 }
