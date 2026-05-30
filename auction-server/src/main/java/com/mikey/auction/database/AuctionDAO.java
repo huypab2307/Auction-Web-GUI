@@ -53,7 +53,7 @@ public class AuctionDAO extends BaseDAO {
         if ("CANCELED".equals(dbStatus)) {
             status = AuctionStatus.CANCELED; // Tôn trọng trạng thái Hủy từ Admin/Seller
         } else {
-            status = AuctionStatus.valueOf(dbStatus.toUpperCase());// Nếu bình thường thì mới tính theo thời gian
+            status = calculateStatus(startTime, endTime); // Nếu bình thường thì mới tính theo thời gian
         }
 
         ItemSummary itemInfo = new ItemSummary(itemId, itemName, description, itemType, imagePath);
@@ -579,6 +579,16 @@ try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) { // Sử dụng t
         return list;
     }
 
+    public boolean closeSingleAuction(int auctionId) {
+    String sql = "UPDATE auctions SET status = 'CLOSED' WHERE id = ? AND status = 'OPEN'";
+    try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, auctionId);
+        return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi đóng phiên đấu giá đơn lẻ: " + e.getMessage());
+        return false;
+    }
+}
     // =========================================================================
     // 🔥 SIÊU THUẬT TOÁN ĐẤU GIÁ: CHỐNG LOST UPDATE & CHỐNG BẮN TỈA (ANTI-SNIPING)
     // =========================================================================
@@ -726,26 +736,6 @@ try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) { // Sử dụng t
             ps.setInt(2, userId);
             return ps.executeUpdate() > 0;
         } catch (java.sql.SQLException e) {
-    // Hàm Mở bán do Scheduler gọi khi điểm giờ
-    public boolean openSingleAuction(int auctionId) {
-        String sql = "UPDATE auctions SET status = 'OPEN' WHERE id = ? AND status = 'PENDING'";
-        try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, auctionId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Hàm Đóng phiên do Scheduler gọi khi điểm giờ
-    public boolean closeSingleAuction(int auctionId) {
-        // Đóng bất kể đang Mở bán hay còn đang chờ
-        String sql = "UPDATE auctions SET status = 'CLOSED' WHERE id = ? AND (status = 'OPEN' OR status = 'PENDING')";
-        try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, auctionId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }

@@ -17,6 +17,9 @@ import com.mikey.auction.items.Item;
 import com.mikey.auction.items.ItemType;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
+import com.mikey.auction.manager.UserManager;
+import com.mikey.auction.user.Bidder;
+import com.mikey.auction.user.Role;
 import com.mikey.auction.user.User;
 
 public class AuctionHandler {
@@ -68,7 +71,7 @@ public class AuctionHandler {
 
                         // 👉 ĐÃ THÊM: Nếu cập nhật thành công, đồng bộ lại bộ đếm ngược thời gian kết thúc mới
                    if (Boolean.TRUE.equals(result)) {
-                        com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleAuction(p);
+                        com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleAuctionClose(p);
                }
                     } else {
                         // 3. Nếu ID <= 0 thì TẠO MỚI

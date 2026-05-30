@@ -166,6 +166,9 @@ public class TopBarController {
             SceneChanger.getInstance().toMyInvoices(user);
         } else {
             SceneChanger.getInstance().toLogin();
+        }
+    }
+    
     // 🔥 THÊM HÀM NÀY: Để nhận trực tiếp ảnh từ UserController truyền sang
     public void updateAvatarImmediately(Image img) {
         if (avatar != null && img != null) {
