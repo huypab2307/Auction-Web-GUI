@@ -2,10 +2,7 @@ package com.mikey.auction.javagui.user;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Base64;
 
-import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.user.User;
 
 import javafx.event.ActionEvent;
@@ -28,23 +25,48 @@ public class UserController {
     public void initialize() {
     }
 
-    public void setUser(User user) {
-        this.user = user;
+   public void setUser(User user) {
+    this.user = user;
+    
+    if (usernameField != null && user != null) {
         usernameField.setText(user.getUsername());
-        // Hiển thị ảnh đại diện nếu có
-        if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
+    }
+    
+    if (user != null && user.getUsername() != null && avatarCircle != null) {
+        // Thêm ?t= + System.currentTimeMillis() để phá cache của JavaFX
+        String avatarUrl = "https://res.cloudinary.com/devnd8ndw/image/upload/auction_avatars/avatar_" 
+                            + user.getUsername() + ".jpg?t=" + System.currentTimeMillis();
+        
         try {
-            // Giải mã chuỗi Base64 ngược lại thành mảng byte
-            byte[] imageBytes = java.util.Base64.getDecoder().decode(user.getAvatar());
-            // Tạo Image từ mảng byte
-            Image image = new Image(new java.io.ByteArrayInputStream(imageBytes));
-            // Đổ ảnh vào Circle
-            avatarCircle.setFill(new ImagePattern(image));
-        } catch (Exception e) {
-            System.err.println("Lỗi hiển thị ảnh đại diện cũ: " + e.getMessage());
+    // Tải ảnh bất đồng bộ (true) - Không chặn luồng UI chính
+    Image image = new Image(avatarUrl, true);
+    
+    // 1. Theo dõi tiến trình tải ảnh (Khi hoàn thành thì progress = 1.0)
+    image.progressProperty().addListener((observable, oldProgress, newProgress) -> {
+        if (newProgress.doubleValue() == 1.0 && !image.isError()) {
+            // ĐÃ TẢI XONG THÀNH CÔNG: Chuyển về luồng UI chính để cập nhật giao diện
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    avatarCircle.setFill(new javafx.scene.paint.ImagePattern(image));
+                } catch (Exception ex) {
+                    System.err.println("Lỗi khi đổ ảnh vào vòng tròn: " + ex.getMessage());
+                }
+            });
         }
+    });
+    
+    // 2. Theo dõi nếu xảy ra lỗi (Ví dụ: 404 không tìm thấy ảnh, mất mạng...)
+    image.errorProperty().addListener((observable, oldHasError, newHasError) -> {
+        if (newHasError) {
+            System.out.println("User '" + user.getUsername() + "' chưa có avatar trên Cloudinary hoặc tải lỗi. Giữ ảnh mặc định.");
+        }
+    });
+    
+} catch (Exception e) {
+    System.err.println("Lỗi khởi tạo tiến trình Image: " + e.getMessage());
+}
     }
-    }
+}
     public void setStage(Stage stage) {
         this.stage = stage;
     }
@@ -73,41 +95,45 @@ public class UserController {
         stage.setScene(scene);
         stage.show();
     }
-    public void handleUploadPicture(ActionEvent actionEvent) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Chọn ảnh đại diện");
+  public void handleUploadPicture(ActionEvent actionEvent) {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Chọn ảnh đại diện");
+    fileChooser.getExtensionFilters().addAll(
+        new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+    );
+
+    javafx.stage.Stage currentStage = (javafx.stage.Stage) ((javafx.scene.Node) actionEvent.getSource()).getScene().getWindow();
+    File selectedFile = fileChooser.showOpenDialog(currentStage);
+
+    if (selectedFile == null) {
+        return;
+    }
+
+    try {
+        // 1. Gọi hàm upload mới (bản có 2 tham số) để đặt tên file theo tên tài khoản của User
+        String cloudinaryUrl = com.mikey.auction.cloudinary.CloudinaryService.upload(selectedFile, user.getUsername());
         
-        // Chỉ cho phép chọn các định dạng file ảnh
-        fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
-        );
-
-        // Mở hộp thoại chọn file
-        File selectedFile = fileChooser.showOpenDialog(stage);
-
-        if (selectedFile == null) {
+        if (cloudinaryUrl == null || cloudinaryUrl.trim().isEmpty()) {
+            System.err.println("Upload ảnh lên Cloudinary thất bại!");
             return;
         }
 
-        try {
-            // Lấy đường dẫn file và tạo đối tượng Image
-            Image image = new Image(selectedFile.toURI().toString());
-            avatarCircle.setFill(new ImagePattern(image));
+        // 2. Hiển thị ảnh local lên vòng tròn ngay lập tức để người dùng thấy luôn
+        Image localImage = new Image(selectedFile.toURI().toString());
+        avatarCircle.setFill(new ImagePattern(localImage));
 
-            // Đọc file thành mảng byte
-            byte[] fileContent = Files.readAllBytes(selectedFile.toPath());
-            // Mã hóa thành chuỗi văn bản Base64
-            String base64Image = Base64.getEncoder().encodeToString(fileContent);
-
-            // Gửi yêu cầu lên Server (giống lúc đổi mật khẩu)
-            RequestHandler.getInstance().requestUpdateAvatar(user.getId(), base64Image);
-
-            // Cập nhật avatar local để hiển thị lại khi cần
-            user.setAvatar(base64Image);
-
-            System.out.println("Đã gửi ảnh lên Server thành công!");
-        } catch (IOException e) {
-            System.err.println("Lỗi khi đọc file ảnh: " + e.getMessage());
+        // 🔥 2. THÊM ĐOẠN NÀY: Gọi thanh TopBar ở màn hình chính tự động nạp lại ảnh mới
+        if (com.mikey.auction.javagui.topbar.TopBarController.getInstance() != null) {
+            com.mikey.auction.javagui.topbar.TopBarController.getInstance().updateAvatarImmediately(localImage);
         }
+
+        // 💡 ĐÃ BỎ LỆNH RequestHandler.getInstance().requestUpdateAvatar(...) 
+        // Vì từ bây giờ không lưu URL vào database nữa.
+
+        System.out.println("Đã upload lên Cloudinary thành công với tên cố định theo username!");
+    } catch (Exception e) {
+        System.err.println("Lỗi khi xử lý ảnh: " + e.getMessage());
+        e.printStackTrace();
     }
+}
 }

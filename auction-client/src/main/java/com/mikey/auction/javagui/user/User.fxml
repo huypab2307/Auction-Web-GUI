@@ -104,10 +104,10 @@
                 <Insets top="10.0" />
             </VBox.margin>
             <children>
-                <Button onAction="#cancelHandle" mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0"
+                <Button  mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0"
                         style="-fx-background-color: #EDF2F7; -fx-text-fill: #4A5568; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;"
                         text="Cancel" />
-                <Button mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0"
+                <Button onAction="#cancelHandle"  mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0"
                         style="-fx-background-color: #2D3748; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;"
                         text="Save Changes" />
             </children>

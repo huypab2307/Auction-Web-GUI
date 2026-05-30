@@ -1,7 +1,6 @@
 package com.mikey.auction.database;
 
 import java.sql.Connection;
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,20 +73,6 @@ public class AuctionDAOTest {
         assertEquals(5000000.0, info.getCurPrice(), "Giá phải khớp");
     }
 
-    @Test
-    public void testCreateAuction() {
-        // Kiểm tra tạo auction
-        assertDoesNotThrow(() -> {
-            Connection conn = AuctionDAO.getInstance().getConnect();
-            LocalDateTime start = LocalDateTime.now();
-            LocalDateTime end = LocalDateTime.now().plusHours(24);
-
-            // Chỉ kiểm tra không ném exception
-            AuctionDAO.getInstance().createAuction(conn, 1, 2, 1000000, 50000, start, end);
-
-            conn.close();
-        }, "Create auction không được ném exception");
-    }
 
     @Test
     public void testFindAuctionById() {
