@@ -17,6 +17,9 @@ import com.mikey.auction.items.Item;
 import com.mikey.auction.items.ItemType;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
+import com.mikey.auction.manager.UserManager;
+import com.mikey.auction.user.Bidder;
+import com.mikey.auction.user.Role;
 import com.mikey.auction.user.User;
 
 public class AuctionHandler {
@@ -47,6 +50,12 @@ public class AuctionHandler {
                 case "SEARCH":
                     result = AuctionDAO.getInstance().searchAuction(parts[2].trim());
                     break;
+
+                case "SEARCH_BY_ID":
+                    int searchId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().searchAuctionById(searchId);
+                    break;
+
                 case "USER":
                     int userid = Integer.parseInt(parts[2].trim());
                     result = AuctionDAO.getInstance().searchAuctionByUserId(userid);
@@ -62,7 +71,7 @@ public class AuctionHandler {
 
                         // 👉 ĐÃ THÊM: Nếu cập nhật thành công, đồng bộ lại bộ đếm ngược thời gian kết thúc mới
                    if (Boolean.TRUE.equals(result)) {
-                        com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleAuction(p);
+                        com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleAuctionClose(p);
                }
                     } else {
                         // 3. Nếu ID <= 0 thì TẠO MỚI
@@ -83,7 +92,7 @@ public class AuctionHandler {
                                 p.getStartTime(), p.getEndTime()
                             );
                             result = true;
-                            com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleNewAuctions();
+                            com.mikey.auction.manager.AuctionScheduler.getInstance().loadActiveAuctionsOnStartup();
                         } catch (Exception e) {
                             System.err.println("Lỗi khi tạo sản phẩm: " + e.getMessage());
                             e.printStackTrace();
@@ -222,6 +231,23 @@ public class AuctionHandler {
                 // 👉 THÊM VÀO ĐỂ XỬ LÝ LỆNH LẤY TOÀN BỘ LỊCH SỬ CHO ADMIN
                 case "GET_ALL_BID_HISTORY":
                     result = AuctionDAO.getInstance().getAllSystemBidHistory();
+                    break;
+
+                case "INVOICE_GET":
+                    int invUserId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getUserInvoices(invUserId);
+                    break;
+                    
+                case "INVOICE_PAY":
+                    int payInvoiceId = Integer.parseInt(parts[2].trim());
+                    int payUserId = Integer.parseInt(parts[3].trim());
+                    boolean isPaid = AuctionDAO.getInstance().payInvoice(payInvoiceId, payUserId);
+                    
+                    if (isPaid) {
+                        result = "SUCCESS";
+                    } else {
+                        result = "FAIL";
+                    }
                     break;
             }
 

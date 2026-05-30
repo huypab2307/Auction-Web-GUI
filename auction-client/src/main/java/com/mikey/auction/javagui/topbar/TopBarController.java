@@ -159,6 +159,16 @@ public class TopBarController {
     public void userConfigHandle(ActionEvent actionEvent) {
     }
 
+    @FXML
+    public void handleOpenMyInvoices(ActionEvent actionEvent) {
+        if (user != null) {
+            // Gọi SceneChanger để chuyển cảnh
+            SceneChanger.getInstance().toMyInvoices(user);
+        } else {
+            SceneChanger.getInstance().toLogin();
+        }
+    }
+    
     // 🔥 THÊM HÀM NÀY: Để nhận trực tiếp ảnh từ UserController truyền sang
     public void updateAvatarImmediately(Image img) {
         if (avatar != null && img != null) {

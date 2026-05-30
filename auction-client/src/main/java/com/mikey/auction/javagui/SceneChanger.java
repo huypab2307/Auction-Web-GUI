@@ -3,6 +3,7 @@ package com.mikey.auction.javagui;
 import com.mikey.auction.javagui.bidder.AuctionHubController;
 import com.mikey.auction.javagui.seller.SellerController;
 import com.mikey.auction.javagui.seller.SellerHubController;
+import com.mikey.auction.javagui.Invoices.MyInvoicesController;
 import com.mikey.auction.javagui.auction.AuctionItemController;
 
 import com.mikey.auction.dto.AuctionInfo;
@@ -176,6 +177,18 @@ public void toBidder(User user, ArrayList<AuctionInfo> results) {
             
             mainStage.setResizable(true);
             mainStage.setMaximized(true); // Giao diện Admin nên cho Full màn hình
+        });
+    }
+
+    public void toMyInvoices(User user) {
+        if (user == null) {
+            toLogin();
+            return;
+        }
+        // Lưu ý: Đảm bảo đường dẫn "my_invoices.fxml" khớp với thư mục bạn lưu file
+        navigate("Invoices/my_invoices.fxml", "Đơn hàng của tôi - " + user.getUsername(), loader -> {
+            MyInvoicesController controller = loader.getController();
+            controller.setUser(user); 
         });
     }
 
