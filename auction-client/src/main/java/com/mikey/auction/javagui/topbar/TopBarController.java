@@ -116,4 +116,14 @@ public class TopBarController {
 
     public void userConfigHandle(ActionEvent actionEvent) {
     }
+
+    @FXML
+    public void handleOpenMyInvoices(ActionEvent actionEvent) {
+        if (user != null) {
+            // Gọi SceneChanger để chuyển cảnh
+            SceneChanger.getInstance().toMyInvoices(user);
+        } else {
+            SceneChanger.getInstance().toLogin();
+        }
+    }
 }

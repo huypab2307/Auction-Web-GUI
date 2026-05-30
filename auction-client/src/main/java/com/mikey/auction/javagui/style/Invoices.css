@@ -1,0 +1,109 @@
+/* ================= THIẾT KẾ NỀN & HEADER ================= */
+.root {
+    -fx-background-color: #f4f7fc;
+}
+
+.header-box {
+    -fx-background-color: white;
+    -fx-padding: 15 30 15 30;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 2);
+}
+
+.header-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.back-button {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #334155;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.back-button:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #0f172a;
+}
+
+/* ================= BẢNG DỮ LIỆU (TABLEVIEW) ================= */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 3);
+}
+
+/* Bo tròn góc và làm nền trắng cho phần tiêu đề cột */
+.table-view .column-header-background {
+    -fx-background-color: white;
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 0 0 5 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-size: 45px;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: #f1f5f9;
+}
+
+/* Chữ trong tiêu đề cột */
+.table-view .column-header .label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+    -fx-alignment: CENTER;
+}
+
+/* Thiết kế từng hàng (Row) */
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #f8fafc;
+    -fx-cell-size: 55px; /* Cho hàng cao lên nhìn cho thoáng */
+}
+
+/* Hàng chẵn/lẻ xen kẽ màu cho dễ nhìn */
+.table-row-cell:odd {
+    -fx-background-color: #fbfcfd;
+}
+
+/* Hiệu ứng rê chuột vào hàng */
+.table-row-cell:hover {
+    -fx-background-color: #f1f5f9;
+}
+
+/* Bỏ màu xanh mặc định khi click chọn hàng */
+.table-row-cell:selected {
+    -fx-background-color: #e2e8f0;
+}
+
+/* Thiết kế ô dữ liệu (Cell) */
+.table-cell {
+    -fx-font-size: 15px;
+    -fx-text-fill: #334155;
+    -fx-alignment: CENTER;
+}
+
+/* ================= NÚT THANH TOÁN ================= */
+.pay-button {
+    -fx-background-color: #10b981;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.pay-button:hover {
+    -fx-background-color: #059669; /* Đậm hơn khi rê chuột */
+}
+
+.pay-button:disabled {
+    -fx-background-color: #6ee7b7;
+    -fx-cursor: default;
+}

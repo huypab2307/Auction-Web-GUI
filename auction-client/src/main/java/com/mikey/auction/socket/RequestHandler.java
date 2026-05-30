@@ -194,4 +194,12 @@ public class RequestHandler {
     public void requestRecentActivities(int userId) {
         send("AUCTION|HISTORY|"+ userId);
     }
+
+    public void requestUserInvoices(int userId) {
+        send("AUCTION|INVOICE_GET|" + userId);
+    }
+
+    public void requestPayInvoice(int invoiceId, int userId) {
+        send("AUCTION|INVOICE_PAY|" + invoiceId + "|" + userId);
+    }
 }

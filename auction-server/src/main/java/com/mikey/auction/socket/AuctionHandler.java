@@ -50,6 +50,12 @@ public class AuctionHandler {
                 case "SEARCH":
                     result = AuctionDAO.getInstance().searchAuction(parts[2].trim());
                     break;
+
+                case "SEARCH_BY_ID":
+                    int searchId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().searchAuctionById(searchId);
+                    break;
+
                 case "USER":
                     int userid = Integer.parseInt(parts[2].trim());
                     result = AuctionDAO.getInstance().searchAuctionByUserId(userid);
@@ -86,6 +92,7 @@ public class AuctionHandler {
                                 p.getStartTime(), p.getEndTime()
                             );
                             result = true;
+                            com.mikey.auction.manager.AuctionScheduler.getInstance().loadActiveAuctionsOnStartup();
                         } catch (Exception e) {
                             System.err.println("Lỗi khi tạo sản phẩm: " + e.getMessage());
                             e.printStackTrace();
@@ -224,6 +231,23 @@ public class AuctionHandler {
                 // 👉 THÊM VÀO ĐỂ XỬ LÝ LỆNH LẤY TOÀN BỘ LỊCH SỬ CHO ADMIN
                 case "GET_ALL_BID_HISTORY":
                     result = AuctionDAO.getInstance().getAllSystemBidHistory();
+                    break;
+
+                case "INVOICE_GET":
+                    int invUserId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getUserInvoices(invUserId);
+                    break;
+                    
+                case "INVOICE_PAY":
+                    int payInvoiceId = Integer.parseInt(parts[2].trim());
+                    int payUserId = Integer.parseInt(parts[3].trim());
+                    boolean isPaid = AuctionDAO.getInstance().payInvoice(payInvoiceId, payUserId);
+                    
+                    if (isPaid) {
+                        result = "SUCCESS";
+                    } else {
+                        result = "FAIL";
+                    }
                     break;
             }
 

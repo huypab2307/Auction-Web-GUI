@@ -56,27 +56,49 @@ public class AuctionScheduler {
     }
 
     /**
-     * Logic thực hiện khóa phiên dưới DB và phát tín hiệu cho Client
+     * Logic thực hiện khóa phiên dưới DB, sinh HÓA ĐƠN và phát tín hiệu cho Client
      */
     private void executeClosing(int auctionId) {
         try {
             System.out.println("[SCHEDULER] Hệ thống bắt đầu đóng phiên ID: " + auctionId);
-            boolean isClosed = AuctionDAO.getInstance().closeSingleAuction(auctionId);
+            
+            // 1. Lấy thông tin TRƯỚC KHI ĐÓNG để biết ai đang top 1
+            com.mikey.auction.dto.AuctionInfo closingInfo = com.mikey.auction.database.AuctionDAO.getInstance().searchAuctionById(auctionId);
+            
+            // 2. Chốt sổ đổi status thành CLOSED dưới Database
+            boolean isClosed = com.mikey.auction.database.AuctionDAO.getInstance().closeSingleAuction(auctionId);
             
             if (isClosed) {
-                AuctionInfo freshInfo = AuctionDAO.getInstance().searchAuctionById(auctionId);
+                System.out.println("✅ Đã khóa phiên thành công: " + auctionId);
+                
+                // 3. 👉 MA THUẬT NẰM Ở ĐÂY: Nếu có người thắng, tự động xuất hóa đơn!
+                if (closingInfo != null && closingInfo.getLastBidderName() != null && !closingInfo.getLastBidderName().isEmpty()) {
+                    // Truy vấn lại ID của người thắng bằng hàm findById
+                    com.mikey.auction.auction.Auction rawAuc = com.mikey.auction.database.AuctionDAO.getInstance().findById(
+                        com.mikey.auction.database.AuctionDAO.getInstance().getConnect(), auctionId
+                    );
+                    
+                    if (rawAuc != null && rawAuc.getLastBidder() > 0) {
+                        // Gọi hàm tạo hóa đơn trong DAO
+                        com.mikey.auction.database.AuctionDAO.getInstance().generateInvoice(auctionId, rawAuc.getLastBidder(), rawAuc.getCurPrice());
+                    }
+                }
+
+                // 4. Lấy gói dữ liệu mới nhất (đã cập nhật trạng thái) để gửi về Client
+                com.mikey.auction.dto.AuctionInfo freshInfo = com.mikey.auction.database.AuctionDAO.getInstance().searchAuctionById(auctionId);
                 if (freshInfo != null) {
-                    Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(LocalDateTime.class, (com.google.gson.JsonSerializer<LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                    com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+                        .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
                         .create();
                     
-                    // Phát sóng cho toàn bộ Client đang kết nối Socket để cập nhật UI lập tức
-                    AuctionServer.broadcast("AUCTION|CLOSED_NOTIFY|" + gson.toJson(freshInfo));
+                    // 5. Cầm loa phát thanh thông báo "ĐÃ ĐÓNG PHIÊN" cho toàn bộ UI nhảy số
+                    com.mikey.auction.socket.AuctionServer.broadcast("AUCTION|CLOSED_NOTIFY|" + gson.toJson(freshInfo));
                 }
             }
         } catch (Exception e) {
             System.err.println("Lỗi thực thi đóng phiên ID " + auctionId + ": " + e.getMessage());
         } finally {
+            // Đóng xong thì xóa báo thức để giải phóng RAM
             scheduledTasks.remove(auctionId);
         }
     }
@@ -99,7 +121,8 @@ public class AuctionScheduler {
         ArrayList<AuctionInfo> auctions = AuctionDAO.getInstance().getAllAuctions();
         
         for (AuctionInfo a : auctions) {
-            if (a.getEndTime() != null && a.getEndTime().isAfter(LocalDateTime.now())) {
+            // 👉 CHỈ CẦN KHÁC NULL LÀ CHO VÀO SCHEDULE HẾT, BẤT CHẤP TƯƠNG LAI HAY QUÁ KHỨ!
+            if (a.getEndTime() != null) {
                 scheduleAuctionClose(a);
             }
         }

@@ -671,4 +671,73 @@ try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) { // Sử dụng t
             return false;
         }
     }
+
+    // =========================================================================
+    // HÀM TẠO HÓA ĐƠN KHI KẾT THÚC PHIÊN ĐẤU GIÁ
+    // =========================================================================
+    public void generateInvoice(int auctionId, int winnerId, double amount) {
+        String sql = "INSERT INTO invoices (auctionId, winnerId, amount, status) VALUES (?, ?, ?, 'AWAITING_PAYMENT')";
+        try (java.sql.Connection conn = getConnect(); 
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, auctionId);
+            ps.setInt(2, winnerId);
+            ps.setDouble(3, amount);
+            
+            if (ps.executeUpdate() > 0) {
+                System.out.println("📜 Đã tự động tạo Hóa Đơn chờ thanh toán cho phiên ID: " + auctionId);
+                
+                String notiSql = "INSERT INTO notification (userId, auctionId, message, isChecked) VALUES (?, ?, ?, 0)";
+                try (java.sql.PreparedStatement psNoti = conn.prepareStatement(notiSql)) {
+                    psNoti.setInt(1, winnerId);
+                    psNoti.setInt(2, auctionId);
+                    psNoti.setString(3, "🎉 Bạn đã thắng phiên đấu giá! Vui lòng vào 'Đơn hàng của tôi' để thanh toán số tiền " + String.format("%,.0f đ", amount));
+                    psNoti.executeUpdate();
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Lỗi khi tạo hóa đơn: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // 1. Lấy danh sách hóa đơn của một người dùng
+    public java.util.ArrayList<com.mikey.auction.dto.InvoiceInfo> getUserInvoices(int userId) {
+        java.util.ArrayList<com.mikey.auction.dto.InvoiceInfo> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM invoices WHERE winnerId = ? ORDER BY createdAt DESC";
+        
+        try (java.sql.Connection conn = getConnect();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    com.mikey.auction.dto.InvoiceInfo inv = new com.mikey.auction.dto.InvoiceInfo();
+                    inv.setId(rs.getInt("id"));
+                    inv.setAuctionId(rs.getInt("auctionId"));
+                    inv.setWinnerId(rs.getInt("winnerId"));
+                    inv.setAmount(rs.getDouble("amount"));
+                    inv.setStatus(rs.getString("status"));
+                    inv.setCreatedAt(rs.getObject("createdAt", java.time.LocalDateTime.class));
+                    inv.setPaidAt(rs.getObject("paidAt", java.time.LocalDateTime.class));
+                    list.add(inv);
+                }
+            }
+        } catch (java.sql.SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // 2. Xử lý thanh toán hóa đơn
+    public boolean payInvoice(int invoiceId, int userId) {
+        // Chỉ cho phép thanh toán nếu hóa đơn đang chờ (AWAITING_PAYMENT) và đúng chính chủ
+        String sql = "UPDATE invoices SET status = 'PAID', paidAt = NOW() WHERE id = ? AND winnerId = ? AND status = 'AWAITING_PAYMENT'";
+        try (java.sql.Connection conn = getConnect();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, invoiceId);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
