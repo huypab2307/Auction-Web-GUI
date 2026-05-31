@@ -587,15 +587,29 @@ public class AuctionDAO extends BaseDAO {
     }
 
     public boolean closeSingleAuction(int auctionId) {
-    String sql = "UPDATE auctions SET status = 'CLOSED' WHERE id = ? AND status = 'OPEN'";
-    try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, auctionId);
-        return ps.executeUpdate() > 0;
-    } catch (SQLException e) {
-        System.err.println("Lỗi khi đóng phiên đấu giá đơn lẻ: " + e.getMessage());
-        return false;
+        // SQL xịn: Quét cả OPEN lẫn PENDING
+        String sql = "UPDATE auctions SET status = 'CLOSED' WHERE id = ? AND (status = 'OPEN' OR status = 'PENDING')";
+        
+        try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            // Log lỗi xịn của bạn
+            System.err.println("Lỗi khi đóng phiên đấu giá đơn lẻ: " + e.getMessage());
+            return false;
+        }
     }
-}
+
+    public boolean openSingleAuction(int auctionId) {
+        String sql = "UPDATE auctions SET status = 'OPEN' WHERE id = ? AND status = 'PENDING'";
+        try (Connection conn = getConnect(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, auctionId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     // =========================================================================
     // 🔥 SIÊU THUẬT TOÁN ĐẤU GIÁ: CHỐNG LOST UPDATE & CHỐNG BẮN TỈA (ANTI-SNIPING)
     // =========================================================================

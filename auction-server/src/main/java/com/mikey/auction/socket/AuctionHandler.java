@@ -66,10 +66,10 @@ public class AuctionHandler {
                         // Gọi hàm update trong Manager
                         result = AuctionManager.getInstance().updateAuction(p);
 
-                        // 👉 ĐÃ THÊM: Nếu cập nhật thành công, đồng bộ lại bộ đếm ngược thời gian kết thúc mới
-                   if (Boolean.TRUE.equals(result)) {
-                        com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleAuctionClose(p);
-               }
+                        // Cập nhật xong thì cài lại báo thức mới
+                        if (Boolean.TRUE.equals(result)) {
+                            com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleAuction(p);
+                        }
                     } else {
                         // 3. Nếu ID <= 0 thì TẠO MỚI
                         java.sql.Connection conn = null;
@@ -89,7 +89,10 @@ public class AuctionHandler {
                                 p.getStartTime(), p.getEndTime()
                             );
                             result = true;
-                            com.mikey.auction.manager.AuctionScheduler.getInstance().loadActiveAuctionsOnStartup();
+                            
+                            // 👉 KÍCH HOẠT RADAR: Quét và cài báo thức cho sản phẩm lính mới
+                            com.mikey.auction.manager.AuctionScheduler.getInstance().scheduleNewAuctions();
+                            
                         } catch (Exception e) {
                             System.err.println("Lỗi khi tạo sản phẩm: " + e.getMessage());
                             e.printStackTrace();
