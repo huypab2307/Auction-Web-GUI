@@ -220,4 +220,9 @@ public class RequestHandler {
         // Gửi chuỗi dạng: NOTIFICATION|GET_ALL|5
         send("NOTIFICATION|GET_ALL|" + userId);
     }
+
+    public void requestUpdateAuction(AuctionInfo info) {
+        // Biến Object thành chuỗi JSON và bắn qua Socket với Action là UPDATE
+        send("AUCTION|UPDATE|" + gson.toJson(info));
+    }
 }

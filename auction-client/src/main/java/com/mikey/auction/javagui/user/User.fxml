@@ -5,17 +5,13 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefWidth="650.0" spacing="25.0"
-      style="-fx-background-color: #ffffff; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 40;"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.mikey.auction.javagui.user.UserController">
+<VBox prefWidth="650.0" spacing="25.0" style="-fx-background-color: #ffffff; -fx-background-radius: 20; -fx-border-radius: 20; -fx-padding: 40;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikey.auction.javagui.user.UserController">
 
     <children>
         <Label text="Account Settings" textFill="#1A202C">
@@ -37,9 +33,7 @@
                                         <Font name="System Bold" size="13.0" />
                                     </font>
                                 </Label>
-                                <TextField fx:id="usernameField" editable="false" prefHeight="45.0"
-                                           style="-fx-background-color: #F7FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 0 15 0 15;"
-                                           text="Anthony Webb" />
+                                <TextField fx:id="usernameField" editable="false" prefHeight="45.0" style="-fx-background-color: #F7FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 0 15 0 15;" text="Anthony Webb" />
                             </children>
                         </VBox>
 
@@ -53,13 +47,10 @@
                                             </font>
                                         </Label>
                                         <Pane HBox.hgrow="ALWAYS" />
-                                        <Hyperlink onAction="#handleChangePassword" text="Change" textFill="#3182CE" 
-                                                   style="-fx-underline: false; -fx-font-weight: bold;" />
+                                        <Hyperlink onAction="#handleChangePassword" style="-fx-underline: false; -fx-font-weight: bold;" text="Change" textFill="#3182CE" />
                                     </children>
                                 </HBox>
-                                <TextField editable="false" prefHeight="45.0"
-                                           style="-fx-background-color: #F7FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 0 15 0 15;"
-                                           text="**********" />
+                                <TextField editable="false" prefHeight="45.0" style="-fx-background-color: #F7FAFC; -fx-border-color: #E2E8F0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 0 15 0 15;" text="**********" />
                             </children>
                         </VBox>
                         
@@ -70,9 +61,7 @@
                     <children>
                         <Circle fx:id="avatarCircle" fill="#EDF2F7" radius="60.0" stroke="#CBD5E0" strokeType="INSIDE" />
                         
-                        <Button mnemonicParsing="false" onAction="#handleUploadPicture" prefHeight="35.0" prefWidth="140.0"
-                                style="-fx-background-color: #2D3748; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;"
-                                text="Upload picture">
+                        <Button mnemonicParsing="false" onAction="#handleUploadPicture" prefHeight="35.0" prefWidth="140.0" style="-fx-background-color: #2D3748; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;" text="Upload picture">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
@@ -91,12 +80,7 @@
                 <Insets top="10.0" />
             </VBox.margin>
             <children>
-                <Button mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0"
-                        style="-fx-background-color: #EDF2F7; -fx-text-fill: #4A5568; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;"
-                        text="Cancel" />
-                <Button onAction="#cancelHandle" mnemonicParsing="false" prefHeight="45.0" prefWidth="120.0"
-                        style="-fx-background-color: #2D3748; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;"
-                        text="Save Changes" />
+                <Button mnemonicParsing="false" onAction="#cancelHandle" prefHeight="45.0" prefWidth="120.0" style="-fx-background-color: #2D3748; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;" text="Done" />
             </children>
         </HBox>
 

@@ -51,7 +51,6 @@ public class SellerController implements SocketListener {
     @FXML private TextField stepPrice;
     @FXML private DatePicker startTime;
     @FXML private DatePicker endTime;
-    @FXML private TextField finalPrice;
     @FXML private TopBarController topBarController;
 
 
@@ -151,13 +150,11 @@ public class SellerController implements SocketListener {
         checkItemName();
         checkPrice();
         checkStepPrice();
-        checkFinalPrice();
         checkDates();
 
         boolean hasError = !errorItemName.getText().isEmpty() ||
                 !errorPrice.getText().isEmpty() ||
                 !errorStepPrice.getText().isEmpty() ||
-                !errorFinalPrice.getText().isEmpty() ||
                 !errorStartTime.getText().isEmpty() ||
                 !errorEndTime.getText().isEmpty();
 
@@ -246,19 +243,23 @@ public class SellerController implements SocketListener {
         // 👉 QUAN TRỌNG: Đưa itemData (chứa Artist, Brand...) vào gói tin
         // Biến itemData bạn đã khai báo và fill ở dòng 159-166 rồi đấy!
         updateData.setExtraData(itemData);
+        submit.setDisable(true);
+        submit.setText("Đang xử lý...");
+        SocketClient.getInstance().setListener(this);
+
         if (this.currentEditingId == -1) {
-            // CHẾ ĐỘ THÊM MỚI
-            SocketClient.getInstance().setListener(this);
             System.out.println("Gửi yêu cầu TẠO MỚI phiên đấu giá lên Server...");
             RequestHandler.getInstance().requestCreateAuction(updateData);
-            }
-
-            showCongratulationEffect(2.5);
+        } else {
+                System.out.println("Gửi yêu cầu CẬP NHẬT phiên đấu giá lên Server...");
+                RequestHandler.getInstance().requestUpdateAuction(updateData); 
+        }
 
         } catch (Exception ex) {
             System.err.println("Lỗi khi đóng gói dữ liệu: " + ex.getMessage());
-        } finally {
+            // CHỈ mở khóa nếu code ở try bị lỗi (chưa kịp gửi lên Server)
             submit.setDisable(false);
+            submit.setText(this.currentEditingId == -1 ? "Tạo sản phẩm" : "Cập nhật sản phẩm");
         }
     }
 
@@ -353,7 +354,7 @@ public class SellerController implements SocketListener {
     }
 
     @FXML
-    private Label errorItemName, errorPrice, errorStepPrice, errorFinalPrice, errorStartTime, errorEndTime;
+    private Label errorItemName, errorPrice, errorStepPrice, errorStartTime, errorEndTime;
 
 private void setTextFieldError(TextField field, Label label, String message) {
         if (!field.getStyleClass().contains("input-error")) {
@@ -471,42 +472,6 @@ private void setTextFieldError(TextField field, Label label, String message) {
             }
         } catch (NumberFormatException e) {
             setTextFieldError(stepPrice, errorStepPrice, "Chỉ được nhập số!");
-        }
-    }
-
-    @FXML
-    public void checkFinalPrice() {
-        String text = finalPrice.getText();
-        if (text.isEmpty()) {
-            setTextFieldError(finalPrice, errorFinalPrice, "Không được bỏ trống!");
-            return;
-        }
-
-        try {
-            double f = Double.parseDouble(text);
-            double startP = 0;
-
-            if (!price.getText().isEmpty()) {
-                try {
-                    startP = Double.parseDouble(price.getText());
-                } catch (Exception e) {
-                    startP = 0;
-                }
-            }
-
-            if (f <= 0) {
-                setTextFieldError(finalPrice, errorFinalPrice, "Giá cuối phải lớn hơn 0!");
-            } else if (startP > 0) {
-                if (f <= startP) {
-                    setTextFieldError(finalPrice, errorFinalPrice, "Giá cuối phải lớn hơn giá khởi điểm!");
-                } else {
-                    clearTextFieldError(finalPrice, errorFinalPrice);
-                }
-            } else {
-                clearTextFieldError(finalPrice, errorFinalPrice);
-            }
-        } catch (NumberFormatException e) {
-            setTextFieldError(finalPrice, errorFinalPrice, "Chỉ được nhập số!");
         }
     }
 
@@ -836,7 +801,6 @@ private void setTextFieldError(TextField field, Label label, String message) {
         stepPrice.setText(String.valueOf(info.getBidStep()));
         itemDescription.setText(info.getItemInfo().getDescription());
 
-        finalPrice.setText(String.valueOf(info.getCurPrice()));
 
 
         if (info.getStartTime() != null) {
@@ -869,7 +833,6 @@ private void setTextFieldError(TextField field, Label label, String message) {
         itemInfo.setDisable(false); // Mở khóa khung chi tiết
         type.setDisable(true);
 
-        finalPrice.setDisable(false);
 
 
         if (info.getStatus() == AuctionStatus.OPEN) {
@@ -882,8 +845,7 @@ private void setTextFieldError(TextField field, Label label, String message) {
                 stepPrice.setDisable(true);
                 type.setDisable(true);
                 itemInfo.setDisable(true); // KHÓA TOÀN BỘ Ô NHẬP NGHỆ SĨ, KÍCH THƯỚC...
-                
-                finalPrice.setDisable(true);
+
 
 
                 price.setTooltip(new Tooltip("Đã có người đấu giá, chỉ được phép cập nhật thêm mô tả!"));
@@ -896,6 +858,33 @@ private void setTextFieldError(TextField field, Label label, String message) {
 
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
+        if ("AUCTION".equals(category) && ("CREATE".equals(action) || "UPDATE".equals(action))) {
+            Platform.runLater(() -> {
+                if (jsonData != null && !jsonData.contains("ERROR")) {
+                    // TẠO THÀNH CÔNG: Chạy hiệu ứng chúc mừng
+                    System.out.println("Tạo sản phẩm thành công, đang chuyển về Seller Hub...");
+                    showCongratulationEffect(1.5);
+                    
+                    // Đợi 1.5s chạy xong GIF thì chuyển trang
+                    PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
+                    pause.setOnFinished(event -> {
+                        try {
+                            com.mikey.auction.javagui.SceneChanger.getInstance().toSellerHubGui(user);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    pause.play();
+                } else {
+                    // TẠO THẤT BẠI: Mở lại nút bấm để người dùng thử lại
+                    System.err.println("Lỗi từ Server: " + jsonData);
+                    submit.setDisable(false);
+                    submit.setText(this.currentEditingId == -1 ? "Tạo sản phẩm" : "Cập nhật sản phẩm");
+                }
+            });
+            return; // Thoát hàm để không chạy xuống phần bên dưới
+        }
+
         if ("ITEM".equals(category) && "FIND".equals(action)) {
             Platform.runLater(() -> {
                 try {

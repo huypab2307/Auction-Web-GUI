@@ -270,6 +270,25 @@ public class AuctionHandler {
                     // Gọi hàm DAO vừa viết ở Bước 1
                     result = com.mikey.auction.database.AuctionDAO.getInstance().getRecentActivities(actUserId);
                     break;
+
+                    // --- BÊN PHÍA SERVER ---
+                case "UPDATE": { // 👉 Bọc ngoặc nhọn { } để tạo "phòng riêng", chống trùng lặp biến
+                    
+                    // 1. Giải mã chuỗi JSON từ Client gửi lên thành đối tượng AuctionInfo (FIX LỖI THIẾU INFO)
+                    AuctionInfo info = gson.fromJson(parts[2], AuctionInfo.class);
+                    
+                    // 2. Đổi tên biến thành isUpdateSuccess (FIX LỖI TRÙNG BIẾN IS-SUCCESS)
+                    boolean isUpdateSuccess = AuctionDAO.getInstance().updateAuction(info);
+
+                    if (isUpdateSuccess) {
+                        out.println("AUCTION|UPDATE|SUCCESS");
+                        out.flush();
+                    } else {
+                        out.println("AUCTION|UPDATE|ERROR|Lỗi khi lưu Database");
+                        out.flush();
+                    }
+                    break;
+                } // 👉 Kết thúc phòng riêng
             }
 
             if (result != null) {

@@ -14,7 +14,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -22,108 +21,130 @@ import com.mikey.auction.socket.RequestHandler;
 import com.mikey.auction.socket.SocketClient;
 import com.mikey.auction.socket.SocketListener;
 
-
-
 public class RegisterController implements SocketListener {
-    @FXML
-    private TextField username;
-    @FXML
-    private PasswordField password;
-    @FXML
-    private Button registerButton;
-    @FXML
-    private Label status;
+    @FXML private TextField username;
+    @FXML private PasswordField password;
+    @FXML private Button registerButton;
+    @FXML private Label status;
 
-    public void initialize(){
+    public void initialize() {
+        // Chỉ đăng ký Listener, không gọi connect() để tránh đụng độ
+        SocketClient.getInstance().setListener(this);
+        
+        status.setText("Sẵn sàng đăng ký");
+        status.setTextFill(javafx.scene.paint.Color.GRAY);
+        status.setVisible(true);
+
         registerButton.setDisable(true);
-        new Thread(() -> {
-            try {
-                // Sử dụng kết nối tập trung từ SocketClient
-                SocketClient.getInstance().connect("localhost", 12345);
-                // Đăng ký nhận phản hồi tại đây
-                SocketClient.getInstance().setListener(this);
-                
-                Platform.runLater(() -> {
-                    status.setText("Đã kết nối server");
-                    registerButton.setDisable(false);
-                });
 
-                password.setOnKeyPressed(event -> {
-                    // Nếu phím vừa gõ là phím ENTER
-                    if (event.getCode() == KeyCode.ENTER) {
-                        // Tự động kích hoạt (bóp cò) nút Đăng nhập
-                        registerButton.fire(); 
-                    }
-                });
-
-            } catch (IOException e) {
-                Platform.runLater(() -> status.setText("Không thể kết nối server, thử lại..."));
+        password.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && !registerButton.isDisabled()) {
+                registerButton.fire(); 
             }
-        }).start();
+        });
     }
+
     @FXML
     public void onHandleRegister(ActionEvent e) throws IOException {
         String text1 = username.getText();
         String text2 = password.getText();
+
+        // Chặn độ dài tối thiểu y hệt Login
+        if (text1.length() < 5) {
+            applyErrorStyle("Tên đăng nhập phải có ít nhất 5 ký tự!");
+            String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red;";
+            username.setStyle(errorStyle);
+            password.setStyle(errorStyle);
+            return;
+        }
+
         status.setText("Đang xử lý...");
+        status.setTextFill(javafx.scene.paint.Color.BLACK);
+        status.setVisible(true);
         registerButton.setDisable(true);
+        
         RequestHandler.getInstance().requestRegister(text1, text2);
     }
 
-
-    /**
-     * Hứng phản hồi từ Server trả về sau khi gửi lệnh REGISTER.
-     */
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
         if ("AUTH".equals(category)) {
             Platform.runLater(() -> {
                 if ("SUCCESS".equals(action)) {
-                    status.setText("đăng ký thành công!!");
+                    status.setText("Đăng ký thành công!! Đang về màn hình Login...");
                     status.setVisible(true);
-                    status.setTextFill(Paint.valueOf("green"));
-                    username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
-                    password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green");
+                    status.setTextFill(javafx.scene.paint.Color.GREEN);
                     
-                    // Đợi 4 giây rồi quay lại màn hình Login
+                    String successStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: green;";
+                    username.setStyle(successStyle);
+                    password.setStyle(successStyle);
+                    
                     PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                     pause.setOnFinished(event -> backToLogin());
                     pause.play();
                 } else {
                     registerButton.setDisable(false);
-                    status.setText("tên đăng nhập tồn tại");
-                    status.setVisible(true);
-                    status.setTextFill(Paint.valueOf("red"));
-                    username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
-                    password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red");
                     username.clear();
                     password.clear();
+                    
+                    applyErrorStyle("Tên đăng nhập đã tồn tại, vui lòng chọn tên khác!");
+                    
+                    String errorStyle = "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red;";
+                    username.setStyle(errorStyle);
+                    password.setStyle(errorStyle);
                 }
             });
         }
     }
 
     @FXML
-    public void onKeyReleased(){
-        String text1 = username.getText();
-        String text2 = password.getText();
-        boolean disable1 = text1.isEmpty() || text1.trim().isEmpty();
-        boolean disable2 = text2.trim().isEmpty() || text2.isEmpty();
-        if (!disable1 || !disable2){ 
-            username.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
-            password.setStyle("-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray");
+    public void onKeyReleased() {
+        String userText = username.getText();
+        String passText = password.getText();
+
+        registerButton.setDisable(userText.trim().isEmpty() || passText.trim().isEmpty());
+
+        boolean isUserValid = validateASCII(userText);
+        boolean isPassValid = validateASCII(passText);
+
+        username.setStyle(isUserValid ? "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray;" 
+                                      : "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 1px;");
+        
+        password.setStyle(isPassValid ? "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: gray;" 
+                                      : "-fx-background-color: white; -fx-border-radius: 20; -fx-border-color: red; -fx-border-width: 1px;");
+
+        if (!isUserValid || !isPassValid) {
+            applyErrorStyle("Kí tự không hợp lệ");
+        } else {
+            if ("Kí tự không hợp lệ".equals(status.getText())) {
+                status.setVisible(false);
+            }
         }
-        registerButton.setDisable(disable1 || disable2);
     }
+
+    private boolean validateASCII(String content) {
+        for (char c : content.toCharArray()) {
+            if (c < 33 || c > 126) return false;
+        }
+        return true;
+    }
+
+    // ĐÃ CHỈNH SỬA: Bê nguyên hàm applyErrorStyle từ LoginController
+    private void applyErrorStyle(String msg) {
+        status.setText(msg);
+        status.setTextFill(javafx.scene.paint.Color.RED);
+        status.setVisible(true);
+    }
+
     @FXML
     public void backToLogin() {
-        try{
+        try {
             Stage stage = (Stage) registerButton.getScene().getWindow();
             Parent root = FXMLLoader.load((getClass().getResource("login.fxml")));
             stage.setScene(new Scene(root));
             stage.show();
-        }catch(IOException e){
-            System.out.println(e.getMessage());
+        } catch(IOException e) {
+            e.printStackTrace();
         }
     }
 }
