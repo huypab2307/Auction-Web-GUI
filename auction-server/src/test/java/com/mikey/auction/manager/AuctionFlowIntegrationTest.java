@@ -1,10 +1,21 @@
 package com.mikey.auction.manager;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.MockedStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
+import com.mikey.auction.database.AuctionDAO;
+import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.Electronics;
 import com.mikey.auction.items.Item;
 import com.mikey.auction.items.ItemType;
@@ -12,36 +23,28 @@ import com.mikey.auction.items.ItemType;
 public class AuctionFlowIntegrationTest {
 
     @Test
-    public void testCompleteAuctionAndAutoBidFlow() {
-        // 1. Chuẩn bị dữ liệu đầu vào hợp lệ
+    public void testCompleteAuctionAndAutoBidFlow() throws Exception {
         Item item = new Electronics("iPad Pro", "M2 Chip", ItemType.ELECTRONICS, 1, -1, "path");
-        double price = 15000000;
-        double stepPrice = 200000;
-        LocalDateTime startTime = LocalDateTime.now();
-        LocalDateTime endTime = LocalDateTime.now().plusHours(5);
 
-        // SỬA: Bọc toàn bộ luồng tích hợp vào try-catch để xử lý mềm dẻo, tránh lỗi "nothing was thrown"
-        try {
-            // Bước 1: Gọi upload item lên hệ thống
-            AuctionManager.getInstance().uploadItem(item, price, stepPrice, startTime, endTime);
+        try (MockedStatic<AuctionDAO> mockedDao = mockStatic(AuctionDAO.class)) {
+            AuctionDAO mockDaoInstance = mock(AuctionDAO.class);
+            mockedDao.when(AuctionDAO::getInstance).thenReturn(mockDaoInstance);
+            
+            Connection mockConn = mock(Connection.class);
+            PreparedStatement mockPs = mock(PreparedStatement.class);
+            
+            when(mockDaoInstance.getConnect()).thenReturn(mockConn);
+            when(mockConn.prepareStatement(anyString())).thenReturn(mockPs);
+            when(mockConn.prepareStatement(anyString(), anyInt())).thenReturn(mockPs);
+            
+            ArrayList<AuctionInfo> mockList = new ArrayList<>();
+            mockList.add(new AuctionInfo(null, 999, "seller", "bidder", 15000000, null, null, null, 200000));
+            when(mockDaoInstance.getAllAuctions()).thenReturn(mockList);
 
-            // Bước 2: Lấy danh sách cuộc đấu giá hiện tại
+            AuctionManager.getInstance().uploadItem(item, 15000000, 200000, LocalDateTime.now(), LocalDateTime.now().plusHours(5));
             var auctions = AuctionManager.getInstance().auctionList();
             
-            // Bước 3: Kiểm tra và bóc tách phần tử cuối cùng nếu danh sách có dữ liệu
-            if (auctions != null && !auctions.isEmpty()) {
-                var latestAuction = auctions.get(auctions.size() - 1);
-                if (latestAuction != null) {
-                    int auctionId = latestAuction.getId();
-                    System.out.println("ID cuộc đấu giá giả lập: " + auctionId);
-                }
-            }
-        } catch (Throwable t) {
-            // Đón đầu và nuốt mọi lỗi phát sinh nếu môi trường test thiếu liên kết database hoặc thiếu phương thức core
-            System.out.println("Bỏ qua lỗi xung đột cấu trúc phương thức trong môi trường test: " + t.getMessage());
+            assertTrue(auctions != null && !auctions.isEmpty(), "Luồng tích hợp phải trả về dữ liệu");
         }
-        
-        // Khẳng định luồng xử lý hoàn tất an toàn và thành công
-        assertTrue(true);
     }
 }
