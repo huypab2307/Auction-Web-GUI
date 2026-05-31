@@ -26,7 +26,7 @@ public class NotificationHandlers {
             Object result = null;
 
             switch (action) {
-                case "SHOW":
+                case "GET_ALL":
                     int userId = Integer.parseInt(parts[2].trim());
                     result = NotificationManager.getInstance().findNotififications(userId);
                     break;

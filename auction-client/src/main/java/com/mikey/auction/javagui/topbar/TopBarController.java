@@ -4,12 +4,16 @@ package com.mikey.auction.javagui.topbar;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mikey.auction.auction.Notifications;
 import com.mikey.auction.javagui.SceneChanger;
-import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.socket.RequestHandler;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
 import com.mikey.auction.user.User;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,9 +26,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import java.lang.reflect.Type;
 
 
-public class TopBarController {
+public class TopBarController implements SocketListener {
     @FXML private TextField searchField;
     @FXML private ToggleButton searchButton;
     @FXML private MenuButton notification;
@@ -155,17 +160,13 @@ public class TopBarController {
     }
 
     @FXML
-    public void showNotification() throws IOException {
-        List<Notifications> list = NotificationManager.getInstance().findNotififications(user.getId());
-        mainContainer.getChildren().clear();
-        for (Notifications notification : list){
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
-            Parent root = loader.load();
-            String color = (notification.isRead()) ? "white" : "#c9efc9";
-            root.setStyle("-fx-background-color: " + color);
-            NotificationController notificationController = loader.getController();
-            notificationController.setContent(notification);
-            mainContainer.getChildren().add(root);
+    public void showNotification() {
+        if (user != null) {
+            System.out.println("Gửi yêu cầu lấy thông báo cho user: " + user.getId());
+            // Dành quyền nghe ngóng Socket
+            SocketClient.getInstance().setListener(this);
+            // Gửi lệnh lên Server
+            RequestHandler.getInstance().requestNotifications(user.getId());
         }
     }
 
@@ -187,6 +188,40 @@ public class TopBarController {
         if (avatar != null && img != null) {
             javafx.application.Platform.runLater(() -> {
                 avatar.setImage(img);
+            });
+        }
+    }
+
+    @Override
+    public void onResponseReceived(String category, String action, String jsonData) {
+        if ("NOTIFICATION".equals(category) && "GET_ALL".equals(action)) {
+            Platform.runLater(() -> {
+                try {
+                    // Dùng Gson để ép kiểu chuỗi JSON thành List<Notifications>
+                    Type listType = new TypeToken<List<Notifications>>(){}.getType();
+                    List<Notifications> list = new Gson().fromJson(jsonData, listType);
+
+                    mainContainer.getChildren().clear(); // Xóa UI cũ
+                    
+                    if (list != null) {
+                        for (Notifications notification : list) {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
+                            Parent root = loader.load();
+                            
+                            // Đổi màu nền nếu chưa đọc
+                            String color = (notification.isRead()) ? "white" : "#c9efc9";
+                            root.setStyle("-fx-background-color: " + color);
+                            
+                            NotificationController notificationController = loader.getController();
+                            notificationController.setContent(notification);
+                            
+                            mainContainer.getChildren().add(root);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Lỗi render thông báo: " + e.getMessage());
+                    e.printStackTrace();
+                }
             });
         }
     }

@@ -207,4 +207,9 @@ public class RequestHandler {
         // Gửi lệnh dạng: AUCTION|GET_ACTIVITIES|5
         send("AUCTION|GET_ACTIVITIES|" + userId);
     }
+
+    public void requestNotifications(int userId) {
+        // Gửi chuỗi dạng: NOTIFICATION|GET_ALL|5
+        send("NOTIFICATION|GET_ALL|" + userId);
+    }
 }
