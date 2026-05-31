@@ -75,10 +75,6 @@ public class UserController {
         navigate("change_password.fxml");
     }
 
-    public void handleDeleteAccount(ActionEvent actionEvent) throws IOException {
-        navigate("delete_confirm.fxml");
-    }
-
     public void cancelHandle(ActionEvent actionEvent) {
         Stage stage = (Stage) usernameField.getScene().getWindow();
         stage.close();
