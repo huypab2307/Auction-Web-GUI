@@ -191,15 +191,20 @@ public class RequestHandler {
         send("AUCTION|DELETE|" + auctionId + "|" + sellerId + "|SELLER");
     }
 
-    public void requestRecentActivities(int userId) {
-        send("AUCTION|HISTORY|"+ userId);
-    }
-
     public void requestUserInvoices(int userId) {
         send("AUCTION|INVOICE_GET|" + userId);
     }
 
     public void requestPayInvoice(int invoiceId, int userId) {
         send("AUCTION|INVOICE_PAY|" + invoiceId + "|" + userId);
+    }
+
+    public void requestFollowedAuctions(int userId) {
+        send("AUCTION|FOLLOWED_LIST|" + userId);
+    }
+
+    public void requestRecentActivities(int userId) {
+        // Gửi lệnh dạng: AUCTION|GET_ACTIVITIES|5
+        send("AUCTION|GET_ACTIVITIES|" + userId);
     }
 }
