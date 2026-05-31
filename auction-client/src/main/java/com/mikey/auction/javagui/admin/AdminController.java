@@ -144,6 +144,36 @@ public class AdminController implements SocketListener {
         }
 
         RequestHandler.getInstance().requestAllBidHistory();
+
+        // ==========================================
+        // BẮT SỰ KIỆN TÌM KIẾM Ở THANH TOPBAR
+        // ==========================================
+        if (searchField != null) {
+            searchField.setOnKeyPressed(event -> {
+                // Nếu người dùng nhấn phím ENTER
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    String keyword = searchField.getText().trim();
+                    
+                    if (!keyword.isEmpty()) {
+                        System.out.println("TopBar đang tìm kiếm từ khóa: " + keyword);
+                        
+                        // 1. Tự động chuyển sang Tab Quản lý vật phẩm
+                        navigateToTab(viewAuctionItems, btnAuctionItems);
+                        
+                        // 2. Chuyển từ khóa từ TopBar sang ô tìm kiếm của Tab
+                        if (searchItemField != null) {
+                            searchItemField.setText(keyword);
+                        }
+                        
+                        // 3. Gọi hàm lọc dữ liệu có sẵn
+                        handleSearchItem(null);
+                        
+                        // 4. (Tùy chọn) Xóa trắng ô TopBar sau khi đã chuyển trang tìm kiếm xong
+                        searchField.clear(); 
+                    }
+                }
+            });
+        }
     }
 
 private void setupTable() {
