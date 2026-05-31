@@ -110,7 +110,6 @@ class ClientHandler implements Runnable {
         }
     }
 
-    // 👉 ĐÃ SỬA: Thêm lệnh Phát sóng (Broadcast) sau khi chốt đơn
     public boolean placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice) {
         AuctionDAO auctionDAO = AuctionDAO.getInstance();
         try (Connection connection = auctionDAO.getConnect()) {

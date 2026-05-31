@@ -258,7 +258,7 @@ public class AuctionItemController implements SearchListener, SocketListener {
     public void onBidHandle(ActionEvent actionEvent) {
         bidButton.setDisable(true);
         bidButton.setText("Đang xử lý...");
-        RequestHandler.getInstance().requestPlaceBid(auctionInfo.getId(), user.getId());
+        RequestHandler.getInstance().requestPlaceBid(auctionInfo, user);
         
         PauseTransition pause = new PauseTransition(Duration.seconds(1));
         pause.setOnFinished(e -> { bidButton.setDisable(false); bidButton.setText("ĐẤU GIÁ NGAY"); });

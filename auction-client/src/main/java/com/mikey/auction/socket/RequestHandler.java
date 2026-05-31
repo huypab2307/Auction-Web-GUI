@@ -11,6 +11,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.items.ItemType;
+import com.mikey.auction.user.User;
 
 public class RequestHandler {
     private static RequestHandler instance;
@@ -82,8 +83,10 @@ public class RequestHandler {
         send("AUCTION|CREATE|" + gson.toJson(info));
     }
 
-    public void requestPlaceBid(int auctionId, int userId) {
-        send("AUCTION|PLACEBID|" + auctionId + "|" + userId);
+    public void requestPlaceBid(AuctionInfo auction, User currentUser) {
+        if (auction != null && currentUser != null) {
+            send("AUCTION|PLACEBID|" + auction.getId() + "|" + currentUser.getId());
+        }
     }
 
     // ==========================================

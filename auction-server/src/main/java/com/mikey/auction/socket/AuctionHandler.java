@@ -17,6 +17,9 @@ import com.mikey.auction.items.Item;
 import com.mikey.auction.items.ItemType;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
+import com.mikey.auction.manager.UserManager;
+import com.mikey.auction.user.Bidder;
+import com.mikey.auction.user.Role;
 import com.mikey.auction.user.User;
 
 public class AuctionHandler {
@@ -102,24 +105,31 @@ public class AuctionHandler {
                         }
                     }
                     break;
-                    
                 case "PLACEBID":
-                    int auctionId = Integer.parseInt(parts[2].trim());
-                    int uId = Integer.parseInt(parts[3].trim());
-                    
-                    // 1. Chạy siêu thuật toán Đấu giá an toàn
-                    boolean success = AuctionDAO.getInstance().placeBid(auctionId, uId);
-                    
-                    if (success) {
-                        // 2. Nếu đặt thành công, kích hoạt các Đại gia (Auto-Bid) vào đọ tiền ngay lập tức!
-                        AuctionDAO.getInstance().triggerAutoBids(auctionId);
-                        
-                        // 3. Lấy thông tin phiên đấu giá MỚI NHẤT (Đã bao gồm cả việc Auto-Bid đẩy giá lên nếu có) 
-                        // để gửi về cho Client
-                        result = AuctionDAO.getInstance().searchAuctionById(auctionId);
-                    } else {
-                        // Trả về false. Client của bạn sẽ tự động hiện thông báo "Thao tác thất bại! Có thể giá đã bị thay đổi."
-                        result = false; 
+                    try {
+                        int bidAuctionId = Integer.parseInt(parts[2].trim());
+                        int bidderUserId = Integer.parseInt(parts[3].trim());
+
+                        AuctionInfo databaseAuctionInfo = AuctionDAO.getInstance().searchAuctionById(bidAuctionId);
+
+                        if (databaseAuctionInfo != null) {
+                            Bidder user =(Bidder) UserManager.getInstance().createUser(Role.BIDDER, UserDAO.getInstance().findById(bidderUserId));
+                            double oldPrice = databaseAuctionInfo.getCurPrice();
+
+                            AuctionInfo freshAuction = AuctionManager.getInstance().placeBid(user, databaseAuctionInfo, oldPrice);
+
+                            if (freshAuction != null) {
+                                // Thành công -> Trả về Object mới nhất cho khối cuối hàm tự động phản hồi và Broadcast
+                                result = freshAuction;
+                            } else {
+                                result = false;
+                            }
+                        } else {
+                            result = false;
+                        }
+                    } catch (Exception e) {
+                        System.err.println("❌ Lỗi xử lý đặt giá theo ID tại Server: " + e.getMessage());
+                        result = false;
                     }
                     break;
 

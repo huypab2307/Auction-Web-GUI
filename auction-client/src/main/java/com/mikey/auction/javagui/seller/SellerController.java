@@ -215,29 +215,29 @@ public class SellerController implements SocketListener {
         String desc = itemDescription.getText();
         double startPrice = Double.parseDouble(price.getText());
         double step = Double.parseDouble(stepPrice.getText());
-        
+
         // 👉 ĐÃ RÚT GỌN: Dùng trực tiếp LocalDateTime
         LocalDateTime startT = startTime.getValue().atStartOfDay();
         LocalDateTime endT = endTime.getValue().atStartOfDay();
-        
+
         String selectedType = type.getValue();
 
         // 2. Tạo đối tượng ItemSummary (Rút gọn tên class)
         ItemSummary itemSum = new ItemSummary();
         itemSum.setTitle(name);
         itemSum.setDescription(desc);
-        itemSum.setImagePath(imagePath); 
+        itemSum.setImagePath(imagePath);
         itemSum.setItemType(ItemType.valueOf(selectedType.toUpperCase()));
 
         // 3. Khởi tạo AuctionInfo để gửi đi
         // currentEditingId giúp Server biết đây là lệnh UPDATE cho sản phẩm số 3
         AuctionInfo updateData = new AuctionInfo(
             itemSum,
-            currentEditingId,      
-            user.getUsername(),    
-            null,                  
+            currentEditingId,
+            user.getUsername(),
+            null,
             startPrice, // Giá khởi điểm mới
-            AuctionStatus.PENDING, 
+            AuctionStatus.PENDING,
             startT,
             endT,
             step        // Bước giá mới
@@ -245,22 +245,22 @@ public class SellerController implements SocketListener {
 
         // 👉 QUAN TRỌNG: Đưa itemData (chứa Artist, Brand...) vào gói tin
         // Biến itemData bạn đã khai báo và fill ở dòng 159-166 rồi đấy!
-        updateData.setExtraData(itemData); 
-
-   if (this.currentEditingId == -1) {
+        updateData.setExtraData(itemData);
+        if (this.currentEditingId == -1) {
             // CHẾ ĐỘ THÊM MỚI
+            SocketClient.getInstance().setListener(this);
             System.out.println("Gửi yêu cầu TẠO MỚI phiên đấu giá lên Server...");
             RequestHandler.getInstance().requestCreateAuction(updateData);
+            }
+
+            showCongratulationEffect(2.5);
+
+        } catch (Exception ex) {
+            System.err.println("Lỗi khi đóng gói dữ liệu: " + ex.getMessage());
+        } finally {
+            submit.setDisable(false);
         }
-
-        showCongratulationEffect(2.5);
-
-    } catch (Exception ex) {
-        System.err.println("Lỗi khi đóng gói dữ liệu: " + ex.getMessage());
-    } finally {
-        submit.setDisable(false);
     }
-}
 
     public void findArtworkData(HashMap<String, String> itemData) {
         TextField artistField = (TextField) itemInfo.lookup("#artist");

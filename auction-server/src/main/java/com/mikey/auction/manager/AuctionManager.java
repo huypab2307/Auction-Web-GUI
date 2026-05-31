@@ -50,39 +50,44 @@ public class AuctionManager {
    }
 
 
-// 👉 ĐÃ SỬA: Đổi kiểu trả về từ boolean sang AuctionInfo để lấy giá mới lập tức
+
     public AuctionInfo placeBid(Bidder bidder, AuctionInfo auctionInfo, double oldPrice) {
         AuctionDAO auctionDAO = AuctionDAO.getInstance();
         try (Connection connection = auctionDAO.getConnect()) {
             connection.setAutoCommit(false);
+
+            // 1. Thực hiện cập nhật số tiền và lịch sử giao dịch vào MySQL (Tầng DAO lo)
             auctionDAO.updateAuction(connection, auctionInfo, bidder.getId(), oldPrice);
             auctionDAO.updateTransaction(connection, auctionInfo, bidder.getId());
-            
-            connection.commit(); // Chốt đơn cho người đặt giá thủ công
+            connection.commit(); // Chốt hạ giao dịch thủ công thành công!
 
-            // KÍCH HOẠT AUTO BIDDING: Máy tự động đọ giá (nếu có)
+            // 2. KÍCH HOẠT AUTO BIDDING: Kéo các đại gia cài tự động vào đọ tiền
             auctionDAO.triggerAutoBids(auctionInfo.getId());
 
-            // LẤY DỮ LIỆU MỚI NHẤT: Bao gồm cả giá sau khi Auto-Bid đọ nhau xong
+            // 3. KÉO DỮ LIỆU MỚI NHẤT: Lấy mốc giá cuối cùng sau khi đọ Auto-Bid xong xuôi
             AuctionInfo freshAuctionInfo = auctionDAO.searchAuctionById(auctionInfo.getId());
 
-            // Bắn thông báo qua cổng phụ cho các máy KHÁC đang cùng xem
-            NotificationManager.getInstance().notiAll(freshAuctionInfo, bidder);
+            if (freshAuctionInfo != null) {
 
-            // PHÁT SÓNG CHO TẤT CẢ CÁC MÁY KHÁC ĐỂ CẬP NHẬT GIÁ
-            Gson gson = new com.google.gson.GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-            .create();
-            AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + gson.toJson(freshAuctionInfo));
-            
+                NotificationManager.getInstance().notiAll(freshAuctionInfo, bidder);
 
-            // 👉 QUAN TRỌNG: Trả về đối tượng mới tinh cho CHÍNH MÁY vừa bấm nút
-            return freshAuctionInfo;
-            
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+                com.google.gson.Gson broadcastGson = new com.google.gson.GsonBuilder()
+                        .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonSerializer<java.time.LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                        .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonDeserializer<java.time.LocalDateTime>) (json, t, ctx) -> java.time.LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .create();
+
+                // Đồng bộ giá cho các máy khác đang mở xem sảnh/chi tiết
+                AuctionServer.broadcast("AUCTION|UPDATE_PRICE|" + broadcastGson.toJson(freshAuctionInfo));
+
+                System.out.println("Manager: Đã xử lý khép quy trình đặt giá thành công cho Phiên ID: " + freshAuctionInfo.getId());
+                return freshAuctionInfo;
+            }
+
+        } catch (java.sql.SQLException e) {
+            System.err.println("Lỗi nghiệp vụ đặt giá tại tầng Manager: " + e.getMessage());
+            e.printStackTrace();
         }
-        return null; // Thất bại trả về null
+        return null;
     }
 
 
@@ -119,7 +124,7 @@ public class AuctionManager {
         return AuctionDAO.getInstance().updateAuction(info);
     }
 
-// 👉 ĐÃ SỬA: Đổi kiểu trả về thành AuctionInfo để trả nguyên cục dữ liệu chứa giá mới cho Client
+//  ĐÃ SỬA: Đổi kiểu trả về thành AuctionInfo để trả nguyên cục dữ liệu chứa giá mới cho Client
     public AuctionInfo registerAutoBid(AutoBidInfo info) {
         //Lưu mức giá tối đa mà người dùng muốn đặt, cùng với ID phiên đấu và ID người dùng
         boolean success = AuctionDAO.getInstance().registerAutoBid(info);

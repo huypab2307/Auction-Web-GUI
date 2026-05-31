@@ -1,6 +1,7 @@
 package com.mikey.auction.javagui.topbar;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -204,42 +205,50 @@ public class TopBarController implements SocketListener {
 
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
-        if ("NOTIFICATION".equals(category) && "GET_ALL".equals(action)) {
-            Platform.runLater(() -> {
-                try {
-                    com.google.gson.Gson customGson = new com.google.gson.GsonBuilder()
-                        .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonDeserializer<java.time.LocalDateTime>) (json, typeOfT, context) -> 
-                            java.time.LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                        .create();
-                        
-                    // 2. 👉 BÍ QUYẾT Ở ĐÂY: Ép thẳng nó thành MẢNG Notifications[].class
-                    Notifications[] notiArray = customGson.fromJson(jsonData, Notifications[].class);
+        if ("NOTIFICATION".equals(category)) {
 
-                    // 3. (Tùy chọn) Chuyển mảng thành List nếu bạn thích dùng List cho dễ vòng lặp
-                    List<Notifications> list = java.util.Arrays.asList(notiArray);
-
-                    mainContainer.getChildren().clear(); // Xóa UI cũ
-                    
-                    if (list != null) {
-                        for (Notifications notification : list) {
-                            FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
-                            Parent root = loader.load();
-                            
-                            // Đổi màu nền nếu chưa đọc
-                            String color = (notification.isRead()) ? "white" : "#c9efc9";
-                            root.setStyle("-fx-background-color: " + color);
-                            
-                            NotificationController notificationController = loader.getController();
-                            notificationController.setContent(notification);
-                            
-                            mainContainer.getChildren().add(root);
-                        }
-                    }
-                } catch (Exception e) {
-                    System.err.println("Lỗi render thông báo: " + e.getMessage());
-                    e.printStackTrace();
+            //  CHỐT CHẶN REAL-TIME: Nếu nhận tín hiệu REFRESH từ Server -> Chủ động kéo mớ thông báo mới về liền!
+            if ("GET_ALL".equals(action) && "REFRESH".equals(jsonData)) {
+                System.out.println("TopBar: Có người nâng giá phiên đang theo dõi! Đang tự động kéo thông báo mới...");
+                if (this.user != null) {
+                    RequestHandler.getInstance().requestNotifications(user.getId());
                 }
-            });
+                return; // Thoát ra để luồng mạng thực hiện cú xin dữ liệu mới
+            }
+            if ("GET_ALL".equals(action)) {
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        com.google.gson.Gson customGson = new com.google.gson.GsonBuilder()
+                                .registerTypeAdapter(LocalDateTime.class, (com.google.gson.JsonSerializer<LocalDateTime>) (src, t, ctx) -> new com.google.gson.JsonPrimitive(src.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                                .registerTypeAdapter(LocalDateTime.class, (com.google.gson.JsonDeserializer<LocalDateTime>) (json, t, ctx) -> LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                                .create();
+
+                        Notifications[] notiArray = customGson.fromJson(jsonData, Notifications[].class);
+                        List<Notifications> list = java.util.Arrays.asList(notiArray);
+
+                        mainContainer.getChildren().clear(); // Xóa sạch mớ UI cũ
+
+                        if (list != null && !list.isEmpty()) {
+                            for (Notifications notification : list) {
+                                FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
+                                Parent root = loader.load();
+
+                                // Đổi màu nền nếu chưa đọc
+                                String color = (notification.isRead()) ? "white" : "#c9efc9";
+                                root.setStyle("-fx-background-color: " + color);
+
+                                NotificationController notificationController = loader.getController();
+                                notificationController.setContent(notification);
+
+                                mainContainer.getChildren().add(root);
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Lỗi render thông báo Real-time: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+            }
         }
     }
 }

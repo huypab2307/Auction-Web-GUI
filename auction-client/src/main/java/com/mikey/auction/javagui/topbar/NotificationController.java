@@ -3,6 +3,7 @@ package com.mikey.auction.javagui.topbar;
 import java.time.format.DateTimeFormatter;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mikey.auction.auction.Notifications;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.javagui.SceneChanger;
@@ -42,23 +43,42 @@ public class NotificationController implements SocketListener {
     public void handleCardClick(MouseEvent mouseEvent) {
         SocketClient.getInstance().setListener(this);
         RequestHandler.getInstance().requestMarkAsRead(userId, notificationId);
-        RequestHandler.getInstance().requestFindItem(null, auctionId); 
+        RequestHandler.getInstance().requestSearchById(auctionId);
     }
 
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
-        if ("ITEM".equals(category) && "FIND".equals(action)) {
-            AuctionInfo auctionInfo = gson.fromJson(jsonData, AuctionInfo.class);
+        if ("AUCTION".equals(category) && "SEARCH_BY_ID".equals(action)) {
+            if (jsonData == null || "null".equals(jsonData)) {
+                System.err.println(" Không tìm thấy cuộc đấu giá tương ứng!");
+                return;
+            }
 
-            Platform.runLater(() -> {
-                try {
-                    if (auctionInfo != null) {
-                        SceneChanger.getInstance().toAuction(auctionInfo, userId);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Lỗi khi chuyển cảnh từ thông báo: " + e.getMessage());
+            try {
+                // Sử dụng Gson xịn bẻ khóa LocalDateTime để không bị crash ngày tháng
+                Gson customGson = new GsonBuilder()
+                        .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonDeserializer<java.time.LocalDateTime>) (json, typeOfT, context) ->
+                                java.time.LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .create();
+
+                // Dịch ngược JSON thẳng về Object AuctionInfo nguyên vẹn
+                AuctionInfo auctionInfo = customGson.fromJson(jsonData, AuctionInfo.class);
+
+                if (auctionInfo != null) {
+                    // Bàn giao luồng đồ họa JavaFX để bốc đầu bay màn hình
+                    javafx.application.Platform.runLater(() -> {
+                        try {
+                            System.out.println("Notification: Đang chuyển hướng sang phiên đấu giá ID: " + auctionInfo.getId());
+                            SceneChanger.getInstance().toAuction(auctionInfo, userId);
+                        } catch (Exception e) {
+                            System.err.println(" Lỗi gọi SceneChanger: " + e.getMessage());
+                        }
+                    });
                 }
-            });
+            } catch (Exception e) {
+                System.err.println(" Lỗi bóc tách JSON ngày tháng tại Card thông báo: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }
