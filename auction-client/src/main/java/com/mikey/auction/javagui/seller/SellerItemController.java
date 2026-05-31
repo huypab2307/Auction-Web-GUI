@@ -2,28 +2,37 @@ package com.mikey.auction.javagui.seller;
 
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import com.mikey.auction.auction.AuctionStatus;
 import com.mikey.auction.dto.AuctionInfo;
 import com.mikey.auction.dto.ItemSummary;
 import com.mikey.auction.javagui.login.LoginController;
 import com.mikey.auction.socket.RequestHandler;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
 
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class SellerItemController {
+public class SellerItemController implements SocketListener {
     @FXML
     private ImageView itemImage;
     @FXML
@@ -39,6 +48,11 @@ public class SellerItemController {
     private int userId;
 
     private AuctionInfo auctionInfo;
+
+    @FXML private Button btnEdit;
+    @FXML private Button btnDelete;
+    @FXML private Node cardRoot;
+    @FXML private VBox mainCard;
 
     @FXML
     public void setData(AuctionInfo i){
@@ -92,36 +106,69 @@ public class SellerItemController {
 
     @FXML
     public void handleDelete(ActionEvent event) {
-        if (auctionInfo.getStatus() == AuctionStatus.OPEN) {
-            Alert warning = new Alert(Alert.AlertType.WARNING, "Không thể xóa phiên đang diễn ra!", ButtonType.OK);
+        boolean hasBidder = auctionInfo.getLastBidderName() != null && !auctionInfo.getLastBidderName().isEmpty();
+
+        // 3. LOGIC XÓA THÔNG MINH:
+        if (auctionInfo.getStatus() == AuctionStatus.OPEN && hasBidder) {
+            // Trường hợp 1: Đang mở bán VÀ Đã có người trả giá -> CẤM XÓA
+            Alert warning = new Alert(Alert.AlertType.WARNING, "Không thể xóa! Đã có người trả giá cho sản phẩm này.", ButtonType.OK);
+            warning.showAndWait();
+            return;
+        } else if (auctionInfo.getStatus() == AuctionStatus.CLOSED || auctionInfo.getStatus() == AuctionStatus.CANCELED) {
+            // Trường hợp 2: Đã kết thúc hoặc đã hủy -> CẤM THAO TÁC
+            Alert warning = new Alert(Alert.AlertType.WARNING, "Phiên này đã kết thúc, không thể thao tác thêm!", ButtonType.OK);
             warning.showAndWait();
             return;
         }
 
+        // Trường hợp 3: PENDING (Chưa mở) HOẶC OPEN nhưng CHƯA CÓ AI ĐẶT GIÁ -> CHO PHÉP XÓA
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Xác nhận xóa");
-        alert.setHeaderText("Xóa sản phẩm: " + auctionInfo.getItemInfo().getTitle());
-        alert.setContentText("Bạn có chắc chắn muốn xóa vĩnh viễn khỏi Database không?");
+        alert.setHeaderText("Hủy sản phẩm: " + auctionInfo.getItemInfo().getTitle());
+        alert.setContentText("Bạn có chắc chắn muốn hủy phiên đấu giá này không?");
 
         if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            // Lắng nghe Server
+            SocketClient.getInstance().setListener(this);
             
-            System.out.println("Gửi yêu cầu xóa vĩnh viễn ID: " + auctionInfo.getId());
-            
-            // 👉 GỌI ĐÚNG HÀM DÀNH CHO SELLER (truyền thêm biến userId của Seller vào)
+            // Tạm khóa nút tránh bấm 2 lần
+            if (btnDelete != null) {
+                btnDelete.setText("Đang xóa...");
+                btnDelete.setDisable(true);
+            }
+            if (btnEdit != null) btnEdit.setDisable(true);
+
+            System.out.println("Gửi yêu cầu hủy ID: " + auctionInfo.getId());
             RequestHandler.getInstance().requestDeleteAuctionSeller(auctionInfo.getId(), this.userId); 
+        }
+    }
 
-            // Hiệu ứng biến mất trên UI...
+    @Override
+    public void onResponseReceived(String category, String action, String jsonData) {
+        if ("AUCTION".equals(category) && "DELETE".equals(action)) {
+            Platform.runLater(() -> {
+                if (jsonData.contains("SUCCESS")) {
+                    // 👉 GỌI TRỰC TIẾP TÊN CÁI KHUNG NGOÀI CÙNG ĐỂ XÓA TẬN GỐC
+                    if (mainCard != null) {
+                        javafx.scene.layout.Pane parent = (javafx.scene.layout.Pane) mainCard.getParent();
+                        if (parent != null) {
+                            parent.getChildren().remove(mainCard);
+                        }
+                    }
+                } else if (jsonData.contains("ERROR_SELLER_DENIED")) {
+                    if (btnDelete != null) {
+                        btnDelete.setText("Xóa");
+                        btnDelete.setDisable(false);
+                    }
+                    if (btnEdit != null) btnEdit.setDisable(false);
 
-            // Hiệu ứng biến mất trên UI (giữ nguyên)
-            Node cardRoot = ((Node) event.getSource()).getParent().getParent();
-            FadeTransition fade = new FadeTransition(Duration.millis(300), cardRoot);
-            fade.setFromValue(1.0);
-            fade.setToValue(0.0);
-            fade.setOnFinished(e -> {
-                cardRoot.setVisible(false);
-                cardRoot.setManaged(false);
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Không thể hủy");
+                    alert.setHeaderText("Hủy phiên đấu giá thất bại!");
+                    alert.setContentText("Sản phẩm đã có người trả giá. Để bảo vệ người mua, bạn không thể hủy ngang!");
+                    alert.showAndWait();
+                }
             });
-            fade.play();
         }
     }
 

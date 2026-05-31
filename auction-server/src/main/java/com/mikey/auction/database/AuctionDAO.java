@@ -105,16 +105,21 @@ public class AuctionDAO extends BaseDAO {
         ArrayList<AuctionInfo> results = executeQueryAndGetList(sql, auctionId);
         return results.isEmpty() ? null : results.get(0);
     }
+
     public ArrayList<AuctionInfo> searchAuctionByUserId(int userId) {
-        String sql = BASE_SELECT_QUERY + " WHERE u_seller.id = ?";
-        ArrayList<AuctionInfo> results = executeQueryAndGetList(sql, userId);
-        return results;
+        // CHỈ hiển thị những phiên chưa bị hủy (CANCELED) và chưa chốt sổ (CLOSED) ở màn hình chính
+        String sql = BASE_SELECT_QUERY + " WHERE u_seller.id = ? AND a.status != 'CANCELED' AND a.status != 'CLOSED'";
+        return executeQueryAndGetList(sql, userId);
     }
-//    public AuctionInfo searchAuctionByInterestedId(int userId) {
-//        String sql = BASE_SELECT_QUERY + " WHERE .id = ?";
-//        ArrayList<AuctionInfo> results = executeQueryAndGetList(sql, userId);
-//        return results.isEmpty() ? null : results.get(0);
-//    }
+
+    public ArrayList<AuctionInfo> getFollowedAuctions(int userId) {
+        // JOIN bảng auctions với bảng notificationList (bảng lưu lượt theo dõi)
+        // Kèm theo bộ lọc: CHỈ lấy những phiên đang OPEN hoặc PENDING
+        String sql = BASE_SELECT_QUERY + 
+                     " INNER JOIN notificationList n ON a.id = n.auctionId " +
+                     " WHERE n.userId = ? AND (a.status = 'OPEN' OR a.status = 'PENDING')";
+        return executeQueryAndGetList(sql, userId);
+    }
 
 
     public boolean createAuction(Connection connection, int itemId, int sellerId, double price, double stepPrice, LocalDateTime startTime, LocalDateTime endTime) throws SQLException {
@@ -442,7 +447,7 @@ public class AuctionDAO extends BaseDAO {
         
         try (Connection conn = getConnect()) {
             // 1. Tổng chi tiêu (Mua thành công)
-            String sqlSpent = "SELECT IFNULL(SUM(curPrice), 0) FROM auctions WHERE lastBidderId = ? AND status = 'CLOSED'";
+            String sqlSpent = "SELECT IFNULL(SUM(amount), 0) FROM invoices WHERE winnerId = ? AND status = 'PAID'";
             try (PreparedStatement ps = conn.prepareStatement(sqlSpent)) {
                 ps.setInt(1, userId);
                 try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setTotalSpent(rs.getDouble(1)); }
@@ -456,7 +461,7 @@ public class AuctionDAO extends BaseDAO {
             }
 
             // 3. Sản phẩm đã đấu giá thắng
-            String sqlWon = "SELECT COUNT(*) FROM auctions WHERE lastBidderId = ? AND status = 'CLOSED'";
+            String sqlWon = "SELECT COUNT(*) FROM invoices WHERE winnerId = ? AND status != 'CANCELLED'";
             try (PreparedStatement ps = conn.prepareStatement(sqlWon)) {
                 ps.setInt(1, userId);
                 try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setWonItems(rs.getInt(1)); }
@@ -473,19 +478,21 @@ public class AuctionDAO extends BaseDAO {
 
             // 5. Sản phẩm đang theo dõi (Yêu thích)
             // 5. Sản phẩm đang theo dõi (Yêu thích) - ĐÃ SỬA LỖI TRÙNG BIẾN CONN
-String sqlFollow = "SELECT COUNT(*) FROM notificationList WHERE userId = ?";
-try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) { // Sử dụng trực tiếp biến conn có sẵn của hàm
-    ps.setInt(1, userId);
-    try (ResultSet rs = ps.executeQuery()) { 
-        if (rs.next()) stats.setFollowingCount(rs.getInt(1)); 
-    }
-} catch (Exception e) {
-    System.err.println("Lỗi đồng bộ đếm người theo dõi: " + e.getMessage());
-    stats.setFollowingCount(0);
-}
+            String sqlFollow = "SELECT COUNT(n.auctionId) FROM notificationList n " +
+                               "JOIN auctions a ON n.auctionId = a.id " +
+                               "WHERE n.userId = ? AND (a.status = 'OPEN' OR a.status = 'PENDING')";
+            try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) { 
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) { 
+                    if (rs.next()) stats.setFollowingCount(rs.getInt(1)); 
+                }
+            } catch (Exception e) {
+                System.err.println("Lỗi đồng bộ đếm người theo dõi: " + e.getMessage());
+                stats.setFollowingCount(0);
+            }
 
             // 6. Sản phẩm người này đã bán thành công
-            String sqlSold = "SELECT COUNT(*) FROM auctions WHERE sellerId = ? AND status = 'CLOSED' AND lastBidderId IS NOT NULL";
+            String sqlSold = "SELECT COUNT(i.id) FROM invoices i JOIN auctions a ON i.auctionId = a.id WHERE a.sellerId = ? AND i.status = 'PAID'";
             try (PreparedStatement ps = conn.prepareStatement(sqlSold)) {
                 ps.setInt(1, userId);
                 try (ResultSet rs = ps.executeQuery()) { if (rs.next()) stats.setSoldItems(rs.getInt(1)); }
@@ -739,5 +746,59 @@ try (PreparedStatement ps = conn.prepareStatement(sqlFollow)) { // Sử dụng t
             e.printStackTrace();
             return false;
         }
+    }
+
+    public java.util.ArrayList<String> getRecentActivities(int userId) {
+        java.util.ArrayList<String> list = new java.util.ArrayList<>();
+        
+        // Dùng UNION ALL để gom 3 bảng: bidTransactions (Đấu giá), invoices (Thắng), auctions (Đăng bán)
+        String sql = 
+            "SELECT 'BID' as type, i.title, b.bidAmount as amount, b.createdAt as time " +
+            "FROM bidTransactions b JOIN auctions a ON b.auctionId = a.id JOIN items i ON a.itemId = i.id " +
+            "WHERE b.userId = ? " +
+            "UNION ALL " +
+            "SELECT 'WIN' as type, i.title, inv.amount as amount, inv.createdAt as time " +
+            "FROM invoices inv JOIN auctions a ON inv.auctionId = a.id JOIN items i ON a.itemId = i.id " +
+            "WHERE inv.winnerId = ? " +
+            "UNION ALL " +
+            "SELECT 'CREATE' as type, i.title, a.startingPrice as amount, a.startTime as time " +
+            "FROM auctions a JOIN items i ON a.itemId = i.id " +
+            "WHERE a.sellerId = ? " +
+            "ORDER BY time DESC LIMIT 10";
+
+        try (java.sql.Connection conn = getConnect();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            // Truyền userId cho cả 3 dấu chấm hỏi (?)
+            ps.setInt(1, userId);
+            ps.setInt(2, userId);
+            ps.setInt(3, userId);
+            
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM HH:mm");
+                
+                while (rs.next()) {
+                    String type = rs.getString("type");
+                    String title = rs.getString("title");
+                    double amount = rs.getDouble("amount");
+                    java.sql.Timestamp time = rs.getTimestamp("time");
+                    
+                    String timeStr = (time != null) ? sdf.format(time) : "";
+                    String money = String.format("%,.0f đ", amount);
+                    
+                    // Format lại thành câu văn chuẩn chỉ để ném lên UI
+                    if ("BID".equals(type)) {
+                        list.add("[" + timeStr + "] Bạn đã đặt giá " + money + " cho '" + title + "'");
+                    } else if ("WIN".equals(type)) {
+                        list.add("[" + timeStr + "] 🎉 Bạn đã thắng '" + title + "' với giá " + money);
+                    } else if ("CREATE".equals(type)) {
+                        list.add("[" + timeStr + "] Bạn đã đăng bán '" + title + "'");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

@@ -61,9 +61,10 @@ public class DashBoardController implements SocketListener {
         this.user = user;
         SocketClient.getInstance().setListener(this);
         
-        // Gửi 2 yêu cầu lên Server
-        RequestHandler.getInstance().requestUserAuctions(user.getId());
+        // ĐÃ SỬA: Gọi đúng hàm xin danh sách THEO DÕI
+        RequestHandler.getInstance().requestFollowedAuctions(user.getId());
         RequestHandler.getInstance().requestDashboardStats(user.getId());
+        SocketClient.getInstance().setListener(this);
         RequestHandler.getInstance().requestRecentActivities(user.getId());
     }
 
@@ -81,7 +82,7 @@ public class DashBoardController implements SocketListener {
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
         // NHÁNH 1: Load danh sách thẻ sản phẩm
-        if ("AUCTION".equals(category) && "USER".equals(action)) {
+        if ("AUCTION".equals(category) && "FOLLOWED_LIST".equals(action)) {
             Type listType = new TypeToken<ArrayList<AuctionInfo>>(){}.getType();
             ArrayList<AuctionInfo> followedList = gson.fromJson(jsonData, listType);
 
@@ -104,7 +105,7 @@ public class DashBoardController implements SocketListener {
         // -----------------------------------------------------------------
     // 🔥 NHÁNH 2: THÊM VÀO ĐÂY - Load danh sách hoạt động gần đây
     // -----------------------------------------------------------------
-    else if ("AUCTION".equals(category) && "HISTORY".equals(action)) { 
+    else if ("AUCTION".equals(category) && "GET_ACTIVITIES".equals(action)) { 
         // 1. Phân rã chuỗi JSON nhận từ Server thành List<String>
         Type stringListType = new TypeToken<ArrayList<String>>(){}.getType();
         ArrayList<String> activitiesList = gson.fromJson(jsonData, stringListType);
@@ -250,4 +251,6 @@ public class DashBoardController implements SocketListener {
         }
     });
 }
+
+    
 }

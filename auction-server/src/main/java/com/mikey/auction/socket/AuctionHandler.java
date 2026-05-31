@@ -249,6 +249,17 @@ public class AuctionHandler {
                         result = "FAIL";
                     }
                     break;
+
+                case "FOLLOWED_LIST":
+                    int fUserId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getFollowedAuctions(fUserId);
+                    break;
+
+                case "GET_ACTIVITIES":
+                    int actUserId = Integer.parseInt(parts[2].trim());
+                    // Gọi hàm DAO vừa viết ở Bước 1
+                    result = com.mikey.auction.database.AuctionDAO.getInstance().getRecentActivities(actUserId);
+                    break;
             }
 
             if (result != null) {
