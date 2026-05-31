@@ -2,6 +2,7 @@ package com.mikey.auction.manager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet; // BẮT BUỘC THÊM IMPORT NÀY
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -36,10 +37,19 @@ public class AuctionTimeoutSchedulerTest {
             
             Connection mockConn = mock(Connection.class);
             PreparedStatement mockPs = mock(PreparedStatement.class);
+            ResultSet mockRs = mock(ResultSet.class); // 1. TẠO RESULTSET GIẢ
             
             when(mockDaoInstance.getConnect()).thenReturn(mockConn);
             when(mockConn.prepareStatement(anyString())).thenReturn(mockPs);
             when(mockConn.prepareStatement(anyString(), anyInt())).thenReturn(mockPs);
+            
+            // 2. DẠY PREPARED STATEMENT CÁCH TRẢ VỀ RESULTSET ĐỂ CHỐNG LỖI NULL
+            when(mockPs.getGeneratedKeys()).thenReturn(mockRs);
+            when(mockPs.executeQuery()).thenReturn(mockRs);
+            
+            // 3. GIẢ LẬP DỮ LIỆU ĐỌC TỪ DB (1 DÒNG DUY NHẤT)
+            when(mockRs.next()).thenReturn(true).thenReturn(false);
+            when(mockRs.getInt(1)).thenReturn(99); 
 
             ArrayList<AuctionInfo> mockList = new ArrayList<>();
             mockList.add(new AuctionInfo(null, 999, "seller", "bidder", 550000.0, null, startTime, endTime, 50000));

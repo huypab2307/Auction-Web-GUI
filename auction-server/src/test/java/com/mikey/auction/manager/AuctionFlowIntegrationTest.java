@@ -2,6 +2,7 @@ package com.mikey.auction.manager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet; // BẮT BUỘC THÊM DÒNG IMPORT NÀY
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -32,15 +33,23 @@ public class AuctionFlowIntegrationTest {
             
             Connection mockConn = mock(Connection.class);
             PreparedStatement mockPs = mock(PreparedStatement.class);
+            ResultSet mockRs = mock(ResultSet.class); // 1. TẠO RESULTSET GIẢ
             
             when(mockDaoInstance.getConnect()).thenReturn(mockConn);
             when(mockConn.prepareStatement(anyString())).thenReturn(mockPs);
             when(mockConn.prepareStatement(anyString(), anyInt())).thenReturn(mockPs);
             
+            // 2. BƠM RESULTSET GIẢ VÀO PREPARED STATEMENT (CHỐNG NULL)
+            when(mockPs.getGeneratedKeys()).thenReturn(mockRs);
+            when(mockPs.executeQuery()).thenReturn(mockRs);
+            when(mockRs.next()).thenReturn(true).thenReturn(false); // 3. Giả lập vòng lặp while(rs.next())
+            when(mockRs.getInt(1)).thenReturn(99); // 4. Giả lập trả về ID sản phẩm
+            
             ArrayList<AuctionInfo> mockList = new ArrayList<>();
             mockList.add(new AuctionInfo(null, 999, "seller", "bidder", 15000000, null, null, null, 200000));
             when(mockDaoInstance.getAllAuctions()).thenReturn(mockList);
 
+            // Chạy luồng code thật, giờ thì DAO đã có ResultSet giả để xử lý mượt mà
             AuctionManager.getInstance().uploadItem(item, 15000000, 200000, LocalDateTime.now(), LocalDateTime.now().plusHours(5));
             var auctions = AuctionManager.getInstance().auctionList();
             

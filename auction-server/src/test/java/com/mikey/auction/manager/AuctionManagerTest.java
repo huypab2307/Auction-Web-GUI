@@ -1,14 +1,22 @@
 package com.mikey.auction.manager;
 
-import java.time.LocalDateTime;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.LocalDateTime; // BẮT BUỘC THÊM IMPORT NÀY
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.MockedStatic;
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.mikey.auction.database.AuctionDAO;
 import com.mikey.auction.dto.AuctionInfo;
@@ -33,10 +41,18 @@ public class AuctionManagerTest {
             
             Connection mockConn = mock(Connection.class);
             PreparedStatement mockPs = mock(PreparedStatement.class);
+            ResultSet mockRs = mock(ResultSet.class); // 1. TẠO RESULTSET GIẢ
             
             when(mockDaoInstance.getConnect()).thenReturn(mockConn);
             when(mockConn.prepareStatement(anyString())).thenReturn(mockPs);
             when(mockConn.prepareStatement(anyString(), anyInt())).thenReturn(mockPs);
+            
+            // 2. BƠM RESULTSET VÀO PREPARED STATEMENT
+            when(mockPs.getGeneratedKeys()).thenReturn(mockRs);
+            when(mockPs.executeQuery()).thenReturn(mockRs);
+            // 3. GIẢ LẬP ĐỌC DATA TỪ DB
+            when(mockRs.next()).thenReturn(true).thenReturn(false);
+            when(mockRs.getInt(1)).thenReturn(99); 
 
             assertDoesNotThrow(() -> {
                 AuctionManager.getInstance().uploadItem(item, price, stepPrice, startTime, endTime);
