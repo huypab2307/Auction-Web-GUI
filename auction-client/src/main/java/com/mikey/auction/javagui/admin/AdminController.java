@@ -144,6 +144,32 @@ public class AdminController implements SocketListener {
         }
 
         RequestHandler.getInstance().requestAllBidHistory();
+        // Gắn sự kiện nhấn Enter cho ô tìm kiếm Item
+        if (searchItemField != null) {
+            searchItemField.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    handleSearchItem(null); // Truyền null vì hàm của bạn không sử dụng biến event
+                }
+            });
+        }
+
+        // Gắn sự kiện nhấn Enter cho ô tìm kiếm User
+        if (searchUserField != null) {
+            searchUserField.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    handleSearchUser(null);
+                }
+            });
+        }
+
+        // Gắn sự kiện nhấn Enter cho ô tìm kiếm Bid
+        if (searchBidField != null) {
+            searchBidField.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    handleSearchBid(null);
+                }
+            });
+        }
     }
 
 private void setupTable() {

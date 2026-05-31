@@ -5,6 +5,7 @@ import com.mikey.auction.items.Arts;
 import com.mikey.auction.items.Electronics;
 import com.mikey.auction.items.ItemType;
 import com.mikey.auction.items.Vehicle;
+import com.mikey.auction.javagui.bidder.AuctionHubController;
 import com.mikey.auction.javagui.bidder.AutoBidDialogController;
 import com.mikey.auction.javagui.login.LoginController;
 import com.mikey.auction.javagui.Helper;
@@ -92,10 +93,40 @@ public class AuctionItemController implements SearchListener, SocketListener {
             .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, t, ctx) -> new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
             .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, t, ctx) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
             .create();
-
     @FXML
     public void initialize() {
         if (topBarController != null) topBarController.setListener(this);
+        // Lắng nghe sự kiện bàn phím sau khi Scene đã được thiết lập
+        Platform.runLater(() -> {
+            if (mainStackPane.getScene() != null) {
+                mainStackPane.getScene().setOnKeyPressed(event -> {
+                    // Kiểm tra xem phím được nhấn có phải là phím ENTER không
+                    if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                        // Gọi hàm backToHome()
+                        backToHome(); 
+                    }
+                });
+            }
+        });
+    }
+    @FXML
+    public void backToHome() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/bidder/auctionhub.fxml"));
+            Parent root = loader.load();
+            AuctionHubController auctionHubController = loader.getController();
+            if (this.user != null) {
+                auctionHubController.setUser(this.user);
+            } else {
+                System.err.println("Warning: Attempted to return to home without a logged-in user.");
+            }
+            javafx.scene.Scene homeScene = new javafx.scene.Scene(root);
+            javafx.stage.Stage currentStage = (javafx.stage.Stage) mainStackPane.getScene().getWindow();
+            currentStage.setScene(homeScene);
+            currentStage.setWidth(1200);
+            currentStage.setHeight(750);
+            currentStage.show();
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     public void setAuctionInfo(AuctionInfo auctionInfo) { this.auctionInfo = auctionInfo; }

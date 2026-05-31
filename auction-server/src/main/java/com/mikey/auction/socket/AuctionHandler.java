@@ -17,9 +17,6 @@ import com.mikey.auction.items.Item;
 import com.mikey.auction.items.ItemType;
 import com.mikey.auction.manager.AuctionManager;
 import com.mikey.auction.manager.ItemManager;
-import com.mikey.auction.manager.UserManager;
-import com.mikey.auction.user.Bidder;
-import com.mikey.auction.user.Role;
 import com.mikey.auction.user.User;
 
 public class AuctionHandler {
@@ -248,6 +245,17 @@ public class AuctionHandler {
                     } else {
                         result = "FAIL";
                     }
+                    break;
+
+                case "FOLLOWED_LIST":
+                    int fUserId = Integer.parseInt(parts[2].trim());
+                    result = AuctionDAO.getInstance().getFollowedAuctions(fUserId);
+                    break;
+
+                case "GET_ACTIVITIES":
+                    int actUserId = Integer.parseInt(parts[2].trim());
+                    // Gọi hàm DAO vừa viết ở Bước 1
+                    result = com.mikey.auction.database.AuctionDAO.getInstance().getRecentActivities(actUserId);
                     break;
             }
 
