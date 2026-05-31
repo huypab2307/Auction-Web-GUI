@@ -60,6 +60,19 @@ public class TopBarController {
         // Vừa khít với fitHeight="40.0" fitWidth="40.0" trong file fxml của bạn
         Circle clip = new Circle(20, 20, 20);
         avatar.setClip(clip);
+
+        if (searchField != null) {
+            searchField.setOnKeyPressed(event -> {
+                // Nếu phím được ấn là phím ENTER
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    try {
+                        searchHandle(); // Gọi thẳng hàm xử lý tìm kiếm
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
     @FXML
     public void onKeySearchHandle(){
