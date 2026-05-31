@@ -99,7 +99,7 @@ public class AdminController implements SocketListener {
 
     // TAB 4: Quản lý chi tiết tài khoản khách hàng
 // TAB 4: Quản lý chi tiết tài khoản khách hàng
-    // 👉 XÓA CÁC DÒNG CÓ DẤU <?> VÀ THAY BẰNG CÁC DÒNG DƯỚI ĐÂY:
+    //  XÓA CÁC DÒNG CÓ DẤU <?> VÀ THAY BẰNG CÁC DÒNG DƯỚI ĐÂY:
     
     @FXML private TableView<User> userTable;
     @FXML private TableColumn<User, Integer> colUserIdx;
@@ -133,7 +133,7 @@ public class AdminController implements SocketListener {
         serverStatusIndicator.setStyle("-fx-fill: #38EF7D;");
         serverStatusLabel.setText("Server: Hệ thống vận hành mượt mà");
         setupTable();
-        // 👉 THÊM DÒNG NÀY ĐỂ AUTO-LOAD DỮ LIỆU KHI VỪA MỞ APP:
+        //  THÊM DÒNG NÀY ĐỂ AUTO-LOAD DỮ LIỆU KHI VỪA MỞ APP:
         RequestHandler.getInstance().requestAllAuctions();
 
         // Khởi tạo ComboBox Lọc dữ liệu
@@ -192,7 +192,7 @@ private void setupTable() {
     colItemEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
 
     // =========================================================
-    // 👉 DÁN THÊM TOÀN BỘ KHỐI CODE TẠO NÚT XÓA NÀY VÀO ĐÂY
+    //  DÁN THÊM TOÀN BỘ KHỐI CODE TẠO NÚT XÓA NÀY VÀO ĐÂY
     // =========================================================
     // Ép JavaFX nhận diện cột để tránh lỗi trống
     colItemAction.setCellValueFactory(param -> new javafx.beans.property.SimpleObjectProperty<>(null));
@@ -209,7 +209,7 @@ private void setupTable() {
                 
                 System.out.println("Admin (ID: " + adminId + ") ra lệnh XÓA phiên đấu giá ID: " + data.getId());
                 
-                // 👉 GỌI ĐÚNG HÀM DÀNH CHO ADMIN
+                //  GỌI ĐÚNG HÀM DÀNH CHO ADMIN
                 RequestHandler.getInstance().requestDeleteAuctionAdmin(data.getId(), adminId);
                 
                 RequestHandler.getInstance().requestAllAuctions();
@@ -229,7 +229,7 @@ private void setupTable() {
                     return;
             }
                 
-                // 👉 BỔ SUNG LOGIC ĐỔI MÀU NÚT BẤM
+                //  BỔ SUNG LOGIC ĐỔI MÀU NÚT BẤM
                 if (data.getStatus() == com.mikey.auction.auction.AuctionStatus.CANCELED) {
                     btnDelete.setText("Đã Hủy");
                     btnDelete.setStyle("-fx-background-color: #A1A5B7; -fx-text-fill: white; -fx-background-radius: 5;");
@@ -248,7 +248,7 @@ private void setupTable() {
     // =========================================================
 
     // ==========================================
-    // 👉 5. CẤU HÌNH BẢNG LỊCH SỬ ĐẶT GIÁ (TAB 3)
+    //  5. CẤU HÌNH BẢNG LỊCH SỬ ĐẶT GIÁ (TAB 3)
     // ==========================================
     colHistBidId.setCellValueFactory(new PropertyValueFactory<>("id"));
     colHistAucId.setCellValueFactory(new PropertyValueFactory<>("auctionId"));
@@ -326,7 +326,7 @@ private void setupTable() {
     colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
         // ==========================================
-        // 👉 4. KHẮC PHỤC LỖI HIỂN THỊ SỐ E (Định dạng Tiền tệ)
+        //  4. KHẮC PHỤC LỖI HIỂN THỊ SỐ E (Định dạng Tiền tệ)
         // ==========================================
 
         // Format ép hiển thị tiền cho cột Giá ở TAB 2
@@ -478,7 +478,7 @@ private void setupTable() {
     @FXML
     void showUsers(ActionEvent event) {
         navigateToTab(viewUsers, btnUsers);
-        // 👉 YÊU CẦU SERVER GỬI DATA KHI MỞ TAB
+        //  YÊU CẦU SERVER GỬI DATA KHI MỞ TAB
         RequestHandler.getInstance().requestAllUsers();
     }
 
@@ -519,7 +519,7 @@ private void setupTable() {
                             String pw = obj.get("password").getAsString();
 
                             String roleStr = obj.has("role") && !obj.get("role").isJsonNull() ? obj.get("role").getAsString() : "BIDDER";
-                            String statusStr = obj.has("status") && !obj.get("status").isJsonNull() ? obj.get("status").getAsString() : "ACTIVE"; // 👉 THÊM DÒNG NÀY
+                            String statusStr = obj.has("status") && !obj.get("status").isJsonNull() ? obj.get("status").getAsString() : "ACTIVE"; //  THÊM DÒNG NÀY
                             
                             User u = null;
                             if ("ADMIN".equals(roleStr)) u = new com.mikey.auction.user.Admin(un, pw, id);
@@ -527,7 +527,7 @@ private void setupTable() {
                             else u = new com.mikey.auction.user.Bidder(un, pw, id);
                             
                             if (u != null) {
-                                u.setStatus(statusStr); // 👉 THÊM DÒNG NÀY để hiện đúng ACTIVE/BANNED khi load bảng
+                                u.setStatus(statusStr); //  THÊM DÒNG NÀY để hiện đúng ACTIVE/BANNED khi load bảng
                                 users.add(u);
                             }
                         }
@@ -537,7 +537,6 @@ private void setupTable() {
                     }
                 }
 
-                // 👉 THÊM NHÁNH NÀY VÀO TRONG HÀM onResponseReceived ĐỂ XỬ LÝ REAL-TIME
                 if ("AUCTION".equals(category) && "BAN_USER_SUCCESS".equals(action)) {
                     int bannedUserId = Integer.parseInt(jsonData.trim());
                     Platform.runLater(() -> {
@@ -551,7 +550,6 @@ private void setupTable() {
                     });
                 }
 
-                // 👉 CHÈN THÊM NHÁNH NÀY VÀO TRONG HÀM onResponseReceived ĐỂ ĐỒNG BỘ REAL-TIME MỞ KHÓA
                 if ("AUCTION".equals(category) && "UNBAN_USER_SUCCESS".equals(action)) {
                     int unbannedUserId = Integer.parseInt(jsonData.trim());
                     Platform.runLater(() -> {
@@ -565,7 +563,6 @@ private void setupTable() {
                     });
                 }
 
-                // 👉 DÁN THÊM NHÁNH NÀY NGAY DƯỚI NHÁNH UNBAN_USER_SUCCESS
                 if ("AUCTION".equals(category) && "All".equals(action)) {
                     System.out.println("📦 DỮ LIỆU VẬT PHẨM TỪ SERVER: " + jsonData);
                     if (jsonData != null && !jsonData.equals("null")) {
@@ -593,7 +590,7 @@ private void setupTable() {
                     }
                 }
 
-                // 👉 NHÁNH NHẬN DỮ LIỆU LỊCH SỬ ĐẶT GIÁ CHO TAB 3
+                //  NHÁNH NHẬN DỮ LIỆU LỊCH SỬ ĐẶT GIÁ CHO TAB 3
                 if ("AUCTION".equals(category) && "GET_ALL_BID_HISTORY".equals(action)) {
                     if (jsonData != null && !jsonData.equals("null")) {
                         // Khởi tạo Gson đọc được ngày tháng
@@ -616,7 +613,7 @@ private void setupTable() {
                     }
                 }
 
-                // 👉 THÊM NHÁNH NÀY ĐỂ REAL-TIME ĐỔI MÀU GIAO DIỆN KHI XÓA
+                //  THÊM NHÁNH NÀY ĐỂ REAL-TIME ĐỔI MÀU GIAO DIỆN KHI XÓA
                 if ("AUCTION".equals(category) && "UPDATE_STATUS".equals(action)) {
                     // Dữ liệu Server trả về dạng: id|CANCELED
                     String[] updateData = jsonData.split("\\|");
@@ -673,6 +670,7 @@ private void setupTable() {
         if (vehicleCount > 0) categoryPieChart.getData().add(new javafx.scene.chart.PieChart.Data("Xe cộ", vehicleCount));
 
         // --- XỬ LÝ BIỂU ĐỒ CỘT (BAR CHART) ---
+        // --- XỬ LÝ BIỂU ĐỒ CỘT (BAR CHART) ---
         java.util.List<AuctionInfo> sortedList = new java.util.ArrayList<>(list);
         sortedList.sort((a, b) -> Double.compare(b.getCurPrice(), a.getCurPrice()));
 
@@ -688,18 +686,39 @@ private void setupTable() {
         };
 
         int limit = Math.min(5, sortedList.size());
+        
+        //  1. TÌM GIÁ TRỊ CAO NHẤT ĐỂ QUYẾT ĐỊNH ĐƠN VỊ THÔNG MINH
+        double maxPrice = limit > 0 ? sortedList.get(0).getCurPrice() : 0;
+        double divisor = 1.0;
+        String unitLabel = "Giá Hiện Tại (VNĐ)";
+
+        if (maxPrice >= 1_000_000_000) {
+            divisor = 1_000_000_000.0;
+            unitLabel = "Giá Hiện Tại (Tỷ VNĐ)";
+        } else if (maxPrice >= 1_000_000) {
+            divisor = 1_000_000.0;
+            unitLabel = "Giá Hiện Tại (Triệu VNĐ)";
+        } else if (maxPrice >= 1_000) {
+            divisor = 1_000.0;
+            unitLabel = "Giá Hiện Tại (Nghìn VNĐ)";
+        }
+
         for (int i = 0; i < limit; i++) {
             AuctionInfo info = sortedList.get(i);
-            // Đã xóa chữ "P.", chỉ lấy mã ID nguyên bản theo ý bạn
             String labelX = String.valueOf(info.getId()); 
             
-            // Chia triệu VNĐ
-            double priceInMillion = Math.round((info.getCurPrice() / 1000000.0) * 10.0) / 10.0;
-            series.getData().add(new javafx.scene.chart.XYChart.Data<>(labelX, priceInMillion));
+            //  2. SCALE GIÁ TRỊ VÀ LÀM TRÒN
+            double scaledPrice = info.getCurPrice() / divisor;
+            scaledPrice = Math.round(scaledPrice * 10.0) / 10.0; // Làm tròn 1 chữ số thập phân
+            
+            series.getData().add(new javafx.scene.chart.XYChart.Data<>(labelX, scaledPrice));
         }
 
         topAuctionsBarChart.getData().add(series);
         barYAxis.setForceZeroInRange(false);
+        
+        //  3. CẬP NHẬT TÊN TRỤC Y CHO ĐÚNG ĐƠN VỊ (Rất quan trọng)
+        barYAxis.setLabel(unitLabel);
 
         // --- RENDER GIAO DIỆN & TÍCH HỢP SỰ KIỆN CLICK ---
         Platform.runLater(() -> {
@@ -797,19 +816,19 @@ private void setupTable() {
         double totalVolume = 0;
         
         for (AuctionInfo item : itemListData) {
-            // 👉 1. SỬA LỖI TRẠNG THÁI: Trong DB của bạn là OPEN chứ không phải ONGOING
+            //  1. SỬA LỖI TRẠNG THÁI: Trong DB của bạn là OPEN chứ không phải ONGOING
             if (item.getStatus() != null && item.getStatus() == com.mikey.auction.auction.AuctionStatus.OPEN) {
                 activeCount++;
             }
             
-            // 👉 2. TỔNG GIÁ TRỊ GIAO DỊCH: Chỉ cộng tiền của các phiên ĐÃ CÓ người trả giá 
+            //  2. TỔNG GIÁ TRỊ GIAO DỊCH: Chỉ cộng tiền của các phiên ĐÃ CÓ người trả giá 
             // (Tránh việc cộng nhầm giá khởi điểm của các phiên trống)
             if (item.getLastBidderName() != null && !item.getLastBidderName().isEmpty()) {
                 totalVolume += item.getCurPrice(); 
             }
         }
 
-        // 👉 3. LƯỢT TRẢ GIÁ MỚI: Bằng chính số lượng bản ghi trong bảng bidTransactions
+        //  3. LƯỢT TRẢ GIÁ MỚI: Bằng chính số lượng bản ghi trong bảng bidTransactions
         int totalBids = bidHistoryData.size();
 
         final long finalActiveCount = activeCount;
