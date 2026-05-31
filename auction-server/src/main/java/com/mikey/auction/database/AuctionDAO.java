@@ -96,8 +96,11 @@ public class AuctionDAO extends BaseDAO {
     }
 
     public ArrayList<AuctionInfo> searchAuction(String text) {
-        String sql = BASE_SELECT_QUERY + " WHERE UPPER(i.title) LIKE ?";
-        return executeQueryAndGetList(sql, text.toUpperCase() + "%");
+        // Thêm điều kiện AND để chỉ lấy những phiên đang OPEN (Mở) hoặc PENDING (Sắp mở)
+        String sql = BASE_SELECT_QUERY + " WHERE UPPER(i.title) LIKE ? AND (a.status = 'OPEN' OR a.status = 'PENDING')";
+        
+        // Thêm dấu % vào cả đầu và cuối để tìm kiếm mượt hơn (gõ chữ ở giữa tên vẫn ra)
+        return executeQueryAndGetList(sql, "%" + text.toUpperCase() + "%");
     }
 
     public AuctionInfo searchAuctionById(int auctionId) {
