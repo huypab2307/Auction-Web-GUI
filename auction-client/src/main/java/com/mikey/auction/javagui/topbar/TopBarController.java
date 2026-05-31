@@ -26,7 +26,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-import java.lang.reflect.Type;
 
 
 public class TopBarController implements SocketListener {
@@ -197,9 +196,16 @@ public class TopBarController implements SocketListener {
         if ("NOTIFICATION".equals(category) && "GET_ALL".equals(action)) {
             Platform.runLater(() -> {
                 try {
-                    // Dùng Gson để ép kiểu chuỗi JSON thành List<Notifications>
-                    Type listType = new TypeToken<List<Notifications>>(){}.getType();
-                    List<Notifications> list = new Gson().fromJson(jsonData, listType);
+                    com.google.gson.Gson customGson = new com.google.gson.GsonBuilder()
+                        .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonDeserializer<java.time.LocalDateTime>) (json, typeOfT, context) -> 
+                            java.time.LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .create();
+                        
+                    // 2. 👉 BÍ QUYẾT Ở ĐÂY: Ép thẳng nó thành MẢNG Notifications[].class
+                    Notifications[] notiArray = customGson.fromJson(jsonData, Notifications[].class);
+
+                    // 3. (Tùy chọn) Chuyển mảng thành List nếu bạn thích dùng List cho dễ vòng lặp
+                    List<Notifications> list = java.util.Arrays.asList(notiArray);
 
                     mainContainer.getChildren().clear(); // Xóa UI cũ
                     
