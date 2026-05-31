@@ -92,6 +92,12 @@ public class DashBoardController implements SocketListener {
 
                 for (AuctionInfo info : followedList) {
                     try {
+                        String currentStatus = String.valueOf(info.getStatus());
+                        
+                        // 🟢 SỬA TẠI ĐÂY: Thêm điều kiện lọc CANCELLED
+                        if ("CLOSED".equalsIgnoreCase(currentStatus) || "CANCELED".equalsIgnoreCase(currentStatus)) {
+                            continue; // Bỏ qua, không nạp vào giao diện Dashboard
+                        }
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/bidder/item.fxml"));
                         Parent itemCard = loader.load();
                         ItemController controller = loader.getController();

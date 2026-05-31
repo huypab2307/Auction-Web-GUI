@@ -26,6 +26,23 @@ public class UserHandler {
             Object result = null;
 
             switch (action) {
+
+                // 🔥 THÊM MỚI: Xử lý cập nhật tên người dùng (Username)
+                case "UPDATE_PROFILE":
+                    if (parts.length < 4) {
+                        result = false;
+                        break;
+                    }
+                    int uId = Integer.parseInt(parts[3].trim());
+                    String newUsername = parts[4].trim();
+
+                    // Gọi xuống Database qua UserDAO để cập nhật tên mới
+                    // Hàm này trả về boolean (true nếu thành công, false nếu thất bại)
+                    boolean isUpdated = UserDAO.getInstance().updateUsername(uId, newUsername);
+                    result = isUpdated; 
+                    break;
+
+
                 case "CHANGE_PASSWORD":
                     int userId = Integer.parseInt(parts[2].trim());
                     String oldPass = parts[3].trim();

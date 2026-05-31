@@ -247,4 +247,19 @@ public class UserDAO extends BaseDAO {
         }
         return null;
     }
+
+    // 🔥 THÊM MỚI: Hàm cập nhật Tên người dùng (Username) vào Database
+    public boolean updateUsername(int userId, String newUsername) {
+        String query = "UPDATE user SET username = ? WHERE id = ?";
+        try (Connection connection = getConnect();
+             PreparedStatement pr = connection.prepareStatement(query)) {
+            pr.setString(1, newUsername);
+            pr.setInt(2, userId);
+            return pr.executeUpdate() > 0; // Trả về true nếu cập nhật thành công dòng dữ liệu
+        } catch (SQLException e) {
+            System.err.println("Lỗi SQL khi thực hiện cập nhật username: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

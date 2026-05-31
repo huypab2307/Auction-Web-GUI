@@ -207,4 +207,10 @@ public class RequestHandler {
         // Gửi lệnh dạng: AUCTION|GET_ACTIVITIES|5
         send("AUCTION|GET_ACTIVITIES|" + userId);
     }
+
+    public void requestUpdateUser(int userId, String newUsername) {
+        // Gửi lệnh dạng: USER|UPDATE_PROFILE|5|TênMới
+        // Bạn nhớ kiểm tra xem Server quy định chữ "USER" và "UPDATE_PROFILE" có viết hoa giống như này không nhé
+        send("USER|UPDATE_PROFILE|" + userId + "|" + newUsername);
+    }
 }

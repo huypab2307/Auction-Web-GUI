@@ -96,7 +96,9 @@ public class AuctionDAO extends BaseDAO {
     }
 
     public ArrayList<AuctionInfo> searchAuction(String text) {
-        String sql = BASE_SELECT_QUERY + " WHERE UPPER(i.title) LIKE ?";
+        // ĐÃ SỬA: Thêm điều kiện loại trừ các phiên đấu giá đã CLOSED hoặc CANCELED
+        String sql = BASE_SELECT_QUERY + " WHERE UPPER(i.title) LIKE ? "
+                   + " AND a.status != 'CANCELED' AND a.status != 'CLOSED'";
         return executeQueryAndGetList(sql, text.toUpperCase() + "%");
     }
 
@@ -111,7 +113,7 @@ public class AuctionDAO extends BaseDAO {
         String sql = BASE_SELECT_QUERY + " WHERE u_seller.id = ? AND a.status != 'CANCELED' AND a.status != 'CLOSED'";
         return executeQueryAndGetList(sql, userId);
     }
-
+    
     public ArrayList<AuctionInfo> getFollowedAuctions(int userId) {
         // JOIN bảng auctions với bảng notificationList (bảng lưu lượt theo dõi)
         // Kèm theo bộ lọc: CHỈ lấy những phiên đang OPEN hoặc PENDING

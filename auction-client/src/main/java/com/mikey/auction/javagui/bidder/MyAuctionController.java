@@ -1,30 +1,28 @@
 package com.mikey.auction.javagui.bidder;
 
-import javafx.application.Platform;
-import com.mikey.auction.user.User;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.layout.FlowPane;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-
-import com.mikey.auction.dto.AuctionInfo;
-import com.mikey.auction.socket.RequestHandler;
-import com.mikey.auction.socket.SocketClient;
-import com.mikey.auction.socket.SocketListener;
-
-// THÊM GSON
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import com.mikey.auction.dto.AuctionInfo;
+import com.mikey.auction.socket.RequestHandler;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
+import com.mikey.auction.user.User;
+
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.layout.FlowPane;
 
 public class MyAuctionController implements SocketListener {
     @FXML private FlowPane myAuction;
@@ -38,7 +36,8 @@ public class MyAuctionController implements SocketListener {
             .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, t, ctx) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
             .create();
 
-    public void initialize(){}
+    public void initialize(){
+    }
 
     public void loadMyAuction(User user) {
         this.user = user;

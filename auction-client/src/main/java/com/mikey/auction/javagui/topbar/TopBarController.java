@@ -1,6 +1,5 @@
 package com.mikey.auction.javagui.topbar;
 
-
 import java.io.IOException;
 import java.util.List;
 
@@ -19,10 +18,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-
 
 public class TopBarController {
     @FXML private TextField searchField;
@@ -36,7 +36,7 @@ public class TopBarController {
     private static TopBarController instance;
     public static TopBarController getInstance() { return instance; }
     
-     public void setListener(SearchListener listener) {
+    public void setListener(SearchListener listener) {
         this.listener = listener;
     }
 
@@ -49,6 +49,7 @@ public class TopBarController {
             RequestHandler.getInstance().requestSearch(keyword);
         }
     }
+
     public void initialize(){
         instance = this;
         avatar.setPreserveRatio(false);
@@ -61,90 +62,100 @@ public class TopBarController {
         Circle clip = new Circle(20, 20, 20);
         avatar.setClip(clip);
 
+        // Lắng nghe sự kiện phím bấm trên searchField
         if (searchField != null) {
             searchField.setOnKeyPressed(event -> {
-                // Nếu phím được ấn là phím ENTER
-                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                // Nếu phím được ấn là phím ENTER -> Tiến hành tìm kiếm
+                if (event.getCode() == KeyCode.ENTER) {
                     try {
-                        searchHandle(); // Gọi thẳng hàm xử lý tìm kiếm
+                        searchHandle(); 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             });
         }
+
+        // 🔥 THÊM MỚI: Đợi giao diện sẵn sàng rồi gắn sự kiện ESCAPE cho toàn bộ Scene chứa TopBar
+        javafx.application.Platform.runLater(() -> {
+            if (searchField != null && searchField.getScene() != null) {
+                searchField.getScene().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                    // Nếu phím nhấn là ESCAPE -> Quay về màn hình chính (Bidder Hub)
+                    if (event.getCode() == KeyCode.ESCAPE) {
+                        handleEscToHome();
+                        event.consume(); // Ngăn sự kiện phím ảnh hưởng các thành phần khác
+                    }
+                });
+            }
+        });
     }
+
+    // 🔥 THÊM MỚI: Hàm xử lý logic chuyển màn hình khi bấm ESC
+    private void handleEscToHome() {
+        if (user != null) {
+            System.out.println("TopBar: Nhấn ESC quay về màn hình chính.");
+            SceneChanger.getInstance().toBidder(user);
+        } else {
+            SceneChanger.getInstance().toLogin();
+        }
+    }
+
     @FXML
     public void onKeySearchHandle(){
         String text = searchField.getText();
         boolean disable = text.isEmpty() || text.trim().isEmpty();
         searchButton.setDisable(disable);
     }
+
     @FXML
     public void logoutHandle(){
         SceneChanger.getInstance().toLogin();
     }
-  public void setUser(User user) {
-    this.user = user;
-    
-    if (user != null && user.getUsername() != null && avatar != null) {
-        // 1. Tự động dựng URL Cloudinary từ username + phá cache bằng timestamp (?t=...)
-        String avatarUrl = "https://res.cloudinary.com/devnd8ndw/image/upload/v1/auction_avatars/avatar_" 
-                            + user.getUsername() + ".jpg?t=" + System.currentTimeMillis();
+
+    public void setUser(User user) {
+        this.user = user;
         
-        try {
-            // 2. Tải ảnh bất đồng bộ (true) - Không làm khựng giao diện thanh TopBar
-            Image img = new Image(avatarUrl, true);
+        if (user != null && user.getUsername() != null && avatar != null) {
+            // 1. Tự động dựng URL Cloudinary từ username + phá cache bằng timestamp (?t=...)
+            String avatarUrl = "https://res.cloudinary.com/devnd8ndw/image/upload/v1/auction_avatars/avatar_" 
+                                + user.getUsername() + ".jpg?t=" + System.currentTimeMillis();
             
-            // 3. Theo dõi tiến trình tải ảnh (Khi hoàn thành tiến trình đạt 1.0)
-            img.progressProperty().addListener((observable, oldProgress, newProgress) -> {
-                if (newProgress.doubleValue() == 1.0 && !img.isError()) {
-                    // ĐÃ TẢI XONG THÀNH CÔNG: Chuyển về luồng UI chính để hiển thị ảnh
-                    javafx.application.Platform.runLater(() -> {
-                        avatar.setImage(img);
-                    });
-                }
-            });
-            
-            // 4. Theo dõi nếu xảy ra lỗi (User mới chưa up ảnh, lỗi mạng 404...)
-            img.errorProperty().addListener((observable, oldHasError, newHasError) -> {
-                if (newHasError) {
-                    System.out.println("TopBar: Không tìm thấy avatar trên Cloudinary cho user '" + user.getUsername() + "'. Hiển thị ảnh mặc định.");
-                }
-            });
-            
-        } catch (Exception e) {
-            System.err.println("Lỗi khởi tạo tiến trình Image ở TopBar: " + e.getMessage());
+            try {
+                // 2. Tải ảnh bất đồng bộ (true) - Không làm khựng giao diện thanh TopBar
+                Image img = new Image(avatarUrl, true);
+                
+                // 3. Theo dõi tiến trình tải ảnh (Khi hoàn thành tiến trình đạt 1.0)
+                img.progressProperty().addListener((observable, oldProgress, newProgress) -> {
+                    if (newProgress.doubleValue() == 1.0 && !img.isError()) {
+                        // ĐÃ TẢI XONG THÀNH CÔNG: Chuyển về luồng UI chính để hiển thị ảnh
+                        javafx.application.Platform.runLater(() -> {
+                            avatar.setImage(img);
+                        });
+                    }
+                });
+                
+                // 4. Theo dõi nếu xảy ra lỗi (User mới chưa up ảnh, lỗi mạng 404...)
+                img.errorProperty().addListener((observable, oldHasError, newHasError) -> {
+                    if (newHasError) {
+                        System.out.println("TopBar: Không tìm thấy avatar trên Cloudinary cho user '" + user.getUsername() + "'. Hiển thị ảnh mặc định.");
+                    }
+                });
+                
+            } catch (Exception e) {
+                System.err.println("Lỗi khởi tạo tiến trình Image ở TopBar: " + e.getMessage());
+            }
         }
     }
-}
+
     public void toHubHandle(ActionEvent actionEvent) {
-        if (user != null) {
-            SceneChanger.getInstance().toBidder(user);
-        } else {
-            // no user info available: fallback to login
-            SceneChanger.getInstance().toLogin();
-        }
+        handleEscToHome(); // Tái sử dụng hàm để quay về Hub
     }
 
     @FXML
     public void userGuiHandle(ActionEvent actionEvent) {
         SceneChanger.getInstance().openSettings(new Stage(), user);
-//        Stage stage = new Stage();
-//        try {
-//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mikey/auction/javagui/user/User.fxml"));
-//            Parent root = loader.load();
-//            UserController controller = loader.getController();
-//            controller.setUser(user);
-//            stage.setTitle("User");
-//            stage.setResizable(false);
-//            stage.setAlwaysOnTop(true);
-//            stage.setScene(new javafx.scene.Scene(root));
-//            stage.show();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
+
     @FXML
     public void sellerGuiHandle(ActionEvent actionEvent) {
         if (user != null) {
@@ -175,14 +186,13 @@ public class TopBarController {
     @FXML
     public void handleOpenMyInvoices(ActionEvent actionEvent) {
         if (user != null) {
-            // Gọi SceneChanger để chuyển cảnh
             SceneChanger.getInstance().toMyInvoices(user);
         } else {
             SceneChanger.getInstance().toLogin();
         }
     }
     
-    // 🔥 THÊM HÀM NÀY: Để nhận trực tiếp ảnh từ UserController truyền sang
+    // Để nhận trực tiếp ảnh từ UserController truyền sang
     public void updateAvatarImmediately(Image img) {
         if (avatar != null && img != null) {
             javafx.application.Platform.runLater(() -> {
