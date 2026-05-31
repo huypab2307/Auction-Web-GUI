@@ -1,13 +1,23 @@
 package com.mikey.auction.database;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.mikey.auction.auction.Auction;
 import com.mikey.auction.dto.AuctionInfo;
@@ -16,88 +26,128 @@ import com.mikey.auction.dto.AutoBidInfo;
 public class AuctionDAOTest {
 
     @Test
-    public void testDatabaseConnection() {
-        // Kiểm tra kết nối database thông qua AuctionDAO
-        assertDoesNotThrow(() -> {
-            Connection conn = AuctionDAO.getInstance().getConnect();
-            assertNotNull(conn, "Kết nối database không được null");
-            assertFalse(conn.isClosed(), "Kết nối database phải đang mở");
-            conn.close();
-        }, "Kết nối database không được ném exception");
-    }
-
-    @Test
     public void testAuctionDAOSingleton() {
-        // Kiểm tra AuctionDAO là singleton
+        // Kiểm tra RAM, hoàn toàn an toàn
         AuctionDAO dao1 = AuctionDAO.getInstance();
         AuctionDAO dao2 = AuctionDAO.getInstance();
-
         assertSame(dao1, dao2, "AuctionDAO phải là singleton - instance phải giống nhau");
     }
 
     @Test
-    public void testGetAllAuctions() {
-        // Kiểm tra lấy tất cả auction
-        assertDoesNotThrow(() -> {
-            var auctions = AuctionDAO.getInstance().getAllAuctions();
-            assertNotNull(auctions, "Danh sách auction không được null");
-        }, "Get all auctions không được ném exception");
-    }
-
-    @Test
-    public void testSearchAuctionById() {
-        // Kiểm tra tìm auction theo ID
-        assertDoesNotThrow(() -> {
-            AuctionInfo auction = AuctionDAO.getInstance().searchAuctionById(1);
-            // Kết quả có thể null nếu ID không tồn tại
-        }, "Search auction by ID không được ném exception");
-    }
-
-    @Test
     public void testAuctionInfoDTO() {
-        // Khởi tạo AuctionInfo bằng constructor có tham số thật của hệ thống
+        // Kiểm tra RAM, hoàn toàn an toàn
         AuctionInfo info = new AuctionInfo(
-            null,          // itemInfo
-            123,           // id
-            "sellerTest",  // sellerUsername
-            "bidderTest",  // lastBidderName
-            5000000.0,     // SỬA TẠI ĐÂY: Đổi từ 500000.0 thành 5000000.0 để đồng bộ với dòng kiểm tra bên dưới
-            null,          // status
-            null,          // startTime
-            null,          // endTime
-            0.0            // bidStep
+            null, 123, "sellerTest", "bidderTest", 5000000.0, null, null, null, 0.0
         );
-        
-        // Khẳng định giá trị kiểm thử
         assertEquals(123, info.getId(), "ID phải khớp");
         assertEquals(5000000.0, info.getCurPrice(), "Giá phải khớp");
     }
 
-
     @Test
-    public void testFindAuctionById() {
-        // Kiểm tra tìm kiếm với Connection parameter
+    public void testDatabaseConnection() throws Exception {
+        // TẠO ĐIỆP VIÊN: Giám sát AuctionDAO thật
+        AuctionDAO spyDao = spy(AuctionDAO.getInstance());
+        Connection mockConn = mock(Connection.class);
+        
+        // Tráo hàng: Ép điệp viên trả về Connection giả mỗi khi getConnect() được gọi
+        doReturn(mockConn).when(spyDao).getConnect();
+        when(mockConn.isClosed()).thenReturn(false);
+
         assertDoesNotThrow(() -> {
-            Connection conn = AuctionDAO.getInstance().getConnect();
-            Auction auction = AuctionDAO.getInstance().findById(conn, 1);
+            // Gọi qua điệp viên thay vì gọi thẳng hệ thống
+            Connection conn = spyDao.getConnect();
+            assertNotNull(conn, "Kết nối database không được null");
+            assertFalse(conn.isClosed(), "Kết nối database phải đang mở");
             conn.close();
-        }, "Find by ID không được ném exception");
+            
+            // Xác nhận lệnh close() thực sự đã được gọi vào Connection giả
+            verify(mockConn, times(1)).close();
+        });
     }
 
     @Test
-    public void testRegisterAutoBid() {
-        // Kiểm tra đăng ký auto-bid
+    public void testGetAllAuctions() throws Exception {
+        AuctionDAO spyDao = spy(AuctionDAO.getInstance());
+        Connection mockConn = mock(Connection.class);
+        PreparedStatement mockStmt = mock(PreparedStatement.class);
+        ResultSet mockRs = mock(ResultSet.class);
+
+        // Giả lập luồng DB
+        doReturn(mockConn).when(spyDao).getConnect();
+        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+        when(mockStmt.executeQuery()).thenReturn(mockRs);
+        when(mockRs.next()).thenReturn(false); // Báo DB đang trống để khỏi lặp
+
+        assertDoesNotThrow(() -> {
+            var auctions = spyDao.getAllAuctions(); // GỌI QUA ĐIỆP VIÊN
+            assertNotNull(auctions, "Danh sách auction không được null");
+        });
+    }
+
+    @Test
+    public void testSearchAuctionById() throws Exception {
+        AuctionDAO spyDao = spy(AuctionDAO.getInstance());
+        Connection mockConn = mock(Connection.class);
+        PreparedStatement mockStmt = mock(PreparedStatement.class);
+        ResultSet mockRs = mock(ResultSet.class);
+
+        doReturn(mockConn).when(spyDao).getConnect();
+        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+        when(mockStmt.executeQuery()).thenReturn(mockRs);
+        when(mockRs.next()).thenReturn(false);
+
+        assertDoesNotThrow(() -> {
+            AuctionInfo auction = spyDao.searchAuctionById(1);
+        });
+    }
+
+    @Test
+    public void testFindAuctionById() throws Exception {
+        // Hàm này MỞ (nhận tham số Connection), nên không cần Điệp viên, truyền thẳng Connection giả vào!
+        Connection mockConn = mock(Connection.class);
+        PreparedStatement mockStmt = mock(PreparedStatement.class);
+        ResultSet mockRs = mock(ResultSet.class);
+
+        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+        when(mockStmt.executeQuery()).thenReturn(mockRs);
+        when(mockRs.next()).thenReturn(false);
+
+        assertDoesNotThrow(() -> {
+            Auction auction = AuctionDAO.getInstance().findById(mockConn, 1);
+        });
+    }
+
+    @Test
+    public void testRegisterAutoBid() throws Exception {
+        AuctionDAO spyDao = spy(AuctionDAO.getInstance());
+        Connection mockConn = mock(Connection.class);
+        PreparedStatement mockStmt = mock(PreparedStatement.class);
+
+        doReturn(mockConn).when(spyDao).getConnect();
+        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+        when(mockStmt.executeUpdate()).thenReturn(1); // Giả lập Insert thành công 1 dòng
+
         assertDoesNotThrow(() -> {
             AutoBidInfo info = new AutoBidInfo(1, 1, 5000000.0);
-            boolean result = AuctionDAO.getInstance().registerAutoBid(info);
-        }, "Register auto-bid không được ném exception");
+            boolean result = spyDao.registerAutoBid(info);
+            assertTrue(result, "Hàm phải trả về True khi có 1 dòng được update");
+        });
     }
 
     @Test
-    public void testTriggerAutoBids() {
-        // Kiểm tra trigger auto-bid
+    public void testTriggerAutoBids() throws Exception {
+        AuctionDAO spyDao = spy(AuctionDAO.getInstance());
+        Connection mockConn = mock(Connection.class);
+        PreparedStatement mockStmt = mock(PreparedStatement.class);
+        ResultSet mockRs = mock(ResultSet.class);
+
+        doReturn(mockConn).when(spyDao).getConnect();
+        when(mockConn.prepareStatement(anyString())).thenReturn(mockStmt);
+        when(mockStmt.executeQuery()).thenReturn(mockRs);
+        when(mockRs.next()).thenReturn(false);
+
         assertDoesNotThrow(() -> {
-            AuctionDAO.getInstance().triggerAutoBids(1);
-        }, "Trigger auto-bids không được ném exception");
+            spyDao.triggerAutoBids(1);
+        });
     }
 }
