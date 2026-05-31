@@ -79,19 +79,28 @@ public class ChangePasswordController implements SocketListener {
     @Override
     public void onResponseReceived(String category, String action, String jsonData) {
         if ("USER".equals(category) && "CHANGE_PASSWORD".equals(action)) {
-            // Bắt buộc dùng Platform.runLater khi hiển thị Alert/UI
-            Platform.runLater(() -> {
-                // Server của chúng ta trả về "true" nếu đổi thành công
-                if ("true".equals(jsonData)) {
+            if ("true".equals(jsonData)) {
+                javafx.application.Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Đổi mật khẩu thành công!");
+                    if (this.stage != null) {
+                        alert.initOwner(this.stage);
+                    }
                     alert.showAndWait();
-                    // Quay lại màn hình cài đặt
-                    SceneChanger.getInstance().openSettings(stage, user);
-                } else {
+                    try {
+                        SceneChanger.getInstance().openSettings(this.stage, user);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            } else {
+                javafx.application.Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Mật khẩu cũ không chính xác!");
+                    if (this.stage != null) {
+                        alert.initOwner(this.stage);
+                    }
                     alert.showAndWait();
-                }
-            });
+                });
+            }
         }
     }
 }
