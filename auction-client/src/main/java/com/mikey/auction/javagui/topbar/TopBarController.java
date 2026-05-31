@@ -3,12 +3,16 @@ package com.mikey.auction.javagui.topbar;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mikey.auction.auction.Notifications;
 import com.mikey.auction.javagui.SceneChanger;
-import com.mikey.auction.manager.NotificationManager;
 import com.mikey.auction.socket.RequestHandler;
+import com.mikey.auction.socket.SocketClient;
+import com.mikey.auction.socket.SocketListener;
 import com.mikey.auction.user.User;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,7 +28,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
-public class TopBarController {
+
+public class TopBarController implements SocketListener {
     @FXML private TextField searchField;
     @FXML private ToggleButton searchButton;
     @FXML private MenuButton notification;
@@ -166,17 +171,13 @@ public class TopBarController {
     }
 
     @FXML
-    public void showNotification() throws IOException {
-        List<Notifications> list = NotificationManager.getInstance().findNotififications(user.getId());
-        mainContainer.getChildren().clear();
-        for (Notifications notification : list){
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
-            Parent root = loader.load();
-            String color = (notification.isRead()) ? "white" : "#c9efc9";
-            root.setStyle("-fx-background-color: " + color);
-            NotificationController notificationController = loader.getController();
-            notificationController.setContent(notification);
-            mainContainer.getChildren().add(root);
+    public void showNotification() {
+        if (user != null) {
+            System.out.println("Gửi yêu cầu lấy thông báo cho user: " + user.getId());
+            // Dành quyền nghe ngóng Socket
+            SocketClient.getInstance().setListener(this);
+            // Gửi lệnh lên Server
+            RequestHandler.getInstance().requestNotifications(user.getId());
         }
     }
 
@@ -197,6 +198,47 @@ public class TopBarController {
         if (avatar != null && img != null) {
             javafx.application.Platform.runLater(() -> {
                 avatar.setImage(img);
+            });
+        }
+    }
+
+    @Override
+    public void onResponseReceived(String category, String action, String jsonData) {
+        if ("NOTIFICATION".equals(category) && "GET_ALL".equals(action)) {
+            Platform.runLater(() -> {
+                try {
+                    com.google.gson.Gson customGson = new com.google.gson.GsonBuilder()
+                        .registerTypeAdapter(java.time.LocalDateTime.class, (com.google.gson.JsonDeserializer<java.time.LocalDateTime>) (json, typeOfT, context) -> 
+                            java.time.LocalDateTime.parse(json.getAsString(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .create();
+                        
+                    // 2. 👉 BÍ QUYẾT Ở ĐÂY: Ép thẳng nó thành MẢNG Notifications[].class
+                    Notifications[] notiArray = customGson.fromJson(jsonData, Notifications[].class);
+
+                    // 3. (Tùy chọn) Chuyển mảng thành List nếu bạn thích dùng List cho dễ vòng lặp
+                    List<Notifications> list = java.util.Arrays.asList(notiArray);
+
+                    mainContainer.getChildren().clear(); // Xóa UI cũ
+                    
+                    if (list != null) {
+                        for (Notifications notification : list) {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("notificationCard.fxml"));
+                            Parent root = loader.load();
+                            
+                            // Đổi màu nền nếu chưa đọc
+                            String color = (notification.isRead()) ? "white" : "#c9efc9";
+                            root.setStyle("-fx-background-color: " + color);
+                            
+                            NotificationController notificationController = loader.getController();
+                            notificationController.setContent(notification);
+                            
+                            mainContainer.getChildren().add(root);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Lỗi render thông báo: " + e.getMessage());
+                    e.printStackTrace();
+                }
             });
         }
     }

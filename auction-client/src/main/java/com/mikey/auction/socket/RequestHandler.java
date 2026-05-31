@@ -213,4 +213,8 @@ public class RequestHandler {
         // Bạn nhớ kiểm tra xem Server quy định chữ "USER" và "UPDATE_PROFILE" có viết hoa giống như này không nhé
         send("USER|UPDATE_PROFILE|" + userId + "|" + newUsername);
     }
+    public void requestNotifications(int userId) {
+        // Gửi chuỗi dạng: NOTIFICATION|GET_ALL|5
+        send("NOTIFICATION|GET_ALL|" + userId);
+    }
 }
